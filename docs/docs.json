@@ -1,0 +1,51 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Unpage",
+  "description": "Unpage is an open-source tool for augmenting your incident response workflows",
+  "colors": {
+    "primary": "#3B82F6",
+    "light": "#F8FAFC",
+    "dark": "#0F172A"
+  },
+  "navigation": {
+    "pages": [
+      "index"
+    ],
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "server"
+        ]
+      },
+      {
+        "group": "Core Concepts",
+        "pages": [
+          "concepts/agents",
+          "concepts/router",
+          "concepts/knowledge-graph",
+          "concepts/plugins",
+          "concepts/tools"
+        ]
+      },
+      {
+        "group": "Plugins",
+        "pages": [
+          "reference/aptible",
+          "reference/aws",
+          "reference/core",
+          "reference/datadog",
+          "reference/graph",
+          "reference/kubernetes",
+          "reference/metrics",
+          "reference/networking",
+          "reference/pagerduty",
+          "reference/papertrail",
+          "reference/shell"
+        ]
+      }
+    ]
+  }
+}

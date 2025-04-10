@@ -1,0 +1,55 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#   "toml>=0.10.2",
+# ]
+# ///
+
+import os
+import re
+import sys
+from pathlib import Path
+
+import toml
+
+
+def main() -> None:
+    # Read pyproject.toml
+    config = toml.loads(Path("pyproject.toml").read_text())
+
+    # Get allowed tags from semantic release config
+    allowed_tags = config["tool"]["semantic_release"]["commit_parser_options"]["allowed_tags"]
+
+    # Get PR title from environment variable
+    pr_title = os.getenv("PR_TITLE", "").strip()
+
+    if not pr_title:
+        print("❌ PR title is empty")
+        sys.exit(1)
+
+    # Create regex pattern for conventional commit format
+    # Pattern: type(optional-scope): description
+    tag_pattern = "|".join(re.escape(tag) for tag in allowed_tags)
+    pattern = rf"^({tag_pattern})(\([^)]+\))?: .+"
+
+    match = re.match(pattern, pr_title)
+    if match:
+        print(f"✅ PR title follows conventional commit format: '{pr_title}'")
+        # Extract the tag for additional validation
+        tag = match.group(1)
+        print(f"✅ Tag '{tag}' is in allowed tags: {allowed_tags}")
+    else:
+        print(f"❌ PR title does not follow conventional commit format: '{pr_title}'")
+        print("Expected format: <type>(optional-scope): <description>")
+        print(f"Allowed types: {', '.join(allowed_tags)}")
+        print("Examples:")
+        print("  - feat: add new authentication system")
+        print("  - fix: resolve memory leak in parser")
+        print("  - docs(api): update authentication guide")
+        print("  - chore: update dependencies")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

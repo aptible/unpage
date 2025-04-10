@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Prevent committing to the main branch.
+      - id: no-commit-to-branch
+        args: ["--branch", "main"]
+      # Check YAML file syntax.
+      - id: check-yaml
+      # Check TOML file syntax.
+      - id: check-toml
+      # Check JSON file syntax.
+      - id: check-json
+      # Make sure files end with a newline.
+      - id: end-of-file-fixer
+      # Remove trailing whitespace.
+      - id: trailing-whitespace
+      # Ensure that scripts with shebangs are executable
+      - id: check-shebang-scripts-are-executable
+      # Ensure that executable files have shebangs
+      - id: check-executables-have-shebangs
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    # Zizmor version.
+    rev: v1.7.0
+    hooks:
+      # Run the linter.
+      - id: zizmor
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.10
+    hooks:
+      # Run the linter and fix linting errors.
+      - id: ruff-check
+        args: ["--fix"]
+      # Run the formatter.
+      - id: ruff-format
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.400
+    hooks:
+      # Check for type errors.
+      - id: pyright
+        entry: uv run --active pyright

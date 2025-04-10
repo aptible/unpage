@@ -1,0 +1,19 @@
+# A brief description of when this agent should be used
+description: >
+  Use this agent to analyze alerts that meet the following criteria:
+
+    - ...
+
+# Instructions for the agent for investigating the alert.
+prompt: >
+  ...
+
+# The tools the agent has access to. Accepts wildcards (e.g. "graph_*"). You can
+# also use regex patterns by surrounding the pattern in slashes (e.g. "/^graph_.*/").
+#
+# Use this to list all tools:
+#
+#    unpage tools list
+#
+tools:
+  - "*"

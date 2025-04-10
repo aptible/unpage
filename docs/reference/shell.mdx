@@ -1,0 +1,80 @@
+---
+title: Shell Commands
+---
+
+Shell Commands allow [Agents](/concepts/agents) to run standard
+UNIX and custom shell commands.
+
+<Note>
+  Unlike other agentic tools, Unpage will **only** run the shell commands
+  you have explicitly configured.
+</Note>
+
+
+## Configuration
+Enable the Shell Commands plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands: []
+```
+
+### Defining Shell Commands
+You must explicitly define each shell command you want to make available to
+Agents. For example:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: get_current_directory
+          description: Get the path to the current directory.
+          command: pwd
+```
+
+Each command requires a `handle` (which must be unique), a `description` (which
+helps the LLM decide when to use it) and the `command` itself.
+
+### Commands With Arguments
+
+
+## Environment
+
+
+## Tools
+Each shell command you define ends up as an Agent / MCP tool, named with the
+`shell_` prefix.
+
+For example, a command with the handle `get_current_directory` will result in
+a new tool named `shell_get_current_directory`.
+
+
+## Developing & Testing Commands
+The easiest way to develop and test new shell commands is by using the
+`unpage tools` subcommands.
+
+To list all tools, including your custom shell commands, run:
+
+```bash
+$ uv run unpage tools list
+```
+
+To call a tool via the CLI and test your command, you can run:
+
+```bash
+$ uv run unpage tools call shell_<your command handle> <arguments>
+```
+
+For example:
+
+```bash
+$ uv run unpage tools call shell_get_current_directory
+/Users/michael/dev/unpage
+```

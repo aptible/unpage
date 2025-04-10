@@ -1,0 +1,61 @@
+# Edit the list of criteria in this description.
+description: >
+  Use this agent to analyze alerts that meet the following criteria:
+
+    - Any alert that doesn't meet the criteria for any other agent
+
+# Instructions for the agent for investigating the alert.
+prompt: >
+  This is an unfamiliar alert that you haven't been instructed to act upon, so
+  you should not (and you will not be allowed to) take any action that has side
+  effects.
+
+  You should attempt to investigate the cause and severity of this alert using
+  available tools, and you should update the accompanying PagerDuty incident
+  with a status update that includes:
+
+    - A caveat that this is an alert you haven't been instructed on, and so your
+      recommendation is low-confidence
+    - A recommendation for whether the alert can be resolved without further
+      investigation, or reviewed by a human SRE
+    - Your assessment of severity of the incident, along with any real-time
+      status information that you retrieved from tools that (a) is not included in
+      the alert itself and (b) has a moderate likelihood of being relevant to
+      assessing severity or root cause.
+
+  Your assessment of severity should be brief but you should explain how you
+  came to the assessment.
+
+  You should NEVER make up information. If any of the information required for
+  your assessment is unclear, you should state that it is unclear and that you
+  will defer to a human SRE to make a final determination.
+
+# The tools the agent has access to. Accepts wildcards (e.g. "graph_*"). You can
+# also use regex patterns by surrounding the pattern in slashes (e.g. "/^graph_.*/").
+#
+# Use this to list all tools:
+#
+#    unpage tools list
+#
+tools:
+  - "core_calculate"
+  - "core_convert_to_timezone"
+  - "core_current_datetime"
+  - "core_*"
+  - "graph_get_neighboring_resources"
+  - "graph_get_resource_details"
+  - "graph_get_resource_map"
+  - "graph_get_resource_topology"
+  - "graph_search_resources"
+  - "metrics_get_anomalies_for_metrics"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "metrics_list_node_types_that_support_metrics"
+  - "networking_dig"
+  - "networking_ping"
+  - "networking_request_url"
+  - "networking_traceroute"
+  - "pagerduty_get_alert_details_for_incident"
+  - "pagerduty_get_incident_details"
+  - "pagerduty_post_status_update"
+  - "papertrail_search_logs"

@@ -1,0 +1,165 @@
+[project]
+name = "unpage"
+version = "0.2.0-alpha.22"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aioboto3>=14.1.0",
+    "anyio>=4.9.0",
+    "dnspython>=2.7.0",
+    "fastmcp>=2.10.1",
+    "httpx>=0.28.1",
+    "graphviz>=0.20.3",
+    "httpx>=0.28.1",
+    "matplotlib>=3.10.1",
+    "networkx>=3.4.2",
+    "numpy<2.4",
+    "pydantic>=2.11.3",
+    "pydot>=3.0.4",
+    "pyod==2.0.5",
+    "pythonping>=1.1.4",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.3",
+    "scapy>=2.6.1",
+    "sh>=2.2.2",
+    "typer>=0.15.2",
+    "whoosh-reloaded>=2.7.5",
+    "boltons>=25.0.0",
+    "logparser>=0.8.4",
+    "drain3",
+    "sparklines>=0.5.0",
+    "pydantic-yaml>=1.5.1",
+    "questionary>=2.1.0",
+    "sentry-sdk>=2.29.1",
+    "datadog-api-client[async]>=2.34.0",
+    "msgspec>=0.19.0",
+    "kr8s>=0.20.7",
+    "dotenv>=0.9.9",
+    "pagerduty>=3.1.0",
+    "fastapi[standard]>=0.116.1",
+    "dspy",
+    "uvicorn[standard]>=0.35.0",
+    "pyngrok>=7.2.12",
+    "pydantic-settings>=2.9.1",
+    "mlflow>=3.1.4",
+    "human-readable>=2.0.0",
+]
+
+[tool.uv.sources]
+drain3 = { git = "https://github.com/logpai/Drain3" }
+dspy = { git = "https://github.com/stanfordnlp/dspy", rev = "a5b7061911a9a5c82a1ab451b064811d6e9e2e24" }
+
+[project.scripts]
+unpage = "unpage.cli:main"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "pyright>=1.1.402",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-freezer>=0.4.9",
+    "ruff>=0.11.4",
+    "types-aioboto3[aioboto3]>=14.1.0",
+    "types-boltons>=25.0.0.20250516",
+    "types-networkx>=3.4.2.20250515",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__"]
+typeCheckingMode = "standard"
+
+# See:
+# - https://docs.astral.sh/ruff/configuration/
+# - https://docs.astral.sh/ruff/settings/
+# - https://docs.astral.sh/ruff/rules/
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+exclude = ["tests/**/test_*.py"]
+ignore = [
+    "S603" # false positive: https://github.com/astral-sh/ruff/issues/4045
+]
+select = [
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "E4",    # pycodestyle-4xx
+    "E7",    # pycodestyle-7xx
+    "E9",    # pycodestyle-9xx
+    "ERA",   # eradicate
+    "F",     # pyflakes
+    "FURB",  # refurb
+    "I",     # isort
+    "NPY",   # numpy
+    "PERF",  # perflint
+    "PTH",   # flake8-use-pathlib
+    "RUF",   # ruff
+    "S",     # flake8-bandit
+    "SIM",   # flake8-simplify
+    "TC",    # flake8-type-checking
+    "UP",    # pyupgrade
+]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true # allow typing *args and *kwargs with Any
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+build_command = "pip install uv && uv lock && git add uv.lock && uv build"
+commit_parser = "conventional"
+allow_zero_version = true
+major_on_zero = false
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease_token = "alpha"
+prerelease = true
+
+[tool.semantic_release.commit_parser_options]
+# https://python-semantic-release.readthedocs.io/en/latest/concepts/commit_parsing.html#conventional-commits-parser
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+other_allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "style",
+    "refactor",
+    "test",
+]
+allowed_tags = [
+    "feat",
+    "fix",
+    "perf",
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "style",
+    "refactor",
+    "test",
+]
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+    '''chore(?:\([^)]*?\))?: .+''',
+    '''ci(?:\([^)]*?\))?: .+''',
+    '''refactor(?:\([^)]*?\))?: .+''',
+    '''style(?:\([^)]*?\))?: .+''',
+    '''test(?:\([^)]*?\))?: .+''',
+    '''build\((?!deps\): .+)''',
+    '''Initial [Cc]ommit.*''',
+]

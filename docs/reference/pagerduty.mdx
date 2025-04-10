@@ -1,0 +1,133 @@
+---
+title: PagerDuty
+---
+
+Our PagerDuty integration allows [Agents](/concepts/agents) to learn about, filter, and
+take action on incidents happening in your infrastructure.
+
+## Prerequisites
+
+To configure the PagerDuty integration you'll need to generate a PagerDuty
+API key.
+
+<Steps>
+  <Step title="Open your PagerDuty 'User Settings' page">
+    In the top right corner of the PagerDuty UI, hover over your profile image
+    and click on "My Profile".
+
+    Then open the "User Settings" tab:
+
+    ![PagerDuty User Settings](/images/pagerduty/user-settings.png)
+  </Step>
+  <Step title="Generate API Token">
+    Click on "Create API User Token":
+
+    ![PagerDuty API Token](/images/pagerduty/user-token.png)
+  </Step>
+</Steps>
+
+
+## Configuration
+Configure the PagerDuty plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  pagerduty:
+    enabled: true
+    settings:
+      api_key: <your api key> # required
+      from_email: <email address for status updates> # optional
+```
+
+
+## Developing Agents
+Your Agents can react to PagerDuty incidents by adding context from your
+[Knowledge Graph](/concepts/knowledge-graph), pulling [Metrics](/reference/metrics),
+or running custom [Shell Commands](/reference/shell).
+
+Learn more about [Creating Agents](/concepts/agents).
+
+### Running Locally
+You can test your Agents locally on past or current PagerDuty incidents by
+passing in a PagerDuty incident URL as the payload to `unpage agent run`:
+
+```bash
+uv run unpage agent run <agent_name> https://youraccount.pagerduty.com/incidents/Q179JHZ8AMBVDO
+```
+
+Unpage will fetch the incident automatically and send it to your Agent. The
+Agent thought process, tool calls, and output will be printed to `stdout`.
+
+### Webhooks
+Agent workflows can run automatically by configuring PagerDuty to send webhooks
+to your [Unpage Server](/server).
+
+<Steps>
+  <Step title="Open the PagerDuty Webhooks page">
+    In the top navigation hover over "Integrations" and then click on
+    "Generic Webhooks (v3)".
+  </Step>
+  <Step title="Add a New Webhook">
+    Click on "+ New Webhook"
+
+    The **Webhook URL** should be the hostname of your running Unpage Server,
+    with a path of `/webhook` (like `https://unpage.yourdomain.com/webhook`).
+
+    During development you can tunnel to your local Unpage instance using ngrok by
+    running `uv run unpage agent serve --tunnel` (see [Unpage Server](/server)
+    for details).
+
+    The **Event Subscriptions** should be whatever events you want to run Agent
+    workflows on, for example `incident.triggered`.
+  </Step>
+</Steps>
+
+Unpage will now receive webhooks from PagerDuty and send them to the
+[Router](/concepts/router), which will decide which [Agent](/concepts/agents) workflow to run.
+
+
+## Tools
+The PagerDuty plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="pagerduty_get_incident_details">
+  Get a PagerDuty incident by ID, including all alert details.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the PagerDuty incident. Typically a string of uppercase letters and
+    numbers. For example "PGR0VU2", "PF9KMXH", or "Q2K78SNJ5U1VE1".
+  </ParamField>
+
+  **Returns** `dict`: The incident JSON payload, including all alert details.
+</Card>
+<br />
+
+<Card title="pagerduty_get_alert_details_for_incident">
+  Get the details of the alert(s) for a PagerDuty incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the PagerDuty incident. Typically a string of uppercase letters and
+    numbers. For example "PGR0VU2", "PF9KMXH", or "Q2K78SNJ5U1VE1".
+  </ParamField>
+
+  **Returns** `list[dict]`: The list of alert details.
+</Card>
+<br />
+
+<Card title="pagerduty_post_status_update">
+  Post a status update to a PagerDuty incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the PagerDuty incident. Typically a string of uppercase letters and
+    numbers. For example "PGR0VU2", "PF9KMXH", or "Q2K78SNJ5U1VE1".
+  </ParamField>
+  <ParamField path="message" type="string" required>
+    The status update to post.
+  </ParamField>
+
+  **Returns** `None`
+</Card>
