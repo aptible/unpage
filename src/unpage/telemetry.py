@@ -47,6 +47,13 @@ class TunaClient(httpx.AsyncClient):
         self._user_id = _get_or_create_user_id()
         self._run_id = str(uuid.uuid4())
 
+        # Check if telemetry is disabled globally
+        global_config = load_global_config()
+        self._telemetry_enabled = global_config.telemetry_enabled and not UNPAGE_TELEMETRY_DISABLED
+        if not self._telemetry_enabled:
+            # Let the user know that their preference is being respected
+            print("Telemetry is disabled")
+
     @property
     def user_id(self) -> str:
         """Unique user_id that is created for each invocation of the unpage program"""
@@ -54,11 +61,7 @@ class TunaClient(httpx.AsyncClient):
 
     async def send_event(self, event: dict[str, Any]) -> None:
         """Record a telemetry event."""
-
-        # Check if telemetry is disabled globally
-        global_config = load_global_config()
-        if UNPAGE_TELEMETRY_DISABLED or not global_config.telemetry_enabled:
-            print("Telemetry is disabled")
+        if not self._telemetry_enabled:
             return
 
         try:
