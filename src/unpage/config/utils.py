@@ -24,6 +24,7 @@ class PluginConfig(BaseModel):
 
 class Config(BaseModel):
     plugins: dict[str, PluginConfig] = {}
+    telemetry_enabled: bool = True
 
 
 DEFAULT_CONFIG = Config(
@@ -47,6 +48,22 @@ def get_config_path(profile: str, create: bool = False) -> Path:
     return get_config_dir(profile, create) / "config.yaml"
 
 
+def get_global_config_path() -> Path:
+    return CONFIG_ROOT / "config.yaml"
+
+
+def load_global_config() -> Config:
+    global_config_path = get_global_config_path()
+
+    if not global_config_path.exists():
+        return Config()
+
+    try:
+        return Config(**yaml.safe_load(global_config_path.read_text()))
+    except Exception:
+        return Config()
+
+
 def load_config(profile: str, create: bool = False) -> Config:
     config_path = get_config_path(profile, create)
 
@@ -56,8 +73,22 @@ def load_config(profile: str, create: bool = False) -> Config:
             raise FileNotFoundError(f"Config file {config_path} does not exist")
         config_path.write_text(DEFAULT_CONFIG_FILE.read_text())
 
-    # Merge the default config with the user config, with the user config taking precedence.
-    return Config(**{**DEFAULT_CONFIG.model_dump(), **yaml.safe_load(config_path.read_text())})
+    # Load global config first
+    global_config = load_global_config()
+
+    # Load profile-specific config
+    profile_config_data = yaml.safe_load(config_path.read_text())
+
+    return Config(
+        **{
+            # Load the default config first
+            **DEFAULT_CONFIG.model_dump(),
+            # Merge the global config
+            **global_config.model_dump(),
+            # Merge the profile-specific config
+            **profile_config_data,
+        }
+    )
 
 
 def save_config(cfg: Config, profile: str, create: bool = False) -> None:

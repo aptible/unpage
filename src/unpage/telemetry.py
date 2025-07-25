@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 import sentry_sdk
 
-from unpage.config.utils import CONFIG_ROOT
+from unpage.config.utils import CONFIG_ROOT, load_global_config
 
 
 def _get_or_create_user_id() -> str:
@@ -17,6 +17,13 @@ def _get_or_create_user_id() -> str:
             identity_file.parent.mkdir(parents=True)
         identity_file.write_text(str(uuid.uuid4()))
     return identity_file.read_text().strip()
+
+
+UNPAGE_TELEMETRY_DISABLED = os.getenv("UNPAGE_TELEMETRY_DISABLED", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 
 class TunaClient(httpx.AsyncClient):
@@ -40,6 +47,13 @@ class TunaClient(httpx.AsyncClient):
         self._user_id = _get_or_create_user_id()
         self._run_id = str(uuid.uuid4())
 
+        # Check if telemetry is disabled globally
+        global_config = load_global_config()
+        self._telemetry_enabled = global_config.telemetry_enabled and not UNPAGE_TELEMETRY_DISABLED
+        if not self._telemetry_enabled:
+            # Let the user know that their preference is being respected
+            print("Telemetry is disabled")
+
     @property
     def user_id(self) -> str:
         """Unique user_id that is created for each invocation of the unpage program"""
@@ -47,6 +61,9 @@ class TunaClient(httpx.AsyncClient):
 
     async def send_event(self, event: dict[str, Any]) -> None:
         """Record a telemetry event."""
+        if not self._telemetry_enabled:
+            return
+
         try:
             uname = os.uname()
             response = await self.get(
