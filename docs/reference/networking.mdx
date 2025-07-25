@@ -1,0 +1,73 @@
+---
+title: Networking
+---
+
+The Networking plugin provides essential network diagnostic and connectivity tools
+that [Agents](/concepts/agents) can use to troubleshoot network issues, test
+connectivity, and gather information about network infrastructure.
+
+## Configuration
+Configure the Networking plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  networking:
+    enabled: true
+```
+
+## Tools
+The Networking plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="ping">
+  Ping a host and return connectivity statistics.
+
+  **Arguments**
+  <ParamField path="host" type="string" required>
+    The hostname or IP address to ping. Can be a domain name (e.g., "google.com") or IP address (e.g., "8.8.8.8").
+  </ParamField>
+
+  **Returns** `string`: Detailed ping results including packet transmission statistics, response times, and packet loss percentage in standard ping output format.
+</Card>
+<br />
+
+<Card title="dig">
+  Resolve a hostname using DNS lookup and return the records.
+
+  **Arguments**
+  <ParamField path="hostname" type="string" required>
+    The hostname to resolve (e.g., "example.com").
+  </ParamField>
+  <ParamField path="record_type" type="string" optional>
+    The DNS record type to query (default: "A"). Common types include A, AAAA, CNAME, MX, TXT, NS, SOA.
+  </ParamField>
+
+  **Returns** `string`: DNS resolution results showing the requested records, or an error message if the hostname cannot be resolved.
+</Card>
+<br />
+
+<Card title="traceroute">
+  Trace the network path to a destination showing all intermediate hops.
+
+  **Arguments**
+  <ParamField path="destination" type="string" required>
+    The target hostname or IP address to trace the route to.
+  </ParamField>
+  <ParamField path="max_hops" type="integer" optional>
+    Maximum number of hops to trace (default: 30). Higher values allow tracing longer network paths.
+  </ParamField>
+
+  **Returns** `string`: Step-by-step trace showing each network hop from your location to the destination, including IP addresses and response times.
+</Card>
+<br />
+
+<Card title="request_url">
+  Make an HTTP GET request to a URL and return the response content.
+
+  **Arguments**
+  <ParamField path="url" type="string" required>
+    The full URL to request (e.g., "https://example.com/api/status"). Must include the protocol (http:// or https://).
+  </ParamField>
+
+  **Returns** `string`: The HTTP response body content. Raises an error if the request fails or returns a non-success status code.
+</Card>

@@ -1,0 +1,59 @@
+---
+title: Core
+---
+
+The Core plugin provides essential utility tools that are commonly needed by
+[Agents](/concepts/agents) for basic operations like working with dates, times,
+and calculations.
+
+## Configuration
+Configure the Core plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  core:
+    enabled: true
+```
+
+## Tools
+The Core plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="current_datetime">
+  Get the current date and time in UTC.
+
+  **Arguments**
+  None
+
+  **Returns** `datetime`: The current date and time as an ISO 8601 timestamp in UTC timezone.
+</Card>
+<br />
+
+<Card title="convert_to_timezone">
+  Convert a datetime to a specific timezone.
+
+  **Arguments**
+  <ParamField path="datetime" type="datetime" required>
+    The datetime to convert (ISO 8601 timestamp).
+  </ParamField>
+  <ParamField path="timezone" type="string" required>
+    The target timezone identifier (e.g., "America/New_York", "Europe/London", "Asia/Tokyo").
+    Use standard IANA timezone names.
+  </ParamField>
+
+  **Returns** `datetime`: The converted datetime as an ISO 8601 timestamp in the specified timezone.
+</Card>
+<br />
+
+<Card title="calculate">
+  Evaluate a mathematical expression safely.
+
+  **Arguments**
+  <ParamField path="expression" type="string" required>
+    The mathematical expression to evaluate. Supports basic arithmetic operations:
+    addition (+), subtraction (-), multiplication (*), division (/), floor division (//),
+    modulo (%), and exponentiation (**). Example: "2 + 3 * 4" or "(10 - 2) / 4".
+  </ParamField>
+
+  **Returns** `string`: The result of the mathematical expression as a string.
+</Card>

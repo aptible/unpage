@@ -1,0 +1,45 @@
+---
+title: Aptible
+---
+
+The [Aptible](https://www.aptible.com/) plugin provides access to the following
+resources from the Aptible PaaS:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Apps
+    - Databases
+    - Containers
+    - Deployments
+    - Disks
+    - Services
+    - Endpoints
+  </Accordion>
+
+  <Accordion title="Metrics" icon="chart-line">
+    - CPU
+    - Memory
+    - Load average
+    - Disk usage
+    - IOPS
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should either have the [Aptible CLI](https://www.aptible.com/docs/reference/aptible-cli/overview)
+installed and authenticated (using [aptible login](https://www.aptible.com/docs/reference/aptible-cli/cli-commands/cli-login))
+or you can set the `APTIBLE_EMAIL` and `APTIBLE_PASSWORD` environment variables.
+
+
+## Configuration
+Configure the Aptible plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  aptible:
+    enabled: true
+```
