@@ -1,7 +1,7 @@
 [project]
 name = "unpage"
-version = "0.2.0-alpha.22"
-description = "Add your description here"
+version = "0.0.1-alpha.1"
+description = "An agent framework for production engineering"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
