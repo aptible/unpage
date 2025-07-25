@@ -13,20 +13,24 @@ At the end of this guide, you will have Unpage set up to run locally with built-
 ### **Prerequisites**
 
 - Python 3.12 or higher
-- uv package manager
+- `uv` package manager
 - API keys for your LLM and alerting, infrastructure, and observability tools. See more in Plugins.
 
-### **Install**
+### **Installation**
 
-You can install Unpage via:
+Unpage is designed to be run using `uvx`, which comes with `uv`:
 
-- PyPi: https://pypi.org/project/unpage/
-- GitHub: https://github.com/aptible/unpage/
-- Homebrew: brew install unpage
+```
+uvx unpage
+```
 
 ### **Quickstart**
 
-To get started, run **uv run unpage agent quickstart**
+To get started, run:
+
+```
+uvx run unpage agent quickstart
+```
 
 This will get you up and running with your first agent, which will automatically investigate and add context to alerts from PagerDuty (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
 
@@ -39,12 +43,16 @@ The quickstart flow will walk you through:
 
 ### Configure
 
-To return to any of the configuration options, run **unpage configure**.
+If you need to add or update plugins or API keys, you can update your configuration with:
+
+```
+uvx unpage configure
+```
 
 ### Add Context
 
-To provide your agents with more context in addition to the knowledge graph, write [Shell Commands](/docs/reference/shell).
+Your agent's responses will improve with more context about your infrastructure, which can be provided via the knowledge graph or custom scripts. To provide your agents with more context in addition to the knowledge graph, see [Shell Commands](/docs/reference/shell).
 
 ### Create Agents
 
-See Create and Edit Agents.
+Learn more about how to create and edit your agents in [Agents](/docs/concepts/agents).
