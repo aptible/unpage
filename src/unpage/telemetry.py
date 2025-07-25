@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 import sentry_sdk
 
-from unpage.config.utils import CONFIG_ROOT
+from unpage.config.utils import CONFIG_ROOT, load_global_config
 
 
 def _get_or_create_user_id() -> str:
@@ -47,6 +47,11 @@ class TunaClient(httpx.AsyncClient):
 
     async def send_event(self, event: dict[str, Any]) -> None:
         """Record a telemetry event."""
+        # Check if telemetry is disabled globally
+        global_config = load_global_config()
+        if not global_config.telemetry_enabled:
+            return
+        
         try:
             uname = os.uname()
             response = await self.get(
