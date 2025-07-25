@@ -58,6 +58,7 @@ class TunaClient(httpx.AsyncClient):
         # Check if telemetry is disabled globally
         global_config = load_global_config()
         if UNPAGE_TELEMETRY_DISABLED or not global_config.telemetry_enabled:
+            print("Telemetry is disabled")
             return
 
         try:

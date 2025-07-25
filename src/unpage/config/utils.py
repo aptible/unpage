@@ -54,10 +54,10 @@ def get_global_config_path() -> Path:
 
 def load_global_config() -> Config:
     global_config_path = get_global_config_path()
-    
+
     if not global_config_path.exists():
         return Config()
-    
+
     try:
         return Config(**yaml.safe_load(global_config_path.read_text()))
     except Exception:
@@ -75,13 +75,20 @@ def load_config(profile: str, create: bool = False) -> Config:
 
     # Load global config first
     global_config = load_global_config()
-    
+
     # Load profile-specific config
     profile_config_data = yaml.safe_load(config_path.read_text())
-    
-    # Merge configs: default -> global -> profile-specific (profile-specific takes precedence)
-    merged_config = {**DEFAULT_CONFIG.model_dump(), **global_config.model_dump(), **profile_config_data}
-    return Config(**merged_config)
+
+    return Config(
+        **{
+            # Load the default config first
+            **DEFAULT_CONFIG.model_dump(),
+            # Merge the global config
+            **global_config.model_dump(),
+            # Merge the profile-specific config
+            **profile_config_data,
+        }
+    )
 
 
 def save_config(cfg: Config, profile: str, create: bool = False) -> None:
