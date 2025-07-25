@@ -601,119 +601,6 @@ wheels = [
 ]
 
 [[package]]
-name = "unpage"
-version = "0.2.0a22"
-source = { editable = "." }
-dependencies = [
-    { name = "aioboto3" },
-    { name = "anyio" },
-    { name = "boltons" },
-    { name = "datadog-api-client", extra = ["async"] },
-    { name = "dnspython" },
-    { name = "dotenv" },
-    { name = "drain3" },
-    { name = "dspy" },
-    { name = "fastapi", extra = ["standard"] },
-    { name = "fastmcp" },
-    { name = "graphviz" },
-    { name = "httpx" },
-    { name = "human-readable" },
-    { name = "kr8s" },
-    { name = "logparser" },
-    { name = "matplotlib" },
-    { name = "mlflow" },
-    { name = "msgspec" },
-    { name = "networkx" },
-    { name = "numpy" },
-    { name = "pagerduty" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "pydantic-yaml" },
-    { name = "pydot" },
-    { name = "pyngrok" },
-    { name = "pyod" },
-    { name = "pythonping" },
-    { name = "pyyaml" },
-    { name = "questionary" },
-    { name = "requests" },
-    { name = "scapy" },
-    { name = "sentry-sdk" },
-    { name = "sh" },
-    { name = "sparklines" },
-    { name = "typer" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "whoosh-reloaded" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-freezer" },
-    { name = "ruff" },
-    { name = "types-aioboto3", extra = ["aioboto3"] },
-    { name = "types-boltons" },
-    { name = "types-networkx" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aioboto3", specifier = ">=14.1.0" },
-    { name = "anyio", specifier = ">=4.9.0" },
-    { name = "boltons", specifier = ">=25.0.0" },
-    { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
-    { name = "dnspython", specifier = ">=2.7.0" },
-    { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "drain3", git = "https://github.com/logpai/Drain3" },
-    { name = "dspy", git = "https://github.com/stanfordnlp/dspy?rev=a5b7061911a9a5c82a1ab451b064811d6e9e2e24" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
-    { name = "fastmcp", specifier = ">=2.10.1" },
-    { name = "graphviz", specifier = ">=0.20.3" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "human-readable", specifier = ">=2.0.0" },
-    { name = "kr8s", specifier = ">=0.20.7" },
-    { name = "logparser", specifier = ">=0.8.4" },
-    { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "mlflow", specifier = ">=3.1.4" },
-    { name = "msgspec", specifier = ">=0.19.0" },
-    { name = "networkx", specifier = ">=3.4.2" },
-    { name = "numpy", specifier = "<2.4" },
-    { name = "pagerduty", specifier = ">=3.1.0" },
-    { name = "pydantic", specifier = ">=2.11.3" },
-    { name = "pydantic-settings", specifier = ">=2.9.1" },
-    { name = "pydantic-yaml", specifier = ">=1.5.1" },
-    { name = "pydot", specifier = ">=3.0.4" },
-    { name = "pyngrok", specifier = ">=7.2.12" },
-    { name = "pyod", specifier = "==2.0.5" },
-    { name = "pythonping", specifier = ">=1.1.4" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "questionary", specifier = ">=2.1.0" },
-    { name = "requests", specifier = ">=2.32.3" },
-    { name = "scapy", specifier = ">=2.6.1" },
-    { name = "sentry-sdk", specifier = ">=2.29.1" },
-    { name = "sh", specifier = ">=2.2.2" },
-    { name = "sparklines", specifier = ">=0.5.0" },
-    { name = "typer", specifier = ">=0.15.2" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
-    { name = "whoosh-reloaded", specifier = ">=2.7.5" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "pyright", specifier = ">=1.1.402" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "pytest-asyncio", specifier = ">=1.0.0" },
-    { name = "pytest-freezer", specifier = ">=0.4.9" },
-    { name = "ruff", specifier = ">=0.11.4" },
-    { name = "types-aioboto3", extras = ["aioboto3"], specifier = ">=14.1.0" },
-    { name = "types-boltons", specifier = ">=25.0.0.20250516" },
-    { name = "types-networkx", specifier = ">=3.4.2.20250515" },
-]
-
-[[package]]
 name = "dill"
 version = "0.3.8"
 source = { registry = "https://pypi.org/simple" }
@@ -3510,6 +3397,119 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/45/ed/582c4daba0f3e1688d923b5cb914ada1f9defa702df38a1916c899f7c4d1/ujson-5.10.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:b9500e61fce0cfc86168b248104e954fead61f9be213087153d272e817ec7b4f", size = 1043580, upload-time = "2024-05-14T02:01:31.447Z" },
     { url = "https://files.pythonhosted.org/packages/d7/0c/9837fece153051e19c7bade9f88f9b409e026b9525927824cdf16293b43b/ujson-5.10.0-cp313-cp313-win32.whl", hash = "sha256:4c4fc16f11ac1612f05b6f5781b384716719547e142cfd67b65d035bd85af165", size = 38766, upload-time = "2024-05-14T02:01:32.856Z" },
     { url = "https://files.pythonhosted.org/packages/d7/72/6cb6728e2738c05bbe9bd522d6fc79f86b9a28402f38663e85a28fddd4a0/ujson-5.10.0-cp313-cp313-win_amd64.whl", hash = "sha256:4573fd1695932d4f619928fd09d5d03d917274381649ade4328091ceca175539", size = 42212, upload-time = "2024-05-14T02:01:33.97Z" },
+]
+
+[[package]]
+name = "unpage"
+version = "0.0.1a1"
+source = { editable = "." }
+dependencies = [
+    { name = "aioboto3" },
+    { name = "anyio" },
+    { name = "boltons" },
+    { name = "datadog-api-client", extra = ["async"] },
+    { name = "dnspython" },
+    { name = "dotenv" },
+    { name = "drain3" },
+    { name = "dspy" },
+    { name = "fastapi", extra = ["standard"] },
+    { name = "fastmcp" },
+    { name = "graphviz" },
+    { name = "httpx" },
+    { name = "human-readable" },
+    { name = "kr8s" },
+    { name = "logparser" },
+    { name = "matplotlib" },
+    { name = "mlflow" },
+    { name = "msgspec" },
+    { name = "networkx" },
+    { name = "numpy" },
+    { name = "pagerduty" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pydantic-yaml" },
+    { name = "pydot" },
+    { name = "pyngrok" },
+    { name = "pyod" },
+    { name = "pythonping" },
+    { name = "pyyaml" },
+    { name = "questionary" },
+    { name = "requests" },
+    { name = "scapy" },
+    { name = "sentry-sdk" },
+    { name = "sh" },
+    { name = "sparklines" },
+    { name = "typer" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "whoosh-reloaded" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-freezer" },
+    { name = "ruff" },
+    { name = "types-aioboto3", extra = ["aioboto3"] },
+    { name = "types-boltons" },
+    { name = "types-networkx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aioboto3", specifier = ">=14.1.0" },
+    { name = "anyio", specifier = ">=4.9.0" },
+    { name = "boltons", specifier = ">=25.0.0" },
+    { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
+    { name = "dnspython", specifier = ">=2.7.0" },
+    { name = "dotenv", specifier = ">=0.9.9" },
+    { name = "drain3", git = "https://github.com/logpai/Drain3" },
+    { name = "dspy", git = "https://github.com/stanfordnlp/dspy?rev=a5b7061911a9a5c82a1ab451b064811d6e9e2e24" },
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
+    { name = "fastmcp", specifier = ">=2.10.1" },
+    { name = "graphviz", specifier = ">=0.20.3" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "human-readable", specifier = ">=2.0.0" },
+    { name = "kr8s", specifier = ">=0.20.7" },
+    { name = "logparser", specifier = ">=0.8.4" },
+    { name = "matplotlib", specifier = ">=3.10.1" },
+    { name = "mlflow", specifier = ">=3.1.4" },
+    { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "networkx", specifier = ">=3.4.2" },
+    { name = "numpy", specifier = "<2.4" },
+    { name = "pagerduty", specifier = ">=3.1.0" },
+    { name = "pydantic", specifier = ">=2.11.3" },
+    { name = "pydantic-settings", specifier = ">=2.9.1" },
+    { name = "pydantic-yaml", specifier = ">=1.5.1" },
+    { name = "pydot", specifier = ">=3.0.4" },
+    { name = "pyngrok", specifier = ">=7.2.12" },
+    { name = "pyod", specifier = "==2.0.5" },
+    { name = "pythonping", specifier = ">=1.1.4" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "questionary", specifier = ">=2.1.0" },
+    { name = "requests", specifier = ">=2.32.3" },
+    { name = "scapy", specifier = ">=2.6.1" },
+    { name = "sentry-sdk", specifier = ">=2.29.1" },
+    { name = "sh", specifier = ">=2.2.2" },
+    { name = "sparklines", specifier = ">=0.5.0" },
+    { name = "typer", specifier = ">=0.15.2" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
+    { name = "whoosh-reloaded", specifier = ">=2.7.5" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "pyright", specifier = ">=1.1.402" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.0.0" },
+    { name = "pytest-freezer", specifier = ">=0.4.9" },
+    { name = "ruff", specifier = ">=0.11.4" },
+    { name = "types-aioboto3", extras = ["aioboto3"], specifier = ">=14.1.0" },
+    { name = "types-boltons", specifier = ">=25.0.0.20250516" },
+    { name = "types-networkx", specifier = ">=3.4.2.20250515" },
 ]
 
 [[package]]
