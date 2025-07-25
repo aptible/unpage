@@ -19,6 +19,13 @@ def _get_or_create_user_id() -> str:
     return identity_file.read_text().strip()
 
 
+UNPAGE_TELEMETRY_DISABLED = os.getenv("UNPAGE_TELEMETRY_DISABLED", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+
+
 class TunaClient(httpx.AsyncClient):
     BASE_URL = "https://tuna.aptible.com"
 
@@ -47,11 +54,12 @@ class TunaClient(httpx.AsyncClient):
 
     async def send_event(self, event: dict[str, Any]) -> None:
         """Record a telemetry event."""
+
         # Check if telemetry is disabled globally
         global_config = load_global_config()
-        if not global_config.telemetry_enabled:
+        if UNPAGE_TELEMETRY_DISABLED or not global_config.telemetry_enabled:
             return
-        
+
         try:
             uname = os.uname()
             response = await self.get(
