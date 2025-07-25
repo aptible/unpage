@@ -1,4 +1,51 @@
 ---
-title: "Introduction"
+title: "Getting Started with Unpage"
 description: "This is the introduction to the documentation"
 ---
+
+<Info>
+  **ALPHA SOFTWARE**: Unpage is experimental, under heavy development, and may be unstable. Use at your own risk\!
+</Info>
+
+### Intro
+
+At the end of this guide, you will have Unpage set up to run locally with built-in integrations and tools, a knowledge graph, and your first infrastructure-aware agent.
+
+### **Prerequisites**
+
+- Python 3.12 or higher
+- uv package manager
+- API keys for your LLM and alerting, infrastructure, and observability tools. See more in Plugins.
+
+### **Install**
+
+You can install Unpage via:
+
+- PyPi: https://pypi.org/project/unpage/
+- GitHub: https://github.com/aptible/unpage/
+- Homebrew: brew install unpage
+
+### **Quickstart**
+
+To get started, run **uv run unpage agent quickstart**
+
+This will get you up and running with your first agent, which will automatically investigate and add context to alerts from PagerDuty (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
+
+The quickstart flow will walk you through:
+
+- Configuring your LLM, PagerDuty plugin, and logs and metrics plugins
+- Creating your first agent and prompt
+- Testing your agent with an existing incident ticket
+- Building your knowledge graph
+
+### Configure
+
+To return to any of the configuration options, run **unpage configure**.
+
+### Add Context
+
+To provide your agents with more context in addition to the knowledge graph, write [Shell Commands](/docs/reference/shell).
+
+### Create Agents
+
+See Create and Edit Agents.
