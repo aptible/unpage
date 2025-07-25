@@ -8,11 +8,9 @@ title: "Getting Started"
 
 ### Intro
 
+Unpage is an agent and infrastructure knowledge graph builder that makes infrastructure context available via MCP server, enabling your LLM-powered applications to query and execute on your infrastructure safely and intelligently. 
+
 At the end of this guide, you will have Unpage set up to run locally with built-in integrations and tools, a knowledge graph, and your first infrastructure-aware agent.
-
-### About Unpage
-
-Unpage is
 
 ### **Prerequisites**
 
@@ -24,7 +22,7 @@ Unpage is
 
 Unpage is designed to be run using `uvx`, which comes with `uv`:
 
-```
+```shell
 uvx unpage
 ```
 
@@ -32,8 +30,8 @@ uvx unpage
 
 To get started, run:
 
-```
-uvx run unpage agent quickstart
+```shell
+uvx unpage agent quickstart
 ```
 
 This will get you up and running with your first agent, which will automatically investigate and add context to alerts from PagerDuty (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
@@ -49,7 +47,7 @@ The quickstart flow will walk you through:
 
 If you need to add or update plugins or API keys, you can update your configuration with:
 
-```
+```shell
 uvx unpage configure
 ```
 
@@ -57,8 +55,8 @@ uvx unpage configure
 
 To refresh your knowledge graph to give your agent up-to-date information, run:
 
-```
-uvx unpage build-graph
+```shell
+uvx unpage graph build
 ```
 
 ### Add Context
