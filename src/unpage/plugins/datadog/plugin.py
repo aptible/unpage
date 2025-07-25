@@ -1,21 +1,28 @@
 import os
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import anyio
 import questionary
+from pydantic import AwareDatetime
 
 from unpage.config.utils import PluginSettings
 from unpage.knowledge import Graph
 from unpage.plugins.base import Plugin
 from unpage.plugins.datadog.client import DatadogClient
+from unpage.plugins.datadog.models import DatadogLogSearchResult
 from unpage.plugins.datadog.nodes.datadog_api import DatadogApi
 from unpage.plugins.datadog.nodes.datadog_service import DatadogService
 from unpage.plugins.datadog.nodes.datadog_system import DatadogSystem
 from unpage.plugins.datadog.nodes.datadog_team import DatadogTeam
-from unpage.plugins.mixins import KnowledgeGraphMixin
+from unpage.plugins.mixins import KnowledgeGraphMixin, tool
+from unpage.plugins.mixins.mcp import McpServerMixin
+
+CLAUDE_DESKTOP_RESULT_MAX_LENGTH = 1048576
+RESULT_LIMIT = int(CLAUDE_DESKTOP_RESULT_MAX_LENGTH * 0.9)
 
 
-class DatadogPlugin(Plugin, KnowledgeGraphMixin):
+class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
     """A plugin for Datadog."""
 
     _client: DatadogClient
@@ -102,3 +109,49 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin):
                             _graph=graph,
                         )
                     )
+
+    @tool()
+    async def search_logs(
+        self,
+        query: str,
+        min_time: AwareDatetime,
+        max_time: AwareDatetime,
+    ) -> DatadogLogSearchResult:
+        """Search Datadog for logs within a given time range
+
+        Args:
+            query (str): The search query.
+            min_time (AwareDatetime): The starting time for the range within which to search.
+            max_time (AwareDatetime): The ending time for the range within which to search.
+
+        Returns:
+            DatadogLogSearchResult: logs that matched the query and fit within response limit
+        """
+        logs = []
+        truncated = False
+        content_length = 0
+
+        class timeoutTracker:
+            timed_out: bool = False
+            start_time: AwareDatetime = datetime.now(UTC)
+
+            def under_time_out(self, _: AwareDatetime | None) -> bool:
+                self.timed_out = (datetime.now(UTC) - self.start_time) > timedelta(seconds=10)
+                return not self.timed_out
+
+        tt = timeoutTracker()
+        async for log in self._client.search_logs(
+            query=f"*:*{query}*",
+            min_time=min_time,
+            max_time=max_time,
+            continue_search=tt.under_time_out,
+        ):
+            content_length += len(log.model_dump_json(indent=6)) + 8
+            if content_length >= int(RESULT_LIMIT / 2):
+                truncated = True
+                break
+            logs.append(log)
+        return DatadogLogSearchResult(
+            results=logs,
+            truncated=truncated or tt.timed_out,
+        )
