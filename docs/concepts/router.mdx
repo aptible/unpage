@@ -3,8 +3,6 @@ title: Router
 description: How Unpage intelligently routes alerts to specialized agents
 ---
 
-# Router
-
 The Unpage Router is the intelligent system that determines which agent should handle an incoming alert or payload. Rather than requiring you to manually select the right agent for each situation, the Router automatically matches alerts to the most appropriate specialized agent.
 
 ## How Routing Works
@@ -26,15 +24,18 @@ When an alert is received, the Router follows these steps:
 
 ```mermaid
 flowchart TD
-    A[Incoming Alert] --> B[Router]
-    B --> C[Extract Alert Information]
-    C --> D[LLM-Based Matching]
+    A[Incoming Alert] --> C[Extract Alert Information]
+    C --> D[LLM-Based Evaluation]
     D --> E{Best Match?}
-    E -- CPU Alert Agent --> F[CPU Alert Agent]
-    E -- Network Alert Agent --> G[Network Alert Agent]
-    E -- Database Alert Agent --> H[Database Alert Agent]
-    E -- No Match --> I[Default Agent]
+    E -- CPU Alert Agent --> F[Execute CPU Alert Agent]
+    E -- Network Alert Agent --> G[Execute Network Alert Agent]
+    E -- Database Alert Agent --> H[Execute Database Alert Agent]
+    E -- No Match --> I[Execute Default Agent]
 ```
+
+- When an alert clearly matches a single agent's description, the Router directs it to that agent.
+- When multiple agents might handle an alert, the Router selects the one with the most specific matching criteria.
+- When no agent description clearly matches, the Router selects the default agent (if configured) or the most general-purpose agent.
 
 ## The Agent Description
 
@@ -77,49 +78,13 @@ The `--debug` flag provides additional insight into why the Router selected a pa
 
 ## Default Agent
 
-If no agent's description sufficiently matches the incoming alert, the Router falls back to a default agent. You can identify the default agent by looking for a description like:
+If no agent's description sufficiently matches the incoming alert, the Router falls back to a default agent. The default agent has the following description:
 
 ```yaml
 description: >
   Use this agent to analyze alerts that meet the following criteria:
     - Any alert that doesn't meet the criteria for any other agent
 ```
-
-## The Router Agent
-
-Under the hood, the Router uses a special "routing agent" configuration that:
-
-1. Has access to all agent descriptions
-2. Uses LLM reasoning to evaluate alert characteristics
-3. Selects the most appropriate agent based on defined criteria
-
-This approach leverages the LLM's natural language understanding to make intelligent routing decisions without requiring complex rule-based logic.
-
-## Router Configuration
-
-The routing behavior is controlled by system configuration and doesn't require separate configuration. When you run the agent server with:
-
-```bash
-unpage agent serve
-```
-
-The Router is automatically engaged to direct incoming alerts to appropriate agents.
-
-## Common Routing Scenarios
-
-The Router handles various scenarios:
-
-### Clear Match
-
-When an alert clearly matches a single agent's description, the Router directs it to that agent.
-
-### Multiple Potential Matches
-
-When multiple agents might handle an alert, the Router selects the one with the most specific matching criteria.
-
-### No Clear Match
-
-When no agent description clearly matches, the Router selects the default agent (if configured) or the most general-purpose agent.
 
 ## Best Practices
 

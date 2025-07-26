@@ -3,8 +3,6 @@ title: Agents
 description: Creating and managing agents that automatically analyze and respond to infrastructure events
 ---
 
-# Agents
-
 Unpage agents are the core building blocks for automating infrastructure operations with LLMs. Unlike traditional automation that requires extensive coding, Unpage agents are defined with simple YAML configurations that specify what they analyze and how they respond.
 
 ## What are Agents?
@@ -24,7 +22,7 @@ Agents are defined using YAML configuration files with three key components:
 
 ### 1. Description
 
-The description specifies when the agent should be used. This is particularly important for the routing system, which automatically selects the most appropriate agent for each incoming alert.
+The description specifies when the agent should be used. This is particularly important for the [routing system](/concepts/router), which automatically selects the most appropriate agent for each incoming alert.
 
 ```yaml
 description: >
