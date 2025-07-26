@@ -7,7 +7,7 @@ for nodes in the [Knowledge Graph](/concepts/knowledge-graph).
 
 This plugin does not get metrics itself--rather, it dispatches to various
 providers depending on the node type (for example when asked for metrics for
-an EC2 instance, it will get the metrics from the [AWS Plugin](/reference/aws),
+an EC2 instance, it will get the metrics from the [AWS Plugin](/plugins/aws),
 which calls out to Cloudwatch).
 
 ## Configuration
@@ -22,7 +22,7 @@ plugins:
 ```
 
 You will also need to configure at least one provider that provides metrics for
-Knowledge Graph nodes, like [AWS](/reference/aws) or [Aptible](/reference/aptible).
+Knowledge Graph nodes, like [AWS](/plugins/aws) or [Aptible](/plugins/aptible).
 
 ## Tools
 The Metrics plugin provides the following tools to Agents and MCP Clients:
