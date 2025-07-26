@@ -84,9 +84,9 @@ For example, the AWS plugin might discover EC2 instances, their security groups,
 
 ```mermaid
 graph LR
-    A[AWS Plugin] -->|Discovers| B[EC2 Instance]
-    A -->|Discovers| C[RDS Database]
-    A -->|Discovers| D[Load Balancer]
+    B[EC2 Instance]
+    C[RDS Database]
+    D[Load Balancer]
     B -->|Connected to| D
     C -->|Connected to| B
     D -->|Serves traffic to| B
