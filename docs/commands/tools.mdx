@@ -64,9 +64,3 @@ unpage tools call aws_list_ec2_instances --region us-west-2
 # Call a tool and pipe output to jq for processing
 unpage tools call datadog_get_metrics | jq .
 ```
-
-## Use Cases
-
-- **Debugging**: Test tools functionality directly without going through an LLM
-- **Automation**: Use Unpage tools in shell scripts and CI/CD pipelines
-- **Development**: Understand available tools when developing agents or custom plugins
