@@ -3401,7 +3401,7 @@ wheels = [
 
 [[package]]
 name = "unpage"
-version = "0.1.0a1"
+version = "0.1.0a3"
 source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },
@@ -3423,6 +3423,7 @@ dependencies = [
     { name = "mlflow" },
     { name = "msgspec" },
     { name = "networkx" },
+    { name = "numba" },
     { name = "numpy" },
     { name = "pagerduty" },
     { name = "pydantic" },
@@ -3478,6 +3479,7 @@ requires-dist = [
     { name = "mlflow", specifier = ">=3.1.4" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "networkx", specifier = ">=3.4.2" },
+    { name = "numba", specifier = ">=0.61.2" },
     { name = "numpy", specifier = "<2.4" },
     { name = "pagerduty", specifier = ">=3.1.0" },
     { name = "pydantic", specifier = ">=2.11.3" },

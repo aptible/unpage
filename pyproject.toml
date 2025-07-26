@@ -1,6 +1,6 @@
 [project]
 name = "unpage"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.3"
 description = "An agent framework for production engineering"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -44,6 +44,7 @@ dependencies = [
     "pydantic-settings>=2.9.1",
     "mlflow>=3.1.4",
     "human-readable>=2.0.0",
+    "numba>=0.61.2",
 ]
 
 [tool.uv.sources]
