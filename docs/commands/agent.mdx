@@ -1,3 +1,148 @@
 ---
 title: unpage agent
+description: Create, manage, and run Unpage agents
 ---
+
+The `agent` command provides functionality to create, manage, and run agents that analyze incidents and alerts, leveraging the infrastructure knowledge graph and LLM capabilities.
+
+## Usage
+
+```shell
+unpage agent [OPTIONS] COMMAND [ARGS]...
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `create` | Create a new agent configuration file and open it in your editor |
+| `delete` | Delete an agent |
+| `edit` | Edit an existing agent configuration file |
+| `list` | List the available agents |
+| `quickstart` | Get up-and-running with an incident agent in \<5min! |
+| `route` | Determine which agent will be used to analyze the given payload |
+| `run` | Run an agent with the provided payload and print the analysis |
+| `serve` | Run the Unpage Agent server to automatically process incoming alerts |
+| `templates` | List the available agent templates |
+
+## Subcommand: create
+
+Creates a new agent configuration file based on available templates and opens it in your default editor.
+
+### Usage
+
+```shell
+unpage agent create [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: delete
+
+Deletes an existing agent.
+
+### Usage
+
+```shell
+unpage agent delete [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: edit
+
+Opens an existing agent configuration file in your default editor.
+
+### Usage
+
+```shell
+unpage agent edit [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: list
+
+Lists all available agents in your Unpage instance.
+
+### Usage
+
+```shell
+unpage agent list [OPTIONS]
+```
+
+## Subcommand: quickstart
+
+Launches an interactive wizard to quickly set up an incident response agent.
+
+### Usage
+
+```shell
+unpage agent quickstart [OPTIONS]
+```
+
+## Subcommand: route
+
+Tests which agent would be selected to analyze a given payload based on your routing configuration.
+
+### Usage
+
+```shell
+unpage agent route [OPTIONS] [PAYLOAD]
+```
+
+## Subcommand: run
+
+Executes an agent with a provided payload and displays the analysis.
+
+### Usage
+
+```shell
+unpage agent run [OPTIONS] AGENT_NAME [PAYLOAD]
+```
+
+## Subcommand: serve
+
+Starts the Unpage Agent server, which listens for incoming alerts and routes them to appropriate agents.
+
+### Usage
+
+```shell
+unpage agent serve [OPTIONS]
+```
+
+## Subcommand: templates
+
+Lists all available agent templates that can be used when creating a new agent.
+
+### Usage
+
+```shell
+unpage agent templates [OPTIONS]
+```
+
+## Examples
+
+### Creating a New Agent
+
+```shell
+# Create a new agent named "disk-alert-agent"
+unpage agent create disk-alert-agent
+```
+
+### Running an Agent with a Test Payload
+
+```shell
+# Run an agent with a JSON payload from a file
+unpage agent run my-agent @path/to/payload.json
+
+# Run an agent with a JSON payload provided directly
+unpage agent run my-agent '{"alert": "Disk usage exceeds 80%"}'
+```
+
+### Starting the Agent Server
+
+```shell
+# Run the agent server to automatically process incoming alerts
+unpage agent serve
+```
+
+## Use Cases
+
+- **Incident Response**: Create agents that automatically analyze and respond to alerts
+- **Troubleshooting**: Run agents manually to analyze specific issues
+- **Automation**: Configure webhook receivers to trigger agent analysis when alerts occur

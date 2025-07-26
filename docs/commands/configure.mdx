@@ -1,3 +1,45 @@
 ---
 title: unpage configure
+description: Configure Unpage plugins and API keys
 ---
+
+The `configure` command launches an interactive setup wizard that guides you through configuring your Unpage instance, including:
+
+- Setting up API keys for your LLM provider
+- Configuring authentication for infrastructure providers
+- Enabling and configuring plugins
+- Setting up alerting integrations
+
+## Usage
+
+```shell
+unpage configure [OPTIONS]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--use-uv-run` | Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage) [default: True] |
+| `-h, --help` | Show help message and exit |
+
+## Examples
+
+### Basic Configuration
+
+Run the configuration wizard with default settings:
+
+```shell
+unpage configure
+```
+
+### Using a Named Profile
+
+Configure a separate environment using a named profile:
+
+```shell
+unpage configure --profile production
+```
+
+This allows you to maintain separate configurations for different environments (e.g., development, staging, production).
