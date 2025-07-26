@@ -9,9 +9,6 @@
     "dark": "#0F172A"
   },
   "navigation": {
-    "pages": [
-      "index"
-    ],
     "groups": [
       {
         "group": "About Unpage",
@@ -43,6 +40,17 @@
           "reference/pagerduty",
           "reference/papertrail",
           "reference/shell"
+        ]
+      },
+      {
+        "group": "Command Reference",
+        "pages": [
+          "commands/configure",
+          "commands/start",
+          "commands/tools",
+          "commands/graph",
+          "commands/agent",
+          "commands/mlflow"
         ]
       }
     ]
