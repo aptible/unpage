@@ -10,7 +10,7 @@ Unpage agents are the core building blocks for automating infrastructure operati
 In Unpage, an agent is a specialized LLM that is:
 
 1. **Purpose-built** for a specific type of infrastructure task or alert
-2. **Context-aware** with access to your knowledge graph
+2. **Context-aware** with access to your [knowledge graph](/concepts/knowledge-graph)
 3. **Tool-enabled** with specific permissions to interact with your infrastructure
 4. **Configuration-driven** rather than requiring custom code development
 
@@ -63,7 +63,7 @@ prompt: >
 
 ### 3. Tools
 
-The tools section explicitly grants the agent permission to use specific infrastructure tools. This follows the principle of least privilege, ensuring agents only have access to the tools they need.
+The tools section explicitly grants the agent permission to use specific infrastructure [tools](/concepts/tools). This follows the principle of least privilege, ensuring agents only have access to the tools they need.
 
 ```yaml
 tools:
