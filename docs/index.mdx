@@ -12,18 +12,20 @@ Unpage is an agent builder and infrastructure knowledge graph builder that makes
 
 At the end of this guide, you will have Unpage set up to run locally with built-in integrations and tools, a knowledge graph, and your first infrastructure-aware agent.
 
-## Prerequisites
+## Installation
+
+### Prerequisites
 
 - Python 3.12 or higher
 - `uv` package manager
 - API keys for your LLM and alerting, infrastructure, and observability tools. Learn more in [Plugins](/docs/concepts/plugins).
 
-## **Install Unpage**
+### **Install Unpage**
 
-Unpage is designed to be run using `uvx`, which comes with `uv`:
+Unpage is designed to be run using `uv`:
 
 ```shell
-uvx unpage
+uvx unpage -h
 ```
 
 ## **Quickstart**
@@ -43,7 +45,19 @@ The quickstart flow will walk you through:
 - Testing your agent with an existing incident ticket
 - Building your knowledge graph
 
-## Configure
+## Running the Agent
+
+Once you're happy with the results of your agent, you can automate the agent's actions for new incidents with:
+
+```shellscript
+uvx unpage agent serve
+```
+
+\<placeholder for Frank\>
+
+## Maintenance
+
+### Update Configuration
 
 If you need to add or update plugins or API keys, you can update your configuration with:
 
@@ -51,18 +65,18 @@ If you need to add or update plugins or API keys, you can update your configurat
 uvx unpage configure
 ```
 
-## Build the Knowledge Graph
+### Update the Knowledge Graph
 
 To refresh your knowledge graph to give your agent up-to-date information, run:
 
 ```shell
-uvx unpage graph build
+uvx unpage graph build -h
 ```
 
-## Add Context
+### Add More Context
 
 Your agent's responses will improve with more context about your infrastructure, which can be provided via the knowledge graph or custom scripts. To provide your agents with more context in addition to the knowledge graph, see [Shell Commands](/docs/reference/shell).
 
-## Create Agents
+### Create Agents
 
 See [Agents](/docs/concepts/agents) to learn more about how to create and edit your agents and prompts.
