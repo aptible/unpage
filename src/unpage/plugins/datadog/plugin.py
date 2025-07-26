@@ -116,7 +116,7 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         query: str,
         min_time: AwareDatetime,
         max_time: AwareDatetime,
-    ) -> DatadogLogSearchResult:
+    ) -> DatadogLogSearchResult | str:
         """Search Datadog for logs within a given time range
 
         Args:
@@ -127,6 +127,8 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         Returns:
             DatadogLogSearchResult: logs that matched the query and fit within response limit
         """
+        if min_time >= max_time:
+            return f"min_time must come before max_time {min_time=} {max_time=}"
         logs = []
         truncated = False
         content_length = 0
