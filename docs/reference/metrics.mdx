@@ -1,0 +1,84 @@
+---
+title: Metrics
+---
+
+The Metrics plugin provides the tools necessary to have Agents fetch metrics
+for nodes in the [Knowledge Graph](/concepts/knowledge-graph).
+
+This plugin does not get metrics itself--rather, it dispatches to various
+providers depending on the node type (for example when asked for metrics for
+an EC2 instance, it will get the metrics from the [AWS Plugin](/reference/aws),
+which calls out to Cloudwatch).
+
+## Configuration
+Configure the Metrics plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  metrics:
+    enabled: true
+```
+
+You will also need to configure at least one provider that provides metrics for
+Knowledge Graph nodes, like [AWS](/reference/aws) or [Aptible](/reference/aptible).
+
+## Tools
+The Metrics plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="list_node_types_that_support_metrics">
+  List the types of nodes that support metrics retrieval.
+
+  **Arguments**
+  None
+
+  **Returns** `list[string]`: Node types in the format "source:type" (e.g., "aws:ec2_instance", "kubernetes:pod") that support metrics collection.
+</Card>
+<br />
+
+<Card title="list_available_metrics_for_node">
+  List the available metrics for a specific node.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The unique identifier of the node to check for available metrics.
+  </ParamField>
+
+  **Returns** `list[string]` or `string`: List of available metric names for the node, or an error message if the node doesn't support metrics.
+</Card>
+<br />
+
+<Card title="get_metrics_for_node">
+  Get metrics data for a resource using its node ID.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The unique identifier of the node to retrieve metrics for.
+  </ParamField>
+  <ParamField path="time_range_start" type="datetime" required>
+    The starting time for the metrics range (ISO 8601 timestamp). A good starting point is one hour before the current time.
+  </ParamField>
+  <ParamField path="time_range_end" type="datetime" required>
+    The ending time for the metrics range (ISO 8601 timestamp).
+  </ParamField>
+  <ParamField path="metric_names" type="list[string]" optional>
+    List of specific metric names to retrieve. If not provided, all available metrics for the node will be returned. Can also be provided as a JSON string array.
+  </ParamField>
+
+  **Returns** `list[dict]` or `string`: Metric observations with timestamps and values, or an error/informational message.
+
+  **Note**: Use `list_available_metrics_for_node` first to get valid metric names for the node.
+</Card>
+<br />
+
+<Card title="get_anomalies_for_metrics">
+  Detect anomalies in metric data using statistical analysis.
+
+  **Arguments**
+  <ParamField path="metrics" type="list[dict]" required>
+    List of data points, where each entry contains a timestamp and value pair. Typically obtained from the results of `get_metrics_for_node`.
+  </ParamField>
+
+  **Returns** `list[dict]`: Detected anomalies in the metric data, including anomaly details and confidence scores.
+</Card>
