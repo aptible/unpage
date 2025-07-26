@@ -1,3 +1,235 @@
 ---
 title: Agents
+description: Creating and managing agents that automatically analyze and respond to infrastructure events
 ---
+
+# Agents
+
+Unpage agents are the core building blocks for automating infrastructure operations with LLMs. Unlike traditional automation that requires extensive coding, Unpage agents are defined with simple YAML configurations that specify what they analyze and how they respond.
+
+## What are Agents?
+
+In Unpage, an agent is a specialized LLM that is:
+
+1. **Purpose-built** for a specific type of infrastructure task or alert
+2. **Context-aware** with access to your knowledge graph
+3. **Tool-enabled** with specific permissions to interact with your infrastructure
+4. **Configuration-driven** rather than requiring custom code development
+
+Agents act as first responders to infrastructure events, analyzing situations and taking appropriate actions based on your predefined instructions.
+
+## Agent Configuration
+
+Agents are defined using YAML configuration files with three key components:
+
+### 1. Description
+
+The description specifies when the agent should be used. This is particularly important for the routing system, which automatically selects the most appropriate agent for each incoming alert.
+
+```yaml
+description: >
+  Use this agent to analyze alerts that meet the following criteria:
+    - CPU usage exceeds 90% on production EC2 instances
+    - The alert has been active for more than 15 minutes
+    - The instance is part of the main application cluster
+```
+
+### 2. Prompt
+
+The prompt contains detailed instructions for the agent, defining:
+- What information to gather
+- How to analyze the situation
+- What actions to take
+- Any constraints or guidelines to follow
+
+```yaml
+prompt: >
+  You are responsible for analyzing high CPU usage alerts on production EC2 instances.
+
+  Follow these steps:
+  1. Verify that CPU usage is indeed exceeding 90% using current metrics
+  2. Check if the instance is experiencing unusual load by examining:
+     - Recent log entries for errors or warnings
+     - Unusual network traffic patterns
+     - Scheduled jobs that might be running
+  3. Determine if this is an isolated incident or affecting multiple instances
+  4. If the issue appears to be temporary and non-critical:
+     - Post a status update indicating it's likely transient
+  5. If the issue appears serious:
+     - Post a detailed analysis with recommended next steps
+     - Highlight any potential service impacts
+
+  Always include specific metrics and timestamps in your analysis.
+  Never make assumptions without data to support them.
+```
+
+### 3. Tools
+
+The tools section explicitly grants the agent permission to use specific infrastructure tools. This follows the principle of least privilege, ensuring agents only have access to the tools they need.
+
+```yaml
+tools:
+  - "core_current_datetime"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "graph_get_resource_details"
+  - "graph_get_neighboring_resources"
+  - "papertrail_search_logs"
+  - "pagerduty_post_status_update"
+```
+
+You can use wildcards and regular expressions to specify tools:
+
+```yaml
+tools:
+  # Allow all metrics tools
+  - "metrics_*"
+  # Allow all tools except those that modify resources
+  - "/^(?!.*_modify_|.*_delete_|.*_create_).*$/"
+```
+
+## Agent File Location
+
+Agent configuration files are stored in your Unpage profile directory:
+
+```
+~/.unpage/profiles/<profile_name>/agents/
+```
+
+Each agent has its own YAML file, named after the agent (e.g., `cpu-alert-agent.yaml`). You can have multiple agents, each specialized for different tasks.
+
+## Example Agent Configuration
+
+Here's an example of a complete agent configuration:
+
+```yaml
+# cpu-alert-agent.yaml
+
+# Used by the router to determine which agent to use for an alert
+description: >
+  Use this agent to analyze alerts that meet the following criteria:
+    - The alert is related to CPU usage exceeding thresholds
+    - The alert comes from AWS CloudWatch or Datadog
+    - The affected resource is a compute instance (EC2, container, etc.)
+
+# Instructions for the agent
+prompt: >
+  You are an agent specialized in analyzing high CPU usage alerts.
+
+  When investigating a CPU alert, follow these steps:
+
+  1. Check the current CPU metrics to verify the alert is still active
+  2. Look at CPU metrics for the past hour to see if this is a spike or sustained usage
+  3. Check logs from around the time the alert started for any errors or unusual activity
+  4. Look for any recent deployments or changes that might explain the high usage
+  5. Check if similar resources are experiencing the same issue
+
+  Based on your findings, update the incident with:
+  - Current status of the issue
+  - Likely cause based on available evidence
+  - Recommended next steps
+  - Whether this appears to be a critical issue requiring immediate human attention
+
+  Be concise but thorough. Include specific metrics, timestamps, and log entries
+  that support your analysis.
+
+  NEVER make up information or assume values you haven't verified.
+
+# Tools the agent can use
+tools:
+  - "core_current_datetime"
+  - "core_convert_to_timezone"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "metrics_get_anomalies_for_metrics"
+  - "graph_get_resource_details"
+  - "graph_get_neighboring_resources"
+  - "graph_get_resource_topology"
+  - "papertrail_search_logs"
+  - "pagerduty_post_status_update"
+  - "pagerduty_get_incident_details"
+  - "aws_describe_ec2_instance"
+```
+
+## Creating and Managing Agents
+
+Unpage provides several commands to work with agents:
+
+### Creating a New Agent
+
+```bash
+unpage agent create my-new-agent
+```
+
+This creates a new agent configuration file from a template and opens it in your default editor.
+
+### Editing an Existing Agent
+
+```bash
+unpage agent edit cpu-alert-agent
+```
+
+### Listing Available Agents
+
+```bash
+unpage agent list
+```
+
+### Running an Agent Manually
+
+```bash
+# Run with a JSON payload from a file
+unpage agent run cpu-alert-agent @path/to/alert.json
+
+# Run with a direct JSON payload
+unpage agent run cpu-alert-agent '{"alert": "CPU usage exceeds 90%"}'
+```
+
+## Common Agent Use Cases
+
+Agents can be configured for various infrastructure tasks:
+
+### Incident Response
+
+Automatically analyze and respond to alerts from monitoring systems:
+
+- Triage alerts based on severity and impact
+- Gather relevant logs and metrics
+- Post status updates with analysis
+- Suggest remediation steps
+
+### Troubleshooting
+
+Assist with diagnosing complex infrastructure issues:
+
+- Analyze performance bottlenecks
+- Correlate events across multiple systems
+- Identify potential root causes
+- Suggest debugging approaches
+
+### Automation
+
+Handle routine operational tasks:
+
+- Respond to common alerts with well-defined playbooks
+- Gather context for human responders
+- Document incident timelines
+- Check system health after changes
+
+## Best Practices for Agent Design
+
+When designing agents, follow these best practices:
+
+1. **Specialize your agents** - Create purpose-specific agents rather than one general-purpose agent
+2. **Clear descriptions** - Write detailed descriptions to help the router select the right agent
+3. **Structured prompts** - Organize prompts with clear steps and expectations
+4. **Principle of least privilege** - Only grant access to tools the agent actually needs
+5. **Include guardrails** - Add explicit constraints in prompts about what not to do
+6. **Test thoroughly** - Run your agents against sample payloads before deploying
+7. **Iterative refinement** - Review agent responses and refine prompts based on performance
+
+## Conclusion
+
+Unpage agents provide a configuration-driven approach to infrastructure automation with LLMs. By defining specialized agents with clear instructions and appropriate tool access, you can create a responsive system that handles routine operations and provides valuable insight for complex incidents.
+
+To learn more about how alerts are routed to the appropriate agent, see the [Router](/concepts/router) documentation.
