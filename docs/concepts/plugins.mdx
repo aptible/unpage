@@ -138,50 +138,6 @@ Unpage's plugin architecture is designed to be extensible. If you have internal 
 3. Define tools tailored to your infrastructure needs
 4. Integrate with your organization's authentication systems
 
-## Common Plugin Patterns
-
-Most plugins follow these common patterns:
-
-### Graph-Building Plugins
-
-These plugins focus on discovering resources and building the knowledge graph:
-
-```yaml
-# Example: AWS plugin configuration
-plugins:
-  aws:
-    enabled: true
-    # Region and resource filters
-    regions: ["us-east-1", "us-west-2"]
-    resources:
-      ec2: true
-      rds: true
-```
-
-### Tool-Focused Plugins
-
-Some plugins primarily provide tools without adding significantly to the graph:
-
-```yaml
-# Example: Core plugin configuration
-plugins:
-  core:
-    enabled: true  # Provides utility tools like datetime conversion
-```
-
-### Hybrid Plugins
-
-Many plugins serve both purposes, adding to the graph and providing related tools:
-
-```yaml
-# Example: Kubernetes plugin configuration
-plugins:
-  kubernetes:
-    enabled: true
-    # Builds graph from k8s resources
-    # Provides tools to interact with those resources
-```
-
 ## Conclusion
 
 Plugins are the foundation of Unpage's ability to understand and interact with your infrastructure. By connecting to various services and providing both knowledge graph data and LLM tools, they enable agents to effectively analyze and respond to infrastructure issues.
