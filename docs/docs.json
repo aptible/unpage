@@ -9,9 +9,6 @@
     "dark": "#0F172A"
   },
   "navigation": {
-    "pages": [
-      "index"
-    ],
     "groups": [
       {
         "group": "About Unpage",
@@ -32,17 +29,28 @@
       {
         "group": "Plugins",
         "pages": [
-          "reference/aptible",
-          "reference/aws",
-          "reference/core",
-          "reference/datadog",
-          "reference/graph",
-          "reference/kubernetes",
-          "reference/metrics",
-          "reference/networking",
-          "reference/pagerduty",
-          "reference/papertrail",
-          "reference/shell"
+          "plugins/aptible",
+          "plugins/aws",
+          "plugins/core",
+          "plugins/datadog",
+          "plugins/graph",
+          "plugins/kubernetes",
+          "plugins/metrics",
+          "plugins/networking",
+          "plugins/pagerduty",
+          "plugins/papertrail",
+          "plugins/shell"
+        ]
+      },
+      {
+        "group": "Command Reference",
+        "pages": [
+          "commands/configure",
+          "commands/start",
+          "commands/tools",
+          "commands/graph",
+          "commands/agent",
+          "commands/mlflow"
         ]
       }
     ]

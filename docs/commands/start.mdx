@@ -1,0 +1,65 @@
+---
+title: unpage start
+description: Start the Unpage MCP Server to enable LLM interaction with infrastructure
+---
+
+The `start` command launches the Unpage MCP (Model Coupling Protocol) Server, which allows LLM-powered applications to interact with your infrastructure through a set of tools exposed by plugins.
+
+## Usage
+
+```shell
+unpage start [OPTIONS]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--disable-stdio` | Disable the stdio transport for the MCP Server |
+| `--disable-http` | Disable the HTTP transport for the MCP Server |
+| `--disable-sse` | Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead) |
+| `--http-host TEXT` | The host to bind the HTTP transport to [default: 127.0.0.1] |
+| `--http-port INTEGER` | The port to bind the HTTP transport to [default: 8000] |
+| `-h, --help` | Show help message and exit |
+
+## Transport Protocols
+
+The MCP Server supports two transport protocols:
+
+- **HTTP Transport**: Enables connection through HTTP, useful for web applications and remote clients
+- **stdio Transport**: Enables communication through standard input/output, useful for direct integration with CLI tools
+
+## Examples
+
+### Default Start
+
+Start the MCP Server with both stdio and HTTP transport:
+
+```shell
+unpage start
+```
+
+### HTTP Only
+
+Start the MCP Server with only HTTP transport:
+
+```shell
+unpage start --disable-stdio
+```
+
+### Custom HTTP Configuration
+
+Start the MCP Server on a specific host and port:
+
+```shell
+unpage start --http-host 0.0.0.0 --http-port 9000
+```
+
+### Using a Named Profile
+
+Start the MCP Server with a specific configuration profile:
+
+```shell
+unpage start --profile production
+```
