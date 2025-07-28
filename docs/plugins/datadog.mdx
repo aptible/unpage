@@ -12,6 +12,9 @@ resources from your Datadog organization:
     - Teams
     - Systems (inferred from relationships)
   </Accordion>
+  <Accordion title="MCP Tools" icon="wrench">
+    - **search_logs**: Search Datadog logs within a specified time range
+  </Accordion>
 </AccordionGroup>
 
 
@@ -49,3 +52,32 @@ export DATADOG_APP_KEY="your-datadog-application-key"
 ```
 
 The plugin will automatically use environment variables if no credentials are specified in the configuration file.
+
+## MCP Tools
+
+The Datadog plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="search_logs">
+  Search Datadog for logs within a given time range.
+
+  **Arguments**
+  <ParamField path="query" type="string" required>
+    The search query. Use Datadog's log search syntax to filter logs by service,
+    host, status, tags, or message content. For example: "service:web", "host:app01",
+    "status:error", or "ERROR".
+  </ParamField>
+  <ParamField path="min_time" type="datetime" required>
+    The starting time for the search range (ISO 8601 timestamp). Logs generated
+    at or after this time will be included in the results.
+  </ParamField>
+  <ParamField path="max_time" type="datetime" required>
+    The ending time for the search range (ISO 8601 timestamp). Logs generated
+    at or before this time will be included in the results.
+  </ParamField>
+
+  **Returns** `DatadogLogSearchResult`: An object containing:
+  - `results`: Array of log events with details including timestamp, host, service, status, tags, and attributes
+  - `truncated`: Boolean indicating if results were truncated due to response size limits or timeout
+
+  **Note**: Results are automatically truncated if they exceed response size limits or if the search takes longer than 10 seconds to ensure optimal performance.
+</Card>

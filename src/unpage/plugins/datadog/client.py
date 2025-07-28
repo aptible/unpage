@@ -1,13 +1,17 @@
 import weakref
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 
 from datadog_api_client import AsyncApiClient, Configuration
+from datadog_api_client.v2.api.logs_api import LogsApi
 from datadog_api_client.v2.api.software_catalog_api import SoftwareCatalogApi
 from datadog_api_client.v2.api.teams_api import TeamsApi
 from datadog_api_client.v2.model.entity_data import EntityData
 from datadog_api_client.v2.model.include_type import IncludeType
 from datadog_api_client.v2.model.list_teams_include import ListTeamsInclude
 from datadog_api_client.v2.model.team import Team
+from pydantic import AwareDatetime
+
+from unpage.plugins.datadog.models import DatadogLogEvent
 
 
 class DatadogClient:
@@ -40,3 +44,22 @@ class DatadogClient:
             include=IncludeType.RELATION
         ):
             yield entity
+
+    async def search_logs(
+        self,
+        query: str,
+        min_time: AwareDatetime,
+        max_time: AwareDatetime,
+        continue_search: Callable[[AwareDatetime | None], bool] | None = None,
+    ) -> AsyncGenerator[DatadogLogEvent, None]:
+        """Search logs in Datadog"""
+        logs = LogsApi(self.client)
+        async for log in logs.list_logs_get_with_pagination(
+            filter_query=query,
+            filter_from=min_time,
+            filter_to=max_time,
+        ):
+            event = DatadogLogEvent(**log.to_dict())
+            yield event
+            if continue_search is not None and not continue_search(event.attributes.timestamp):
+                break
