@@ -29,7 +29,7 @@ jobs:
       run: uv sync --prerelease allow --locked --all-extras --dev
 
     - name: ruff format --check
-      run: uv run ruff format --check
+      run: uv run --prerelease allow --locked ruff format --check
 
     - name: ruff check
-      run: uv run ruff check
+      run: uv run --prerelease allow --locked ruff check

@@ -29,4 +29,4 @@ jobs:
       run: uv sync --prerelease allow --locked --all-extras --dev
 
     - name: Run pyright
-      run: uv run pyright
+      run: uv run --prerelease allow --locked pyright
