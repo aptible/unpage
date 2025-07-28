@@ -1,0 +1,131 @@
+---
+title: Shell Commands
+---
+
+Shell Commands allow [Agents](/concepts/agents) to run standard
+UNIX and custom shell commands.
+
+Shell commands are a way to run automations using internal tools and scripts, or
+can be used when a native Unpage plugin doesn't yet exist for a system you're
+running. Shell commands can give your agents access to anything available on
+your `$PATH`.
+
+<Note>
+  Unlike other agentic tools, Unpage will **only** run the shell commands
+  you have explicitly configured.
+</Note>
+
+
+## Configuration
+Enable the Shell Commands plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands: []
+```
+
+### Defining Shell Commands
+You must explicitly define each shell command you want to make available to
+Agents. For example:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: get_current_directory
+          description: Get the path to the current directory.
+          command: pwd
+```
+
+Each command requires a `handle` (which must be unique), a `description` (which
+helps the LLM decide when to use it) and the `command` itself.
+
+### Commands With Arguments
+Shell commands can accept arguments, which are escaped and then passed to the
+command.
+
+All arguments you define are then **required**. If you have a script
+that has accepts optional arguments, configure it multiple times with and
+without the arguments (make sure to give each version its own `handle` and
+`description`).
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        # ...
+        - handle: list_files_in_directory
+          description: List the files in a given directory.
+          command: ls -lah {directory}
+          args:
+            directory: The path to the directory
+```
+
+You must list each argument under `args`, where the format is
+`<arg_name>: <description of the argument>`. The descriptions are important
+in order to guide the LLM to pass in the arguments correctly.
+
+Then within the `command` itself, include the argument in curly brackets like:
+`command: ls -lah {<arg_name>}`.
+
+
+## Environment
+Shell commands are run within the same environment as Unpage itself. That means
+they have access to the same configuration, environment variables, etc. as the
+main process.
+
+
+## Tools
+Each shell command you define ends up as an Agent / MCP tool, named with the
+`shell_` prefix.
+
+For example, a command with the handle `get_current_directory` will result in
+a new tool named `shell_get_current_directory`.
+
+
+## Developing & Testing Commands
+The easiest way to develop and test new shell commands is by using the
+`unpage tools` subcommands, which will invoke tools directly from the command
+line.
+
+To list all tools, including your custom shell commands, run:
+
+```bash
+$ uv run unpage tools list
+```
+
+To call a tool via the CLI and test your command, you can run:
+
+```bash
+$ uv run unpage tools call shell_<your command handle> <arguments>
+```
+
+For example:
+
+```bash
+$ uv run unpage tools call shell_get_current_directory
+/Users/michael/unpage
+```
+
+Or commands with arguments:
+
+```bash
+$ uv run unpage tools call shell_list_files_in_directory /Users/michael/Downloads
+total 0
+drwx------@  4 michael  staff   128B Jul 25 13:01 .
+drwxr-x---+ 57 michael  staff   1.8K Jul 25 13:01 ..
+-rw-r--r--@  1 michael  staff   9.5K Jul 25 13:01 unpage.zip
+```
+
+Running your tools directly and making sure they work beforehand will make
+debugging your Agents much simpler.

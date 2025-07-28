@@ -1,0 +1,88 @@
+---
+title: Graph
+---
+
+The Graph plugin provides tools for exploring and navigating the [Knowledge Graph](/concepts/knowledge-graph),
+allowing [Agents](/concepts/agents) to search for resources, understand their relationships,
+and discover the overall topology of your infrastructure.
+
+## Configuration
+Configure the Graph plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  graph:
+    enabled: true
+```
+
+## Tools
+The Graph plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_resource_topology">
+  Get a map of the types of resources and how they're connected.
+
+  **Arguments**
+  None
+
+  **Returns** `string`: A DOT graph representation showing resource types and their relationship patterns.
+</Card>
+<br />
+
+<Card title="search_resources">
+  Find resources with an identifier matching the given identifier or regular expression.
+
+  **Arguments**
+  <ParamField path="identifier_or_regex" type="string" required>
+    The identifier to search for, or a regular expression surrounded by slashes (e.g., `/^my-resource-\d+$/`).
+    If no exact match is found, the tool will perform fuzzy matching on partial identifiers.
+  </ParamField>
+
+  **Returns** `list[string]` or `string`: List of node IDs that match the search criteria, or a message if no resources are found.
+
+  **Note**: Results are limited to 500 items. Use `get_resource_details` with the returned node IDs to get full resource information.
+</Card>
+<br />
+
+<Card title="get_resource_details">
+  Get the full details of a resource from its node ID.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The unique node identifier of the resource. Typically obtained from `search_resources` or other graph tools.
+  </ParamField>
+
+  **Returns** `dict`: Complete resource details including all metadata and properties from the original data source.
+</Card>
+<br />
+
+<Card title="get_resource_map">
+  Get a detailed map of a resource and its dependencies.
+
+  **Arguments**
+  <ParamField path="root_node_id" type="string" required>
+    The node ID of the resource to use as the starting point for the map.
+  </ParamField>
+  <ParamField path="max_depth" type="integer" optional>
+    Maximum depth to traverse from the root node (default: 2). Higher values include more distant relationships but may return very large maps.
+  </ParamField>
+
+  **Returns** `string`: A DOT graph representation showing the resource and all its connected resources up to the specified depth.
+
+  **Note**: This is an excellent first tool for understanding a specific part of your system architecture.
+</Card>
+<br />
+
+<Card title="get_neighboring_resources">
+  Get the IDs of resources directly connected to the specified resource.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The unique node identifier of the resource whose neighbors you want to find.
+  </ParamField>
+  <ParamField path="max_depth" type="integer" optional>
+    Maximum depth to traverse for neighbors (default: 1). Use 1 for immediate neighbors only.
+  </ParamField>
+
+  **Returns** `list[string]`: List of node IDs for neighboring resources.
+</Card>

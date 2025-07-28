@@ -61,9 +61,11 @@ class GraphPlugin(Plugin, McpServerMixin):
         return results or "No resources found matching that identifier."
 
     @tool()
-    async def get_resource_details(self, node_id: str) -> dict[str, Any]:
+    async def get_resource_details(self, node_id: str) -> dict[str, Any] | str:
         """Get the full details of a resource from its node ID."""
-        node = await self.graph.get_node(node_id)
+        node = await self.graph.get_node_safe(node_id)
+        if not node:
+            return f"Resource with node ID '{node_id}' not found"
         return node.raw_data
 
     @tool()
@@ -104,7 +106,9 @@ class GraphPlugin(Plugin, McpServerMixin):
         """
         resource_map = nx.DiGraph()
 
-        node = await self.graph.get_node(root_node_id)
+        node = await self.graph.get_node_safe(root_node_id)
+        if not node:
+            return f"Resource with node ID '{root_node_id}' not found"
 
         async for edge in self.graph.iter_neighborhood_edges(node, max_depth):
             resource_map.add_edge(
@@ -116,10 +120,12 @@ class GraphPlugin(Plugin, McpServerMixin):
         return str(nx.nx_pydot.to_pydot(resource_map))
 
     @tool()
-    async def get_neighboring_resources(self, node_id: str, max_depth: int = 1) -> list[str]:
+    async def get_neighboring_resources(self, node_id: str, max_depth: int = 1) -> list[str] | str:
         """Get the IDs of the immediate neighbors of the resource with the given node ID.
 
         Use get_resource_details to get the full details of a resource.
         """
-        node = await self.graph.get_node(node_id)
+        node = await self.graph.get_node_safe(node_id)
+        if not node:
+            return f"Resource with node ID '{node_id}' not found"
         return [n.nid async for n in self.graph.iter_neighbors(node)]

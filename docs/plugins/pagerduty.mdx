@@ -44,8 +44,8 @@ plugins:
 
 ## Developing Agents
 Your Agents can react to PagerDuty incidents by adding context from your
-[Knowledge Graph](/concepts/knowledge-graph), pulling [Metrics](/reference/metrics),
-or running custom [Shell Commands](/reference/shell).
+[Knowledge Graph](/concepts/knowledge-graph), pulling [Metrics](/plugins/metrics),
+or running custom [Shell Commands](/plugins/shell).
 
 Learn more about [Creating Agents](/concepts/agents).
 
@@ -62,7 +62,7 @@ Agent thought process, tool calls, and output will be printed to `stdout`.
 
 ### Webhooks
 Agent workflows can run automatically by configuring PagerDuty to send webhooks
-to your [Unpage Server](/server).
+to your [Unpage Server](/commands/agent#subcommand%3A-serve).
 
 <Steps>
   <Step title="Open the PagerDuty Webhooks page">
@@ -76,7 +76,7 @@ to your [Unpage Server](/server).
     with a path of `/webhook` (like `https://unpage.yourdomain.com/webhook`).
 
     During development you can tunnel to your local Unpage instance using ngrok by
-    running `uv run unpage agent serve --tunnel` (see [Unpage Server](/server)
+    running `uv run unpage agent serve --tunnel` (see [Unpage Server](/commands/agent#subcommand%3A-serve)
     for details).
 
     The **Event Subscriptions** should be whatever events you want to run Agent
