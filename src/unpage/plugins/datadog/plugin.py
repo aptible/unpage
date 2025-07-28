@@ -143,7 +143,7 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
 
         tt = timeoutTracker()
         async for log in self._client.search_logs(
-            query=f"*:*{query}*",
+            query=query if ":" in query else f"*:*{query}*",
             min_time=min_time,
             max_time=max_time,
             continue_search=tt.under_time_out,
