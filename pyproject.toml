@@ -27,7 +27,7 @@ dependencies = [
     "whoosh-reloaded>=2.7.5",
     "boltons>=25.0.0",
     "logparser>=0.8.4",
-    "drain3",
+    "drain3@git+https://github.com/logpai/Drain3@9c50c5ff6a5efa2d78039d2a404e1c7d7eb2084c",
     "sparklines>=0.5.0",
     "pydantic-yaml>=1.5.1",
     "questionary>=2.1.0",
@@ -38,7 +38,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "pagerduty>=3.1.0",
     "fastapi[standard]>=0.116.1",
-    "dspy",
+    "dspy@git+https://github.com/stanfordnlp/dspy.git@cd9ae6e6334c3bcab88fcf387ab9e1aea321f991",
     "uvicorn[standard]>=0.35.0",
     "pyngrok>=7.2.12",
     "pydantic-settings>=2.9.1",
@@ -47,9 +47,8 @@ dependencies = [
     "numba>=0.61.2",
 ]
 
-[tool.uv.sources]
-drain3 = { git = "https://github.com/logpai/Drain3" }
-dspy = { git = "https://github.com/stanfordnlp/dspy", rev = "a5b7061911a9a5c82a1ab451b064811d6e9e2e24" }
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [project.scripts]
 unpage = "unpage.cli:main"
