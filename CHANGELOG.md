@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.10 (2025-07-28)
+
+### Bug Fixes
+
+- Oops broke uv build during release ([#27](https://github.com/aptible/unpage/pull/27),
+  [`1904c71`](https://github.com/aptible/unpage/commit/1904c71cc97402b3307bb08410d1e96424a1119b))
+
+- Update release to handle prerelease ([#25](https://github.com/aptible/unpage/pull/25),
+  [`a70867d`](https://github.com/aptible/unpage/commit/a70867d1dfa8560385700f0ec41ea9aace2bceb2))
+
+
 ## v0.1.0-alpha.9 (2025-07-28)
 
 ### Bug Fixes
