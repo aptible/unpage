@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.4 (2025-07-28)
+
+### Bug Fixes
+
+- Graceful not found message when node_id does not exist in graph [SC-34003]
+  ([#13](https://github.com/aptible/unpage/pull/13),
+  [`e2393d2`](https://github.com/aptible/unpage/commit/e2393d2ff1a2f8c7a854a9068b87a820f8adfece))
+
+### Documentation
+
+- [sc-33936] [sc-33939] [sc-34001] Add Core Concepts and Command Reference docs
+  ([#16](https://github.com/aptible/unpage/pull/16),
+  [`b3c2f8f`](https://github.com/aptible/unpage/commit/b3c2f8feb859ed807f6cfb44f98db3b3ef89404c))
+
+- Getting started - v1 ([#10](https://github.com/aptible/unpage/pull/10),
+  [`672fac9`](https://github.com/aptible/unpage/commit/672fac9e7fd439a3d33ada6fa1012d2064d2e28e))
+
+
 ## v0.1.0-alpha.3 (2025-07-25)
 
 ### Bug Fixes
