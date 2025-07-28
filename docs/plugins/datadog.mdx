@@ -1,0 +1,51 @@
+---
+title: Datadog
+---
+
+The [Datadog](https://www.datadoghq.com/) plugin provides access to the following
+resources from your Datadog organization:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Services (from Software Catalog)
+    - APIs (from Software Catalog)
+    - Teams
+    - Systems (inferred from relationships)
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You'll need a Datadog account with access to:
+
+- **Datadog API**: An API key with appropriate permissions
+- **Datadog Application Key**: An application key for accessing the Datadog APIs
+- **Software Catalog**: Access to Datadog's Software Catalog feature (where services and APIs are defined)
+- **Teams**: Access to Datadog Teams (if you want team relationship data)
+
+The plugin uses Datadog's REST APIs to discover entities and their relationships.
+
+
+## Configuration
+
+Configure the Datadog plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  datadog:
+    enabled: true
+    api_key: "your-datadog-api-key"
+    application_key: "your-datadog-application-key"
+```
+
+Alternatively, you can set these credentials as environment variables:
+
+```bash
+export DATADOG_API_KEY="your-datadog-api-key"
+export DATADOG_APP_KEY="your-datadog-application-key"
+```
+
+The plugin will automatically use environment variables if no credentials are specified in the configuration file.

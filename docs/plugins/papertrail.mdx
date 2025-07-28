@@ -1,0 +1,64 @@
+---
+title: Papertrail
+---
+
+Our Papertrail integration allows [Agents](/concepts/agents) to search and analyze
+log data from your Papertrail account.
+
+## Prerequisites
+<Steps>
+  <Step title="Open your Papertrail profile">
+    [Log in to your Papertrail account](https://www.papertrail.com/), and then
+    go to Settings" > "Profile".
+  </Step>
+  <Step title="Copy your API Token">
+    ![Papertrail API Token](/images/papertrail/token.png)
+  </Step>
+</Steps>
+
+
+## Configuration
+Configure the Papertrail plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  papertrail:
+    enabled: true
+    settings:
+      token: <your papertrail api token> # required
+```
+
+Alternatively, you can set the API token as an environment variable:
+
+```bash
+export PAPERTRAIL_API_TOKEN="your-papertrail-api-token"
+```
+
+
+## Tools
+The Papertrail plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="search_logs">
+  Search Papertrail for logs within a given time range.
+
+  **Arguments**
+  <ParamField path="query" type="string" required>
+    The search query. Use Papertrail's search syntax to filter logs by hostname,
+    program, message content, or other criteria. For example: "error", "hostname:web01",
+    or "program:nginx AND status:500".
+  </ParamField>
+  <ParamField path="min_time" type="datetime" required>
+    The starting time for the search range (ISO 8601 timestamp). Logs generated
+    at or after this time will be included in the results.
+  </ParamField>
+  <ParamField path="max_time" type="datetime" required>
+    The ending time for the search range (ISO 8601 timestamp). Logs generated
+    at or before this time will be included in the results.
+  </ParamField>
+
+  **Returns** `list[dict]`: log events with details including timestamp, hostname, program, message, and metadata.
+
+  **Note**: Results are automatically truncated if they exceed response size limits to ensure optimal performance.
+</Card>

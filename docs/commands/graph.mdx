@@ -1,0 +1,86 @@
+---
+title: unpage graph
+description: Build and manage the infrastructure knowledge graph
+---
+
+The `graph` command enables you to build and manage the infrastructure knowledge graph, which represents your cloud resources and their relationships.
+
+## Usage
+
+```shell
+unpage graph [OPTIONS] COMMAND [ARGS]...
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `build` | Build a knowledge graph for your cloud infrastructure |
+| `logs` | View graph build logs |
+| `status` | Check if graph build is running |
+| `stop` | Stop running graph build |
+
+## Subcommand: build
+
+Builds a knowledge graph by collecting information from all configured infrastructure sources and establishing relationships between resources.
+
+### Usage
+
+```shell
+unpage graph build [OPTIONS]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--interval INTEGER` | Rebuild the graph continuously, pausing for the specified seconds between builds |
+| `--background` | Run in background and return immediately |
+| `-h, --help` | Show help message and exit |
+
+### Examples
+
+```shell
+# Build the graph once
+unpage graph build
+
+# Build the graph in the background
+unpage graph build --background
+
+# Rebuild the graph every 15 minutes
+unpage graph build --interval 900
+
+# Build the graph for a specific profile
+unpage graph build --profile production
+```
+
+## Subcommand: logs
+
+Shows logs from the most recent graph build or from a currently running background graph build.
+
+### Usage
+
+```shell
+unpage graph logs [OPTIONS]
+```
+
+## Subcommand: status
+
+Checks if a background graph build is currently running.
+
+### Usage
+
+```shell
+unpage graph status [OPTIONS]
+```
+
+## Subcommand: stop
+
+Stops a currently running background graph build.
+
+### Usage
+
+```shell
+unpage graph stop [OPTIONS]
+```

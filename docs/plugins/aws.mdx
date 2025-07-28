@@ -1,0 +1,83 @@
+---
+title: AWS
+---
+
+The [AWS](https://aws.amazon.com/) plugin provides access to the following
+resources from Amazon Web Services:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - EC2 Instances
+    - RDS Databases
+    - S3 Buckets
+    - Application Load Balancers (ALB)
+    - Classic Load Balancers (ELB)
+    - ALB Target Groups
+    - EBS Volumes
+  </Accordion>
+
+  <Accordion title="Metrics" icon="chart-line">
+    **EC2 Instances:**
+    - CPU Utilization
+    - Network In/Out
+    - Status Check Failed
+    - EBS Read/Write Bytes
+
+    **RDS Databases:**
+    - CPU Utilization
+    - Database Connections
+    - DB Load Relative to vCPUs
+    - Free Storage Space
+    - Network Receive Throughput
+    - Read/Write IOPS
+    - Read/Write Throughput
+
+    **Application Load Balancers:**
+    - Request Count
+    - HTTP Response Codes (2XX, 3XX, 4XX, 5XX)
+    - Healthy/Unhealthy Host Count
+    - Target Response Time
+
+    **Classic Load Balancers:**
+    - Request Count
+    - HTTP Backend Response Codes
+    - Healthy/Unhealthy Host Count
+    - Latency
+
+    **S3 Buckets:**
+    - Bucket Size (Bytes)
+    - Number of Objects
+    - Request metrics (Get, Put, Delete, etc.)
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should have AWS credentials configured through one of the following methods:
+
+- **AWS CLI Profile**: Use `aws configure` to set up a named profile, or have the [AWS CLI](https://aws.amazon.com/cli/) installed and authenticated
+- **Environment Variables**: Set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optionally `AWS_SESSION_TOKEN`
+- **IAM Roles**: If running on AWS infrastructure (EC2, Lambda, etc.)
+- **AWS SSO**: If using AWS Single Sign-On, ensure you can run `aws sso login`
+
+The plugin follows the [standard AWS credential provider chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html).
+
+
+## Configuration
+
+Configure the AWS plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  aws:
+    enabled: true
+    # Optional: specify an AWS profile
+    accounts:
+      default:
+        profile: "my-aws-profile"
+```
+
+If no profile is specified, the plugin will use the default AWS credential providers.

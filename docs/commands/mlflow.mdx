@@ -1,0 +1,60 @@
+---
+title: unpage mlflow
+description: Debug and monitor agents using MLflow tracking
+---
+
+The `mlflow` command provides functionality to set up MLflow for debugging and monitoring agent performance and behavior.
+
+## Usage
+
+```shell
+unpage mlflow [OPTIONS] COMMAND [ARGS]...
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `serve` | Start an MLflow tracking server for agent debugging |
+
+## Subcommand: serve
+
+Starts a local MLflow tracking server that can be used to capture and visualize agent runs, prompts, and responses.
+
+### Usage
+
+```shell
+unpage mlflow serve [OPTIONS]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--port INTEGER` | Port for MLflow server to listen on [default: 5566] |
+| `-h, --help` | Show help message and exit |
+
+## Examples
+
+### Start MLflow Server
+
+```shell
+# Start MLflow server with default settings
+unpage mlflow serve
+
+# Start MLflow on a custom port
+unpage mlflow serve --port 8080
+```
+
+### Use MLflow with Agents
+
+To use MLflow tracking with your agents, set the environment variable before running:
+
+```shell
+# Set the MLflow tracking URI
+export MLFLOW_TRACKING_URI=http://127.0.0.1:5566
+
+# Run an agent with tracing enabled
+unpage agent run my-agent '{"alert": "Disk usage exceeds 80%"}'
+```

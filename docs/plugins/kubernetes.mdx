@@ -1,0 +1,49 @@
+---
+title: Kubernetes
+---
+
+The [Kubernetes](https://kubernetes.io/) plugin provides access to the following
+resources from Kubernetes clusters:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Pods
+    - Services
+    - Deployments
+    - ReplicaSets
+    - StatefulSets
+    - Jobs
+    - CronJobs
+    - Namespaces
+    - Nodes (cluster nodes)
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should have access to a Kubernetes cluster and valid credentials configured through one of the following methods:
+
+- **kubectl config**: Have `kubectl` installed and configured (the plugin uses the same authentication as kubectl)
+- **Kubeconfig file**: Ensure `~/.kube/config` exists or set the `KUBECONFIG` environment variable
+- **In-cluster authentication**: If running inside a Kubernetes pod with a service account
+- **Manual kubeconfig**: Specify a custom path to your kubeconfig file
+
+The plugin uses the [kr8s](https://kr8s.org/) library under the hood, which follows the same credential lookup order as kubectl:
+1. `~/.kube/config` (or path set by `KUBECONFIG` environment variable)
+2. `/var/run/secrets/kubernetes.io/serviceaccount` (for in-cluster service accounts)
+
+
+## Configuration
+
+Configure the Kubernetes plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  kubernetes:
+    enabled: true
+```
+
+The plugin will automatically use your existing kubectl configuration. No additional settings are required unless you need to specify a custom kubeconfig file or context.

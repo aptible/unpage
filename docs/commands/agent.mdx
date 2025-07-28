@@ -1,0 +1,165 @@
+---
+title: unpage agent
+description: Create, manage, and run Unpage agents
+---
+
+The `agent` command provides functionality to create, manage, and run agents that analyze incidents and alerts, leveraging the infrastructure knowledge graph and LLM capabilities.
+
+## Usage
+
+```shell
+unpage agent [OPTIONS] COMMAND [ARGS]...
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `create` | Create a new agent configuration file and open it in your editor |
+| `delete` | Delete an agent |
+| `edit` | Edit an existing agent configuration file |
+| `list` | List the available agents |
+| `quickstart` | Get up-and-running with an incident agent in \<5min! |
+| `route` | Determine which agent will be used to analyze the given payload |
+| `run` | Run an agent with the provided payload and print the analysis |
+| `serve` | Run the Unpage Agent server to automatically process incoming alerts |
+| `templates` | List the available agent templates |
+
+## Subcommand: create
+
+Creates a new agent configuration file based on available templates and opens it in your default editor.
+
+### Usage
+
+```shell
+unpage agent create [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: delete
+
+Deletes an existing agent.
+
+### Usage
+
+```shell
+unpage agent delete [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: edit
+
+Opens an existing agent configuration file in your default editor.
+
+### Usage
+
+```shell
+unpage agent edit [OPTIONS] AGENT_NAME
+```
+
+## Subcommand: list
+
+Lists all available agents in your Unpage instance.
+
+### Usage
+
+```shell
+unpage agent list [OPTIONS]
+```
+
+## Subcommand: quickstart
+
+Launches an interactive wizard to quickly set up an incident response agent.
+
+### Usage
+
+```shell
+unpage agent quickstart [OPTIONS]
+```
+
+## Subcommand: route
+
+Tests which agent would be selected to analyze a given payload based on your routing configuration.
+
+### Usage
+
+```shell
+unpage agent route [OPTIONS] [PAYLOAD]
+```
+
+## Subcommand: run
+
+Executes an agent with a provided payload and displays the analysis.
+
+### Usage
+
+```shell
+unpage agent run [OPTIONS] AGENT_NAME [PAYLOAD]
+```
+
+### Examples: Running an Agent with a Test Payload
+
+```shell
+# Run an agent with a JSON payload from a file
+unpage agent run my-agent @path/to/payload.json
+
+# Run an agent with a JSON payload provided directly
+unpage agent run my-agent '{"alert": "Disk usage exceeds 80%"}'
+```
+
+
+## Subcommand: serve
+
+Starts the Unpage Agent server, which listens for incoming alerts and routes them to appropriate agents. This creates a webhook receiver that can process alerts from various systems (like PagerDuty) and intelligently selects the most appropriate agent to analyze them.
+
+### Usage
+
+```shell
+unpage agent serve [OPTIONS]
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--host TEXT` | 127.0.0.1 | The host to bind to |
+| `--port INTEGER` | 8000 | The port to bind to |
+| `--workers INTEGER` | 1 | The number of workers to use |
+| `--profile TEXT` | default | The profile to use for configuration |
+| `--reload / --no-reload` | False | Reload the server when code changes |
+| `--tunnel / --no-tunnel` | False | Tunnel the server through ngrok for external access |
+| `--ngrok-token TEXT` | From env var | The ngrok token for tunneling |
+| `--ngrok-domain TEXT` | None | The ngrok domain for tunneling |
+
+### Server Functionality
+
+When running, the agent server:
+
+1. Exposes a `/webhook` endpoint that receives alert payloads as JSON via POST requests
+2. Automatically selects the most appropriate agent based on the incoming payload
+3. Processes the alert using the agent's configuration and LLM capabilities
+4. Returns an analysis of the alert
+
+### Examples
+
+```shell
+# Start the agent server with default settings (localhost:8000)
+unpage agent serve
+
+# Start the server on a custom host and port
+unpage agent serve --host 0.0.0.0 --port 9000
+
+# Start the server with hot-reloading for development
+unpage agent serve --reload
+
+# Start the server and expose it externally using ngrok
+unpage agent serve --tunnel --ngrok-token your_ngrok_token
+```
+
+## Subcommand: templates
+
+Lists all available agent templates that can be used when creating a new agent.
+
+### Usage
+
+```shell
+unpage agent templates [OPTIONS]
+```
