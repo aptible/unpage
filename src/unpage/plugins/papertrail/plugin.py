@@ -1,4 +1,5 @@
 import os
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import questionary
@@ -16,9 +17,7 @@ RESULT_LIMIT = int(CLAUDE_DESKTOP_RESULT_MAX_LENGTH * 0.9)
 class PapertrailSearchResult(BaseModel):
     """Result of a Papertrail log search."""
 
-    """Number of logs that were found, before any truncation"""
-    count: int
-    """True when the search results were truncated due to the response size limit (count is not changed when this happens)"""
+    """True when the search results were truncated due to the response size limit or single search time limit"""
     truncated: bool = False
     """The log events that were found"""
     results: list[PapertrailLogEvent]
@@ -63,7 +62,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         query: str,
         min_time: AwareDatetime,
         max_time: AwareDatetime,
-    ) -> PapertrailSearchResult:
+    ) -> PapertrailSearchResult | str:
         """Search Papertrail for logs within a given time range
 
         Args:
@@ -74,23 +73,33 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         Returns:
             PapertrailSearchResult: logs that matched the query and fit within response limit
         """
-        logs = sorted(
-            [
-                log
-                async for log in self._client.search(
-                    query=query,
-                    min_time=min_time,
-                    max_time=max_time,
-                )
-            ],
-            key=lambda x: x.received_at,
+        if min_time >= max_time:
+            return f"min_time must come before max_time {min_time=} {max_time=}"
+        logs = []
+        truncated = False
+        content_length = 0
+
+        class timeoutTracker:
+            timed_out: bool = False
+            start_time: AwareDatetime = datetime.now(UTC)
+
+            def under_time_out(self, _: AwareDatetime | None) -> bool:
+                self.timed_out = (datetime.now(UTC) - self.start_time) > timedelta(seconds=10)
+                return not self.timed_out
+
+        tt = timeoutTracker()
+        async for log in self._client.search(
+            query=query,
+            min_time=min_time,
+            max_time=max_time,
+            continue_search=tt.under_time_out,
+        ):
+            content_length += len(log.model_dump_json(indent=6)) + 8
+            if content_length >= int(RESULT_LIMIT / 2):
+                truncated = True
+                break
+            logs.append(log)
+        return PapertrailSearchResult(
+            results=logs,
+            truncated=truncated or tt.timed_out,
         )
-        result = PapertrailSearchResult(results=logs, count=len(logs))
-        content_length = len(result.model_dump_json(indent=2))
-        if content_length <= RESULT_LIMIT:
-            return result
-        result.truncated = True
-        while result.results and content_length > RESULT_LIMIT:
-            result.results.pop()
-            content_length = len(result.model_dump_json(indent=2))
-        return result

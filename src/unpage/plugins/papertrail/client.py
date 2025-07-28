@@ -1,5 +1,4 @@
-from collections.abc import AsyncGenerator
-from datetime import UTC, datetime
+from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 import httpx
@@ -116,7 +115,8 @@ class PapertrailClient(httpx.AsyncClient):
         query: str,
         min_time: AwareDatetime,
         max_time: AwareDatetime,
-        max_results: int = 10000,
+        min_time_at_callback: Callable[[AwareDatetime], None] | None = None,
+        continue_search: Callable[[AwareDatetime | None], bool] | None = None,
     ) -> AsyncGenerator[PapertrailLogEvent, None]:
         max_id = None
         logs_found = 0
@@ -156,20 +156,7 @@ class PapertrailClient(httpx.AsyncClient):
                 break
             if result.min_time_at is not None and result.min_time_at < min_time:
                 break
-            if logs_found >= max_results:
-                now = datetime.now(UTC)
-                yield PapertrailLogEvent(
-                    id="unpage_mcp_internal",
-                    generated_at=now,
-                    received_at=now,
-                    display_received_at="",
-                    source_name="unpage_mcp",
-                    hostname="",
-                    source_id=0,
-                    source_ip="",
-                    facility="",
-                    severity="",
-                    program="unpage_mcp",
-                    message=f"NOTICE: Already found {max_results} results, stopping search. Try a shorter time range or a more specific filter.",
-                )
+            if min_time_at_callback is not None and result.min_time_at is not None:
+                min_time_at_callback(result.min_time_at)
+            if continue_search is not None and not continue_search(result.min_time_at):
                 break
