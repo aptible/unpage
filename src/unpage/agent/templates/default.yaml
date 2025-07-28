@@ -41,7 +41,7 @@ tools:
   - "core_calculate"
   - "core_convert_to_timezone"
   - "core_current_datetime"
-  - "core_*"
+  - "datadog_search_logs"
   - "graph_get_neighboring_resources"
   - "graph_get_resource_details"
   - "graph_get_resource_map"
