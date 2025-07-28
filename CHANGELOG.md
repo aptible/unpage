@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.7 (2025-07-28)
+
+### Bug Fixes
+
+- Match git behavior and us vim/vi when no EDITOR env var is set [SC-34065]
+  ([#20](https://github.com/aptible/unpage/pull/20),
+  [`e45a1f5`](https://github.com/aptible/unpage/commit/e45a1f5b2b1b0addcedb5aeb87f43a32a1e2cbfd))
+
+
 ## v0.1.0-alpha.6 (2025-07-28)
 
 ### Bug Fixes
