@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.9 (2025-07-28)
+
+### Bug Fixes
+
+- Uv.lock was somehow missing its prerelease-mode?
+  ([#24](https://github.com/aptible/unpage/pull/24),
+  [`3a544fb`](https://github.com/aptible/unpage/commit/3a544fb72a24c888accd2a075b62ec71bb0adb0e))
+
+
 ## v0.1.0-alpha.8 (2025-07-28)
 
 ### Bug Fixes
