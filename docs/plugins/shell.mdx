@@ -101,26 +101,26 @@ line.
 To list all tools, including your custom shell commands, run:
 
 ```bash
-$ uv run unpage tools list
+$ uv run unpage mcp tools list
 ```
 
 To call a tool via the CLI and test your command, you can run:
 
 ```bash
-$ uv run unpage tools call shell_<your command handle> <arguments>
+$ uv run unpage mcp tools call shell_<your command handle> <arguments>
 ```
 
 For example:
 
 ```bash
-$ uv run unpage tools call shell_get_current_directory
+$ uv run unpage mcp tools call shell_get_current_directory
 /Users/michael/unpage
 ```
 
 Or commands with arguments:
 
 ```bash
-$ uv run unpage tools call shell_list_files_in_directory /Users/michael/Downloads
+$ uv run unpage mcp tools call shell_list_files_in_directory /Users/michael/Downloads
 total 0
 drwx------@  4 michael  staff   128B Jul 25 13:01 .
 drwxr-x---+ 57 michael  staff   1.8K Jul 25 13:01 ..

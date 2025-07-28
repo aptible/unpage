@@ -1,6 +1,6 @@
 import rich
 
-from unpage.cli.client.logs.app import client_logs_app
+from unpage.cli.mcp.client.logs.app import client_logs_app
 
 
 @client_logs_app.command()

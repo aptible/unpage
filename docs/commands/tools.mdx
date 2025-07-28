@@ -8,7 +8,7 @@ The `tools` command provides functionality to list and manually invoke tools tha
 ## Usage
 
 ```shell
-unpage tools [OPTIONS] COMMAND [ARGS]...
+unpage mcp tools [OPTIONS] COMMAND [ARGS]...
 ```
 
 ## Commands
@@ -25,7 +25,7 @@ Lists all MCP tools that are available from the currently enabled plugins.
 ### Usage
 
 ```shell
-unpage tools list [OPTIONS]
+unpage mcp tools list [OPTIONS]
 ```
 
 ### Options
@@ -39,10 +39,10 @@ unpage tools list [OPTIONS]
 
 ```shell
 # List all available tools
-unpage tools list
+unpage mcp tools list
 
 # List tools for a specific profile
-unpage tools list --profile production
+unpage mcp tools list --profile production
 ```
 
 ## Subcommand: call
@@ -52,15 +52,15 @@ Calls an MCP tool directly from the command line, allowing you to test and use t
 ### Usage
 
 ```shell
-unpage tools call [OPTIONS] TOOL_NAME [ARGS]
+unpage mcp tools call [OPTIONS] TOOL_NAME [ARGS]
 ```
 
 ### Examples
 
 ```shell
 # Call a tool with arguments
-unpage tools call aws_list_ec2_instances --region us-west-2
+unpage mcp tools call aws_list_ec2_instances --region us-west-2
 
 # Call a tool and pipe output to jq for processing
-unpage tools call datadog_get_metrics | jq .
+unpage mcp tools call datadog_get_metrics | jq .
 ```

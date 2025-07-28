@@ -38,7 +38,7 @@ prompt: >
 #
 # Use this to list all tools:
 #
-#    unpage tools list
+#    unpage mcp tools list
 #
 tools:
   # This disabled the pagerduty_post_status_update tool, just in case you don't want

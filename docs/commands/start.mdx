@@ -1,5 +1,5 @@
 ---
-title: unpage start
+title: unpage mcp start
 description: Start the Unpage MCP Server to enable LLM interaction with infrastructure
 ---
 
@@ -8,7 +8,7 @@ The `start` command launches the Unpage MCP (Model Coupling Protocol) Server, wh
 ## Usage
 
 ```shell
-unpage start [OPTIONS]
+unpage mcp start [OPTIONS]
 ```
 
 ## Options
@@ -37,7 +37,7 @@ The MCP Server supports two transport protocols:
 Start the MCP Server with both stdio and HTTP transport:
 
 ```shell
-unpage start
+unpage mcp start
 ```
 
 ### HTTP Only
@@ -45,7 +45,7 @@ unpage start
 Start the MCP Server with only HTTP transport:
 
 ```shell
-unpage start --disable-stdio
+unpage mcp start --disable-stdio
 ```
 
 ### Custom HTTP Configuration
@@ -53,7 +53,7 @@ unpage start --disable-stdio
 Start the MCP Server on a specific host and port:
 
 ```shell
-unpage start --http-host 0.0.0.0 --http-port 9000
+unpage mcp start --http-host 0.0.0.0 --http-port 9000
 ```
 
 ### Using a Named Profile
@@ -61,5 +61,5 @@ unpage start --http-host 0.0.0.0 --http-port 9000
 Start the MCP Server with a specific configuration profile:
 
 ```shell
-unpage start --profile production
+unpage mcp start --profile production
 ```

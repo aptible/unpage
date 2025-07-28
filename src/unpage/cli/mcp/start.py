@@ -6,12 +6,12 @@ import typer
 from fastmcp import settings as fastmcp_settings
 
 from unpage import mcp
-from unpage.cli._app import app
+from unpage.cli.mcp._app import mcp_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.telemetry import client as telemetry
 
 
-@app.command()
+@mcp_app.command()
 def start(
     profile: str = PROFILE_OPTION,
     disable_sse: bool = typer.Option(
