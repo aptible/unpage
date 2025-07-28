@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.6 (2025-07-28)
+
+### Bug Fixes
+
+- Ensure dspy and drain3 are installed from source [SC-34060]
+  ([#18](https://github.com/aptible/unpage/pull/18),
+  [`10be9aa`](https://github.com/aptible/unpage/commit/10be9aa393d230875600d00f485cc276fe9e6102))
+
+
 ## v0.1.0-alpha.5 (2025-07-28)
 
 ### Features
