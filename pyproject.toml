@@ -117,7 +117,13 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-build_command = "pip install uv && uv lock && git add uv.lock && uv build"
+build_command = """
+    pip install uv && \
+    uv lock --prerelease allow && \
+    git add uv.lock && \
+    uv build --prerelease allow
+"""
+
 commit_parser = "conventional"
 allow_zero_version = true
 major_on_zero = false
