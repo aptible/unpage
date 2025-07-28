@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.8 (2025-07-28)
+
+### Bug Fixes
+
+- Unbreak dependencies ([#22](https://github.com/aptible/unpage/pull/22),
+  [`03f7c72`](https://github.com/aptible/unpage/commit/03f7c72130bb37072c2e6df4023823322198a732))
+
+
 ## v0.1.0-alpha.7 (2025-07-28)
 
 ### Bug Fixes
