@@ -121,7 +121,7 @@ build_command = """
     pip install uv && \
     uv lock --prerelease allow && \
     git add uv.lock && \
-    uv build --prerelease allow
+    uv build --prerelease allow --locked
 """
 
 commit_parser = "conventional"
