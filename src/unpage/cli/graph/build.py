@@ -67,6 +67,14 @@ def build(
         return
 
     async def _build_graph() -> None:
+        await telemetry.send_event(
+            {
+                "command": "graph build - starting",
+                "profile": profile,
+                "interval": interval,
+                "background": background,
+            }
+        )
         print("Building graph...")
 
         start_time = time.perf_counter()
@@ -108,7 +116,7 @@ def build(
 
         await telemetry.send_event(
             {
-                "command": "build_graph",
+                "command": "graph build - finished",
                 "profile": profile,
                 "duration_seconds": total_time,
                 "node_counts": node_counts,

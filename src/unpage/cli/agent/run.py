@@ -11,6 +11,7 @@ from unpage.cli.agent._app import agent_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.config.utils import load_config
 from unpage.plugins.base import PluginManager
+from unpage.telemetry import client as telemetry
 
 if TYPE_CHECKING:
     from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
@@ -37,6 +38,15 @@ def run(
     """Run an agent with the provided payload and print the analysis."""
 
     async def _run() -> None:
+        await telemetry.send_event(
+            {
+                "command": "agent run",
+                "profile": profile,
+                "debug": debug,
+                "has_payload": payload is not None,
+                "has_pagerduty_incident": bool(pagerduty_incident),
+            }
+        )
         plugin_manager = PluginManager(load_config(profile, create=False))
         data = ""
         if pagerduty_incident:

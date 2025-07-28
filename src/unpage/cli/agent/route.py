@@ -7,6 +7,7 @@ from rich import print
 from unpage.agent.analysis import AnalysisAgent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import PROFILE_OPTION
+from unpage.telemetry import client as telemetry
 
 
 @agent_app.command(
@@ -26,6 +27,13 @@ def route(
     """Determine which agent will be used to analyze the given payload."""
 
     async def _run() -> None:
+        await telemetry.send_event(
+            {
+                "command": "agent route",
+                "profile": profile,
+                "debug": debug,
+            }
+        )
         # Read data from stdin if it's being piped to us.
         if not sys.stdin.isatty():
             if payload is not None:

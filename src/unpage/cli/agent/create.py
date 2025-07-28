@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 import anyio
@@ -7,6 +8,7 @@ from rich import print
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.actions import create_agent
 from unpage.cli.options import PROFILE_OPTION
+from unpage.telemetry import client as telemetry
 from unpage.utils import edit_file
 
 
@@ -24,6 +26,19 @@ def create(
     """Create a new agent configuration file and open it in your editor."""
 
     async def _create() -> None:
+        agent_hash = hashlib.sha256()
+        agent_hash.update(agent_name.encode("utf-8"))
+        await telemetry.send_event(
+            {
+                "command": "agent create",
+                "agent_name_sha256": agent_hash.hexdigest,
+                "profile": profile,
+                "overwrite": overwrite,
+                "template": template,
+                "editor": editor,
+                "no_edit": no_edit,
+            }
+        )
         agent_file = create_agent(
             agent_name=agent_name,
             profile=profile,

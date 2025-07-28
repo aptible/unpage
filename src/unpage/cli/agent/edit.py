@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import os
 
 import typer
@@ -8,6 +9,7 @@ from unpage.agent.utils import get_agent_template
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.config.utils import get_config_dir
+from unpage.telemetry import client as telemetry
 from unpage.utils import edit_file
 
 
@@ -22,6 +24,16 @@ def edit(
     """Edit an existing agent configuration file."""
 
     async def _edit() -> None:
+        agent_hash = hashlib.sha256()
+        agent_hash.update(agent_name.encode("utf-8"))
+        await telemetry.send_event(
+            {
+                "command": "agent edit",
+                "agent_name_sha256": agent_hash.hexdigest,
+                "profile": profile,
+                "editor": editor,
+            }
+        )
         # Get the config directory for the profile
         config_dir = get_config_dir(profile, create=False)
 

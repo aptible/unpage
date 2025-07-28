@@ -45,7 +45,7 @@ def start(
     async def _start() -> None:
         await telemetry.send_event(
             {
-                "command": "start",
+                "command": "mcp start",
                 "profile": profile,
                 "disable_sse": disable_sse,
                 "disable_stdio": disable_stdio,

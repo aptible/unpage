@@ -27,6 +27,7 @@ from unpage.plugins.llm.plugin import LlmPlugin
 from unpage.plugins.pagerduty.models import PagerDutyIncident
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
 from unpage.plugins.papertrail.plugin import PapertrailPlugin
+from unpage.telemetry import client as telemetry
 from unpage.utils import confirm, edit_file, select
 
 
@@ -37,6 +38,12 @@ def quickstart(
     """Get up-and-running with an incident agent in <5min!"""
 
     async def _quickstart() -> None:
+        await telemetry.send_event(
+            {
+                "command": "agent quickstart",
+                "profile": profile,
+            }
+        )
         welcome_to_unpage()
         _quickstart_intro()
         cfg, next_step_count = await _create_config(

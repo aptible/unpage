@@ -1,10 +1,12 @@
 import json
 import os
+import sys
 import uuid
 from importlib.metadata import version
 from typing import Any
 
 import httpx
+import rich
 import sentry_sdk
 
 from unpage.config.utils import CONFIG_ROOT, load_global_config
@@ -20,6 +22,13 @@ def _get_or_create_user_id() -> str:
 
 
 UNPAGE_TELEMETRY_DISABLED = os.getenv("UNPAGE_TELEMETRY_DISABLED", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+
+
+_unpage_telemetry_log_events = os.getenv("UNPAGE_TELEMETRY_LOG_EVENTS", "false").lower() in (
     "1",
     "true",
     "yes",
@@ -53,6 +62,8 @@ class TunaClient(httpx.AsyncClient):
         if not self._telemetry_enabled:
             # Let the user know that their preference is being respected
             print("Telemetry is disabled")
+        if _unpage_telemetry_log_events:
+            print("enabled telemetry event logging", file=sys.stderr)
 
     @property
     def user_id(self) -> str:
@@ -66,28 +77,31 @@ class TunaClient(httpx.AsyncClient):
 
         try:
             uname = os.uname()
+            params = {
+                "id": str(uuid.uuid4()),
+                "user_id": self.user_id,
+                "type": "unpage_telemetry",
+                "url": "https://github.com/aptible/unpage",
+                "value": json.dumps(
+                    {
+                        "version": version("unpage"),
+                        "github": os.getenv("GITHUB_ACTIONS"),
+                        "gitlab": os.getenv("GITLAB_CI"),
+                        "travis": os.getenv("TRAVIS"),
+                        "circleci": os.getenv("CIRCLECI"),
+                        "sysname": uname.sysname,
+                        "sysmachine": uname.machine,
+                        "sysversion": uname.version,
+                        "run_id": self._run_id,
+                        **event,
+                    }
+                ),
+            }
+            if _unpage_telemetry_log_events:
+                rich.print("unpage.telemetry.send_event", {"params": params}, file=sys.stderr)
             response = await self.get(
                 "/www/e",
-                params={
-                    "id": str(uuid.uuid4()),
-                    "user_id": self.user_id,
-                    "type": "unpage_telemetry",
-                    "url": "https://github.com/aptible/unpage",
-                    "value": json.dumps(
-                        {
-                            "version": version("unpage"),
-                            "github": os.getenv("GITHUB_ACTIONS"),
-                            "gitlab": os.getenv("GITLAB_CI"),
-                            "travis": os.getenv("TRAVIS"),
-                            "circleci": os.getenv("CIRCLECI"),
-                            "sysname": uname.sysname,
-                            "sysmachine": uname.machine,
-                            "sysversion": uname.version,
-                            "run_id": self._run_id,
-                            **event,
-                        }
-                    ),
-                },
+                params=params,
             )
             response.raise_for_status()
         except Exception as e:
