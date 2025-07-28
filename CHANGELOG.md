@@ -2,6 +2,18 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.5 (2025-07-28)
+
+### Features
+
+- Add dspy version to `unpage version` command [SC-34060]
+  ([#17](https://github.com/aptible/unpage/pull/17),
+  [`1377d35`](https://github.com/aptible/unpage/commit/1377d35553042e8300ee21619aadca64b469e0bd))
+
+- Datadog log search mcp tool [SC-33638] ([#14](https://github.com/aptible/unpage/pull/14),
+  [`72dfc64`](https://github.com/aptible/unpage/commit/72dfc6474e066e60d5b0120af4e3226249b83440))
+
+
 ## v0.1.0-alpha.4 (2025-07-28)
 
 ### Bug Fixes
