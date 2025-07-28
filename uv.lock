@@ -691,7 +691,7 @@ wheels = [
 [[package]]
 name = "drain3"
 version = "0.9.11"
-source = { git = "https://github.com/logpai/Drain3#0fb6d6e1828838fa05c8f6fa5cda878e02ea79c7" }
+source = { git = "https://github.com/logpai/Drain3?rev=9c50c5ff6a5efa2d78039d2a404e1c7d7eb2084c#9c50c5ff6a5efa2d78039d2a404e1c7d7eb2084c" }
 dependencies = [
     { name = "cachetools" },
     { name = "jsonpickle" },
@@ -700,7 +700,7 @@ dependencies = [
 [[package]]
 name = "dspy"
 version = "3.0.0b3"
-source = { git = "https://github.com/stanfordnlp/dspy?rev=a5b7061911a9a5c82a1ab451b064811d6e9e2e24#a5b7061911a9a5c82a1ab451b064811d6e9e2e24" }
+source = { git = "https://github.com/stanfordnlp/dspy.git?rev=cd9ae6e6334c3bcab88fcf387ab9e1aea321f991#cd9ae6e6334c3bcab88fcf387ab9e1aea321f991" }
 dependencies = [
     { name = "anyio" },
     { name = "asyncer" },
@@ -3466,8 +3466,8 @@ requires-dist = [
     { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
     { name = "dnspython", specifier = ">=2.7.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "drain3", git = "https://github.com/logpai/Drain3" },
-    { name = "dspy", git = "https://github.com/stanfordnlp/dspy?rev=a5b7061911a9a5c82a1ab451b064811d6e9e2e24" },
+    { name = "drain3", git = "https://github.com/logpai/Drain3?rev=9c50c5ff6a5efa2d78039d2a404e1c7d7eb2084c" },
+    { name = "dspy", git = "https://github.com/stanfordnlp/dspy.git?rev=cd9ae6e6334c3bcab88fcf387ab9e1aea321f991" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
     { name = "fastmcp", specifier = ">=2.10.1" },
     { name = "graphviz", specifier = ">=0.20.3" },
