@@ -11,7 +11,7 @@ from collections.abc import Awaitable, Callable, Iterable, Sequence
 from pathlib import Path
 from re import Pattern
 from types import ModuleType
-from typing import Any, Generic, TypeVar, cast, overload
+from typing import Any, cast, overload
 
 import anyio
 import questionary
@@ -22,9 +22,6 @@ from anyio.abc import TaskGroup
 from boltons.iterutils import remap
 from pydantic import AnyUrl, ValidationError
 from rich.console import Console
-
-T = TypeVar("T")
-
 
 stderr = Console(stderr=True)
 
@@ -279,7 +276,7 @@ def import_submodules(
     return results
 
 
-class classproperty(Generic[T]):
+class classproperty[T]:
     """
     Decorator that converts a method with a single cls argument into a property
     that can be accessed directly from the class.
@@ -296,7 +293,7 @@ class classproperty(Generic[T]):
         return self
 
 
-def as_completed(tg: TaskGroup, aws: Iterable[Awaitable[T]]) -> Iterable[Awaitable[T]]:
+def as_completed[T](tg: TaskGroup, aws: Iterable[Awaitable[T]]) -> Iterable[Awaitable[T]]:
     send_stream, receive_stream = create_memory_object_stream[T | Exception]()
 
     # Convert the iterable to a list to get its length
