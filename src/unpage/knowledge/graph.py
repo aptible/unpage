@@ -89,6 +89,13 @@ class Graph:
             raise LookupError(f"Node {nid} not found in graph") from ex
         return node["data"]
 
+    async def get_node_safe(self, nid: str) -> Node | None:
+        """Get a node from the graph. Returns None if no Node found with nid."""
+        try:
+            return await self.get_node(nid)
+        except LookupError:
+            return None
+
     async def iter_nodes(self) -> AsyncIterator[Node]:
         """Get all nodes in the graph."""
         for _, node in self.digraph.nodes(data=True):

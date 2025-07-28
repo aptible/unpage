@@ -29,7 +29,9 @@ class MetricsPlugin(Plugin, McpServerMixin):
     @tool()
     async def list_available_metrics_for_node(self, node_id: str) -> list[str] | str:
         """List the available metrics for a node."""
-        node = await self.context.graph.get_node(node_id)
+        node = await self.context.graph.get_node_safe(node_id)
+        if not node:
+            return f"Resource with node ID '{node_id}' not found"
 
         if not isinstance(node, HasMetrics):
             return f"{node.node_type} nodes do not support metrics"
@@ -53,10 +55,9 @@ class MetricsPlugin(Plugin, McpServerMixin):
 
         Metric names should be provided as a JSON array of strings.
         """
-        node = await self.context.graph.get_node(node_id)
-
+        node = await self.context.graph.get_node_safe(node_id)
         if not node:
-            return f"Resource with node ID {node_id} not found"
+            return f"Resource with node ID '{node_id}' not found"
 
         if not isinstance(node, HasMetrics):
             return f"{node.node_type} nodes do not support metrics"
