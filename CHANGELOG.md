@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.11 (2025-07-29)
+
+### Bug Fixes
+
+- Vendor dspy and drain3 dependencies ([#28](https://github.com/aptible/unpage/pull/28),
+  [`3f25c8d`](https://github.com/aptible/unpage/commit/3f25c8d3c4bea2e5d74d49d81ec5bca3d50e6d32))
+
+
 ## v0.1.0-alpha.10 (2025-07-28)
 
 ### Bug Fixes
