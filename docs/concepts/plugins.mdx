@@ -15,24 +15,24 @@ Each plugin is designed to bridge the gap between your infrastructure and LLM-po
 <AccordionGroup>
   <Accordion title="Knowledge Graph Population" icon="diagram-project">
     Plugins connect to infrastructure providers, observability tools, and other systems to:
-    
+
     - Discover resources (instances, databases, clusters, etc.)
     - Collect metadata and properties from each resource
     - Identify relationships between resources
     - Add nodes and edges to the knowledge graph
-    
+
     This happens during the `unpage graph build` process, creating a comprehensive representation of your infrastructure.
   </Accordion>
 
   <Accordion title="LLM Tool Exposure" icon="toolbox">
     The same plugins also:
-    
+
     - Define tools that LLMs can use through the MCP protocol
     - Handle authentication and permissions for tool access
     - Process tool inputs and return structured outputs
     - Provide capabilities like querying metrics, accessing logs, and managing resources
-    
-    These tools become available when running `unpage start` to launch the MCP server.
+
+    These tools become available when running `unpage mcp start` to launch the MCP server.
   </Accordion>
 </AccordionGroup>
 
@@ -92,7 +92,7 @@ graph LR
 
 ### Tool Provision
 
-When you start the MCP server with `unpage start`, plugins register tools that become available to LLMs:
+When you start the MCP server with `unpage mcp start`, plugins register tools that become available to LLMs:
 
 1. Tools are registered with the MCP server
 2. Each tool has defined parameters and return types

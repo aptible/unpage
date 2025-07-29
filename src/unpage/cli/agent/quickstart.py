@@ -36,7 +36,7 @@ from unpage.utils import confirm, edit_file, select
 def quickstart(
     profile: str = PROFILE_OPTION,
 ) -> None:
-    """Get up-and-running with an incident agent in <5min!"""
+    """Get up-and-running with an incident agent in less than 5 minutes!"""
 
     async def _quickstart() -> None:
         await telemetry.send_event(

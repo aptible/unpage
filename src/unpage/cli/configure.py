@@ -46,6 +46,8 @@ def configure(
         help="Use uv run instead of uvx to start the Unpage MCP server (useful for develping Unpage)",
     ),
 ) -> None:
+    """Setup unpage including all plugins!"""
+
     async def _recipe() -> None:
         welcome_to_unpage()
         await _configure_intro()

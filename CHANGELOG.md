@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.13 (2025-07-29)
+
+### Features
+
+- Intuitive subcommand structure [SC-34058] ([#19](https://github.com/aptible/unpage/pull/19),
+  [`142cdcf`](https://github.com/aptible/unpage/commit/142cdcf86109183a5c120bca6eca736aaaf064b2))
+
+
+## v0.1.0-alpha.12 (2025-07-29)
+
+### Documentation
+
+- Add helpful links to Getting Started ([#23](https://github.com/aptible/unpage/pull/23),
+  [`be9a2f0`](https://github.com/aptible/unpage/commit/be9a2f03b3ff497a3f37aef6ee2416d102e0605a))
+
+### Features
+
+- Simplify llm configuration [SC-34069] [SC-34066]
+  ([#31](https://github.com/aptible/unpage/pull/31),
+  [`6e7dce4`](https://github.com/aptible/unpage/commit/6e7dce41440974263f7615a186bdad79e5ad66f2))
+
+
 ## v0.1.0-alpha.11 (2025-07-29)
 
 ### Bug Fixes

@@ -1,7 +1,7 @@
 import anyio
 import rich
 
-from unpage.cli.client.logs.app import client_logs_app
+from unpage.cli.mcp.client.logs.app import client_logs_app
 from unpage.telemetry import client as telemetry
 
 
