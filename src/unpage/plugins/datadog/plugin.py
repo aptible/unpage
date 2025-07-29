@@ -18,7 +18,7 @@ from unpage.plugins.datadog.nodes.datadog_team import DatadogTeam
 from unpage.plugins.mixins import KnowledgeGraphMixin, tool
 from unpage.plugins.mixins.mcp import McpServerMixin
 
-RESULT_LIMIT = 9 * 1024
+RESULT_LIMIT = 75 * 1024
 
 
 class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):

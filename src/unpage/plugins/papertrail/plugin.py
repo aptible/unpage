@@ -10,7 +10,7 @@ from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
 from unpage.plugins.papertrail.client import PapertrailClient, PapertrailLogEvent
 
-RESULT_LIMIT = 9 * 1024
+RESULT_LIMIT = 75 * 1024
 
 
 class PapertrailSearchResult(BaseModel):
