@@ -155,10 +155,10 @@ Test tools and understand their behavior:
 
 ```bash
 # Test a tool with specific parameters
-unpage tools call metrics_get_metrics_for_node --node-id i-0abc123def456 --metric cpu_utilization
+unpage mcp tools call metrics_get_metrics_for_node --node-id i-0abc123def456 --metric cpu_utilization
 
 # See detailed output structure
-unpage tools call graph_get_resource_details --resource-id i-0abc123def456 | jq
+unpage mcp tools call graph_get_resource_details --resource-id i-0abc123def456 | jq
 ```
 
 ### Automation
@@ -167,7 +167,7 @@ Use tools in scripts and automation workflows:
 
 ```bash
 # Use in a script to get current CPU usage
-CPU_USAGE=$(unpage tools call metrics_get_metrics_for_node --node-id i-0abc123def456 --metric cpu_utilization --last 5m | jq '.avg')
+CPU_USAGE=$(unpage mcp tools call metrics_get_metrics_for_node --node-id i-0abc123def456 --metric cpu_utilization --last 5m | jq '.avg')
 
 # Check if CPU usage is above threshold
 if (( $(echo "$CPU_USAGE > 80" | bc -l) )); then
@@ -181,10 +181,10 @@ Understand available tools when creating new agents:
 
 ```bash
 # List all available tools
-unpage tools list
+unpage mcp tools list
 
 # List tools matching a pattern
-unpage tools list | grep aws_
+unpage mcp tools list | grep aws_
 ```
 
 ## Tool Schema
@@ -261,7 +261,7 @@ For example, a metrics tool might have this schema:
 To get the most value from tools:
 
 1. **Follow least privilege**: Grant agents access only to the tools they need
-2. **Test tools independently**: Use `unpage tools call` to understand behavior
+2. **Test tools independently**: Use `unpage mcp tools call` to understand behavior
 3. **Use structured parameters**: Provide complete parameter objects
 4. **Handle errors gracefully**: Account for potential tool failures in agent prompts
 5. **Chain tool calls**: Build complex workflows by combining multiple tool calls

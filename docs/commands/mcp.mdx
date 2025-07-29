@@ -1,0 +1,197 @@
+---
+title: unpage mcp
+description: MCP server commands for LLM interaction with infrastructure
+---
+
+The `mcp` command group provides functionality to start the MCP (Model Coupling Protocol) Server and interact with the tools exposed by plugins.
+
+## Usage
+
+```shell
+unpage mcp [OPTIONS] COMMAND [ARGS]...
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `start` | Start the Unpage MCP Server |
+| `tools` | List and call MCP tools available from enabled plugins |
+| `client` | Debugging tools for clients of the Unpage MCP Server |
+
+## Subcommand: start
+
+The `start` command launches the Unpage MCP Server, which allows LLM-powered applications to interact with your infrastructure through a set of tools exposed by plugins.
+
+### Usage
+
+```shell
+unpage mcp start [OPTIONS]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--disable-stdio` | Disable the stdio transport for the MCP Server |
+| `--disable-http` | Disable the HTTP transport for the MCP Server |
+| `--disable-sse` | Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead) |
+| `--http-host TEXT` | The host to bind the HTTP transport to [default: 127.0.0.1] |
+| `--http-port INTEGER` | The port to bind the HTTP transport to [default: 8000] |
+| `-h, --help` | Show help message and exit |
+
+### Transport Protocols
+
+The MCP Server supports two transport protocols:
+
+- **HTTP Transport**: Enables connection through HTTP, useful for web applications and remote clients
+- **stdio Transport**: Enables communication through standard input/output, useful for direct integration with CLI tools
+
+### Examples
+
+#### Default Start
+
+Start the MCP Server with both stdio and HTTP transport:
+
+```shell
+unpage mcp start
+```
+
+#### HTTP Only
+
+Start the MCP Server with only HTTP transport:
+
+```shell
+unpage mcp start --disable-stdio
+```
+
+#### Custom HTTP Configuration
+
+Start the MCP Server on a specific host and port:
+
+```shell
+unpage mcp start --http-host 0.0.0.0 --http-port 9000
+```
+
+#### Using a Named Profile
+
+Start the MCP Server with a specific configuration profile:
+
+```shell
+unpage mcp start --profile production
+```
+
+## Subcommand: tools
+
+The `tools` command provides functionality to list and manually invoke tools that are made available by plugins to the MCP server.
+
+### Usage
+
+```shell
+unpage mcp tools [OPTIONS] COMMAND [ARGS]...
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `list` | List all MCP tools available from enabled plugins |
+| `call` | Call an MCP tool from the command line |
+
+### Subcommand: tools list
+
+Lists all MCP tools that are available from the currently enabled plugins.
+
+#### Usage
+
+```shell
+unpage mcp tools list [OPTIONS]
+```
+
+#### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `-h, --help` | Show help message and exit |
+
+#### Examples
+
+```shell
+# List all available tools
+unpage mcp tools list
+
+# List tools for a specific profile
+unpage mcp tools list --profile production
+```
+
+### Subcommand: tools call
+
+Calls an MCP tool directly from the command line, allowing you to test and use tools without going through an LLM.
+
+#### Usage
+
+```shell
+unpage mcp tools call [OPTIONS] TOOL_NAME [ARGS]
+```
+
+#### Examples
+
+```shell
+# Call a tool with arguments
+unpage mcp tools call aws_list_ec2_instances --region us-west-2
+unpage mcp tools call papertrail_search_logs error "2025-07-25T00:00:00+00:00" "2025-07-27T00:00:00+00:00"
+
+# Call a tool and pipe output to jq for processing
+unpage mcp tools call datadog_get_metrics | jq .
+```
+
+## Subcommand: client
+
+The `client` command provides debugging tools for clients of the Unpage MCP Server.
+
+### Usage
+
+```shell
+unpage mcp client [OPTIONS] COMMAND [ARGS]...
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `logs` | Show logs for a client of the Unpage MCP Server |
+
+### Subcommand: client logs
+
+Show logs for a client of the Unpage MCP Server, like Claude Desktop.
+
+#### Usage
+
+```shell
+unpage mcp client logs [OPTIONS] COMMAND [ARGS]...
+```
+
+#### Commands
+
+| Command | Description |
+|---------|-------------|
+| `claude` | Show logs for Claude Desktop Unpage MCP Server |
+
+### Subcommand: client logs claude
+
+Shows the location of log files for Claude Desktop's Unpage MCP Server integration.
+
+#### Usage
+
+```shell
+unpage mcp client logs claude
+```
+
+#### Examples
+
+```shell
+# Show Claude Desktop log file locations
+unpage mcp client logs claude
+```

@@ -1,7 +1,7 @@
 import anyio
 
+from unpage.cli.mcp.tools._app import tools_app
 from unpage.cli.options import PROFILE_OPTION
-from unpage.cli.tools._app import tools_app
 from unpage.config import load_config
 from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
