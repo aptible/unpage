@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 import typer
 from rich import print
@@ -10,7 +9,7 @@ from unpage.cli.options import PROFILE_OPTION
 from unpage.config.utils import get_config_dir
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
-from unpage.utils import edit_file
+from unpage.utils import edit_file, get_editor
 
 
 @agent_app.command()
@@ -18,7 +17,8 @@ def edit(
     agent_name: str = typer.Argument(..., help="The name of the agent to edit"),
     profile: str = PROFILE_OPTION,
     editor: str = typer.Option(
-        os.environ.get("EDITOR"), help="The editor to use to open the agent file"
+        get_editor(),
+        help="The editor to use to open the agent file; DAYDREAM_EDITOR and EDITOR environment variables also work",
     ),
 ) -> None:
     """Edit an existing agent configuration file."""

@@ -2,6 +2,51 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.11 (2025-07-29)
+
+### Bug Fixes
+
+- Vendor dspy and drain3 dependencies ([#28](https://github.com/aptible/unpage/pull/28),
+  [`3f25c8d`](https://github.com/aptible/unpage/commit/3f25c8d3c4bea2e5d74d49d81ec5bca3d50e6d32))
+
+
+## v0.1.0-alpha.10 (2025-07-28)
+
+### Bug Fixes
+
+- Oops broke uv build during release ([#27](https://github.com/aptible/unpage/pull/27),
+  [`1904c71`](https://github.com/aptible/unpage/commit/1904c71cc97402b3307bb08410d1e96424a1119b))
+
+- Update release to handle prerelease ([#25](https://github.com/aptible/unpage/pull/25),
+  [`a70867d`](https://github.com/aptible/unpage/commit/a70867d1dfa8560385700f0ec41ea9aace2bceb2))
+
+
+## v0.1.0-alpha.9 (2025-07-28)
+
+### Bug Fixes
+
+- Uv.lock was somehow missing its prerelease-mode?
+  ([#24](https://github.com/aptible/unpage/pull/24),
+  [`3a544fb`](https://github.com/aptible/unpage/commit/3a544fb72a24c888accd2a075b62ec71bb0adb0e))
+
+
+## v0.1.0-alpha.8 (2025-07-28)
+
+### Bug Fixes
+
+- Unbreak dependencies ([#22](https://github.com/aptible/unpage/pull/22),
+  [`03f7c72`](https://github.com/aptible/unpage/commit/03f7c72130bb37072c2e6df4023823322198a732))
+
+
+## v0.1.0-alpha.7 (2025-07-28)
+
+### Bug Fixes
+
+- Match git behavior and us vim/vi when no EDITOR env var is set [SC-34065]
+  ([#20](https://github.com/aptible/unpage/pull/20),
+  [`e45a1f5`](https://github.com/aptible/unpage/commit/e45a1f5b2b1b0addcedb5aeb87f43a32a1e2cbfd))
+
+
 ## v0.1.0-alpha.6 (2025-07-28)
 
 ### Bug Fixes
