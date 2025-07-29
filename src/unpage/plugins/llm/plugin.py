@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import litellm
@@ -28,6 +29,12 @@ class LlmPlugin(Plugin):
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.cache = cache
+        if (
+            self.model.startswith("bedrock/")
+            and not os.environ.get("AWS_REGION")
+            and not os.environ.get("AWS_DEFAULT_REGION")
+        ):
+            os.environ["AWS_REGION"] = "us-east-1"
 
     @classproperty
     def default_plugin_settings(cls) -> PluginSettings:
@@ -65,11 +72,15 @@ class LlmPlugin(Plugin):
         }
 
     async def validate_plugin_config(self) -> None:
+        params = {
+            "model": self.model,
+            "api_key": self.api_key,
+            **({"temperature": self.temperature} if not self.model.startswith("bedrock/") else {}),
+            "max_tokens": self.max_tokens,
+            "cache": self.cache,
+        }
         await acompletion(
-            model=self.model,
-            api_key=self.api_key,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
+            **params,
             messages=[
                 {
                     "role": "user",
