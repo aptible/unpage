@@ -26,11 +26,10 @@ def create(
     """Create a new agent configuration file and open it in your editor."""
 
     async def _create() -> None:
-        agent_hash_value = hash_value(agent_name)
         await telemetry.send_event(
             {
                 "command": "agent create",
-                "agent_name_sha256": agent_hash_value,
+                "agent_name_sha256": hash_value(agent_name),
                 **prepare_profile_for_telemetry(profile),
                 "overwrite": overwrite,
                 "template": template,

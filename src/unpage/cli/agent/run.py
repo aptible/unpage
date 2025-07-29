@@ -39,12 +39,11 @@ def run(
     """Run an agent with the provided payload and print the analysis."""
 
     async def _run() -> None:
-        agent_hash_value = hash_value(agent_name)
         await telemetry.send_event(
             {
                 "command": "agent run",
                 **prepare_profile_for_telemetry(profile),
-                "agent_name_sha256": agent_hash_value,
+                "agent_name_sha256": hash_value(agent_name),
                 "debug": debug,
                 "has_payload": payload is not None,
                 "has_pagerduty_incident": bool(pagerduty_incident),

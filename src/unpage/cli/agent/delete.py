@@ -12,11 +12,10 @@ def delete(agent_name: str, profile: str = PROFILE_OPTION) -> None:
     """Delete an agent."""
 
     async def _run() -> None:
-        agent_hash_value = hash_value(agent_name)
         await telemetry.send_event(
             {
                 "command": "agent delete",
-                "agent_name_sha256": agent_hash_value,
+                "agent_name_sha256": hash_value(agent_name),
                 **prepare_profile_for_telemetry(profile),
             }
         )
