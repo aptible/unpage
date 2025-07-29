@@ -26,7 +26,7 @@ jobs:
         cache-dependency-glob: "uv.lock"
 
     - name: Install dependencies
-      run: uv sync --prerelease allow --locked --all-extras --dev
+      run: uv sync --locked --all-extras --dev
 
     - name: Run pyright
-      run: uv run --prerelease allow --locked pyright
+      run: uv run pyright

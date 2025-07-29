@@ -21,7 +21,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync --prerelease allow --locked --all-extras --dev
+        run: uv sync --locked --all-extras --dev
 
       - name: Run pytest
-        run: uv run --prerelease allow --locked pytest
+        run: uv run pytest
