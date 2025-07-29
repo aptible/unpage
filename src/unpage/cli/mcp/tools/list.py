@@ -20,7 +20,7 @@ def list_tools(
     async def _list_tools() -> None:
         await telemetry.send_event(
             {
-                "command": "tools list",
+                "command": "mcp tools list",
                 **prepare_profile_for_telemetry(profile),
             }
         )

@@ -39,7 +39,7 @@ def call(
     async def _call_tool() -> None:
         await telemetry.send_event(
             {
-                "command": "tools call",
+                "command": "mcp tools call",
                 "tool": tool,
                 **prepare_profile_for_telemetry(profile),
                 "count_results": count_results,

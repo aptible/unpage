@@ -15,7 +15,7 @@ def claude() -> None:
         rich.print("~/Library/Logs/Claude/mcp-server-unpage.log")
         await telemetry.send_event(
             {
-                "command": "client logs claude",
+                "command": "mcp client logs claude",
             }
         )
 
