@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import sys
@@ -19,6 +20,21 @@ def _get_or_create_user_id() -> str:
             identity_file.parent.mkdir(parents=True)
         identity_file.write_text(str(uuid.uuid4()))
     return identity_file.read_text().strip()
+
+
+def hash_value(value: str) -> str:
+    """Hash a value using SHA256 to protect sensitive data in telemetry."""
+    hasher = hashlib.sha256()
+    hasher.update(value.encode("utf-8"))
+    return hasher.hexdigest()
+
+
+def prepare_profile_for_telemetry(profile: str) -> dict[str, Any]:
+    """Prepare profile value for telemetry, hashing if not 'default'."""
+    result = {"profile": profile}
+    if profile != "default":
+        result["profile_sha256"] = hash_value(profile)
+    return result
 
 
 UNPAGE_TELEMETRY_DISABLED = os.getenv("UNPAGE_TELEMETRY_DISABLED", "false").lower() in (

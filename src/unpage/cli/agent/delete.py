@@ -1,11 +1,10 @@
-import hashlib
-
 import anyio
 
 from unpage.agent.utils import delete_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 
 
 @agent_app.command()
@@ -13,13 +12,12 @@ def delete(agent_name: str, profile: str = PROFILE_OPTION) -> None:
     """Delete an agent."""
 
     async def _run() -> None:
-        agent_hash = hashlib.sha256()
-        agent_hash.update(agent_name.encode("utf-8"))
+        agent_hash_value = hash_value(agent_name)
         await telemetry.send_event(
             {
                 "command": "agent delete",
-                "agent_name_sha256": agent_hash.hexdigest,
-                "profile": profile,
+                "agent_name_sha256": agent_hash_value,
+                **prepare_profile_for_telemetry(profile),
             }
         )
         delete_agent(agent_name, profile)

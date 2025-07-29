@@ -6,6 +6,7 @@ from unpage.cli.options import PROFILE_OPTION
 from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @app.command()
@@ -19,7 +20,7 @@ def visualize(
         await telemetry.send_event(
             {
                 "command": "visualize_graph",
-                "profile": profile,
+                **prepare_profile_for_telemetry(profile),
                 "topology_only": topology,
             }
         )

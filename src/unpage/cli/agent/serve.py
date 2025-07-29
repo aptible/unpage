@@ -6,6 +6,7 @@ import typer
 from unpage.agent.app import listen, settings
 from unpage.cli.agent._app import agent_app
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @agent_app.command()
@@ -40,7 +41,7 @@ def serve(
                 else f"{host.split('.')[0]}.0.0.0",
                 "port": port,
                 "workers": workers,
-                "profile": profile,
+                **prepare_profile_for_telemetry(profile),
                 "reload": reload,
                 "tunnel": tunnel,
             }

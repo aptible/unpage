@@ -14,6 +14,7 @@ from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import Choice, checkbox, confirm
 
 
@@ -65,7 +66,7 @@ async def _tell_it(profile: str, use_uv_run: bool) -> None:
     await telemetry.send_event(
         {
             "command": "configure",
-            "profile": profile,
+            **prepare_profile_for_telemetry(profile),
             "use_uv_run": use_uv_run,
         }
     )

@@ -8,6 +8,7 @@ from unpage.agent.analysis import AnalysisAgent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @agent_app.command(
@@ -30,7 +31,7 @@ def route(
         await telemetry.send_event(
             {
                 "command": "agent route",
-                "profile": profile,
+                **prepare_profile_for_telemetry(profile),
                 "debug": debug,
             }
         )

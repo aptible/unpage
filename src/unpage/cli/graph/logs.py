@@ -8,6 +8,7 @@ from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import get_log_file
 from unpage.cli.options import PROFILE_OPTION
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @graph_app.command()
@@ -21,7 +22,7 @@ async def logs(
         await telemetry.send_event(
             {
                 "command": "graph logs",
-                "profile": profile,
+                **prepare_profile_for_telemetry(profile),
                 "follow": follow,
             }
         )

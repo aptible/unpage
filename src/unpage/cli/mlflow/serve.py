@@ -8,6 +8,8 @@ from rich import print
 from unpage.cli.mlflow._app import mlflow_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.config.utils import get_config_dir
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import confirm
 
 
@@ -17,6 +19,13 @@ def serve(
     port: int = typer.Option(default=5566, help="Port for MLflow server to listen on"),
 ) -> None:
     async def _server() -> None:
+        await telemetry.send_event(
+            {
+                "command": "mlflow serve",
+                **prepare_profile_for_telemetry(profile),
+                "port": port,
+            }
+        )
         host = "127.0.0.1"
         config_dir = get_config_dir(profile, create=True)
         mlflow_db = config_dir / "mlflow" / "debug.db"

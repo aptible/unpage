@@ -28,6 +28,7 @@ from unpage.plugins.pagerduty.models import PagerDutyIncident
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
 from unpage.plugins.papertrail.plugin import PapertrailPlugin
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import confirm, edit_file, select
 
 
@@ -41,7 +42,7 @@ def quickstart(
         await telemetry.send_event(
             {
                 "command": "agent quickstart",
-                "profile": profile,
+                **prepare_profile_for_telemetry(profile),
             }
         )
         welcome_to_unpage()

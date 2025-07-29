@@ -7,6 +7,8 @@ from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @tools_app.command("list")
@@ -16,6 +18,12 @@ def list_tools(
     """List all MCP tools available from enabled plugins."""
 
     async def _list_tools() -> None:
+        await telemetry.send_event(
+            {
+                "command": "tools list",
+                **prepare_profile_for_telemetry(profile),
+            }
+        )
         config = load_config(profile)
         plugins = PluginManager(config=config)
         context = Context(
