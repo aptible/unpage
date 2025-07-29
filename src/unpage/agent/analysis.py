@@ -89,14 +89,19 @@ class AnalysisAgent(dspy.Module):
         return self.mcp_server
 
     async def acall(self, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
-        with dspy.context(
-            lm=dspy.LM(
-                model=self.llm_settings["model"],
-                api_key=self.llm_settings["api_key"],
-                temperature=self.llm_settings["temperature"],
-                max_tokens=self.llm_settings["max_tokens"],
-                cache=self.llm_settings["cache"],
+        params = {
+            "model": self.llm_settings["model"],
+            "api_key": self.llm_settings["api_key"],
+            **(
+                {"temperature": self.llm_settings["temperature"]}
+                if not self.llm_settings["model"].startswith("bedrock/")
+                else {}
             ),
+            "max_tokens": self.llm_settings["max_tokens"],
+            "cache": self.llm_settings["cache"],
+        }
+        with dspy.context(
+            lm=dspy.LM(**params),
         ):
             return await super().acall(*args, **kwargs)
 
