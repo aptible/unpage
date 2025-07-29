@@ -46,8 +46,7 @@
         "group": "Command Reference",
         "pages": [
           "commands/configure",
-          "commands/start",
-          "commands/tools",
+          "commands/mcp",
           "commands/graph",
           "commands/agent",
           "commands/mlflow"
