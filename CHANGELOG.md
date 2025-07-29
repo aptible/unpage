@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.15 (2025-07-29)
+
+### Features
+
+- More telemetry [SC-34016] ([#30](https://github.com/aptible/unpage/pull/30),
+  [`65cf118`](https://github.com/aptible/unpage/commit/65cf1189e3746c91cf495ad5c534bb469d9a8c8a))
+
+
 ## v0.1.0-alpha.14 (2025-07-29)
 
 ### Bug Fixes
