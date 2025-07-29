@@ -12,7 +12,7 @@ from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @graph_app.command()
-async def logs(
+def logs(
     profile: str = PROFILE_OPTION,
     follow: bool = typer.Option(False, "--follow", "-f", help="Follow log output"),
 ) -> None:
