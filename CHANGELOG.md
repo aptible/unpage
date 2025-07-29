@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.14 (2025-07-29)
+
+### Bug Fixes
+
+- Reduce *_search_logs() response sizes [SC-34056]
+  ([#29](https://github.com/aptible/unpage/pull/29),
+  [`1cd488b`](https://github.com/aptible/unpage/commit/1cd488bacd0efbec9dc7bc7734b4682c3a0b65c7))
+
+### Features
+
+- Telemetry [SC-34016] [SC-33944] ([#21](https://github.com/aptible/unpage/pull/21),
+  [`496c017`](https://github.com/aptible/unpage/commit/496c01772e0323282b14f74d372f49c55e619203))
+
+
 ## v0.1.0-alpha.13 (2025-07-29)
 
 ### Features
