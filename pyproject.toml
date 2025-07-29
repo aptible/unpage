@@ -1,6 +1,6 @@
 [project]
 name = "unpage"
-version = "0.1.0-alpha.6"
+version = "0.1.0-alpha.11"
 description = "An agent framework for production engineering"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -27,7 +27,10 @@ dependencies = [
     "whoosh-reloaded>=2.7.5",
     "boltons>=25.0.0",
     "logparser>=0.8.4",
-    "drain3@git+https://github.com/logpai/Drain3@9c50c5ff6a5efa2d78039d2a404e1c7d7eb2084c",
+    # start: drain3 dependencies
+    "jsonpickle",
+    "cachetools",
+    # end: drain3 dependencies
     "sparklines>=0.5.0",
     "pydantic-yaml>=1.5.1",
     "questionary>=2.1.0",
@@ -38,7 +41,28 @@ dependencies = [
     "dotenv>=0.9.9",
     "pagerduty>=3.1.0",
     "fastapi[standard]>=0.116.1",
-    "dspy@git+https://github.com/stanfordnlp/dspy.git@cd9ae6e6334c3bcab88fcf387ab9e1aea321f991",
+    # start: dspy dependencies
+    "backoff>=2.2",
+    "joblib~=1.3",
+    "openai>=0.28.1",
+    "datasets>=2.14.6",
+    "regex>=2023.10.3",
+    "ujson>=5.8.0",
+    "tqdm>=4.66.1",
+    "requests>=2.31.0",
+    "optuna>=3.4.0",
+    "pydantic>=2.0",
+    "magicattr>=0.1.6",
+    "litellm>=1.64.0",
+    "diskcache>=5.6.0",
+    "json-repair>=0.30.0",
+    "tenacity>=8.2.3",
+    "anyio",
+    "asyncer==0.0.8",
+    "cachetools>=5.5.0",
+    "cloudpickle>=3.0.0",
+    "rich>=13.7.1",
+    # end: dspy dependencies
     "uvicorn[standard]>=0.35.0",
     "pyngrok>=7.2.12",
     "pydantic-settings>=2.9.1",
@@ -72,7 +96,8 @@ build-backend = "hatchling.build"
 
 [tool.pyright]
 include = ["src"]
-exclude = ["**/__pycache__"]
+exclude = ["**/__pycache__", "src/unpage/vendor/**"]
+extraPaths = ["src/unpage/vendor"]
 typeCheckingMode = "standard"
 
 # See:
@@ -81,9 +106,10 @@ typeCheckingMode = "standard"
 # - https://docs.astral.sh/ruff/rules/
 [tool.ruff]
 line-length = 100
+exclude = ["src/unpage/vendor/**/*.py"]
 
 [tool.ruff.lint]
-exclude = ["tests/**/test_*.py"]
+exclude = ["tests/**/test_*.py", "src/unpage/vendor/**/*.py"]
 ignore = [
     "S603" # false positive: https://github.com/astral-sh/ruff/issues/4045
 ]

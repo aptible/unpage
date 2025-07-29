@@ -493,7 +493,7 @@ def wildcard_or_regex_match_any(patterns: list[str], string: str) -> bool:
 
 async def edit_file(file_path: str | Path, editor: str | None = None) -> None:
     """Edit a file in the user's editor."""
-    editor = editor or os.environ.get("EDITOR")
+    editor = editor or get_editor()
     if not editor:
         raise ValueError("No editor specified")
 
@@ -517,3 +517,20 @@ async def edit_file(file_path: str | Path, editor: str | None = None) -> None:
     except FileNotFoundError:
         rich.print(f"[red]Editor '{editor!r}' not found[/red]")
         rich.print(f"[blue]Please manually open: {str(file_path)!r}[/blue]")
+
+
+def get_editor() -> str | None:
+    return os.environ.get("DAYDREAM_EDITOR") or os.environ.get("EDITOR") or _get_default_editor()
+
+
+def _get_default_editor() -> str | None:
+    if vim := shutil.which("vim"):
+        return vim
+    if vi := shutil.which("vi"):
+        return vi
+    if nano := shutil.which("nano"):
+        return nano
+    if pico := shutil.which("pico"):
+        return pico
+    if emacs := shutil.which("emacs"):
+        return emacs

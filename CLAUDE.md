@@ -126,7 +126,9 @@ The MCP (Model Coupling Protocol) server enables LLM-powered applications to int
 
 ## Documentation
 
-Documentation lives under docs/ and is built and published using Mintlify.
+Changelog entries live in CHANGELOG.md. This file should not be edited, as it is automatically updated by CI.
+
+User-facing documentation lives under docs/ and is built and published using Mintlify.
 
 ### Working relationship
 - You can push back on ideas-this can lead to better documentation. Cite sources and explain your reasoning when you do so
