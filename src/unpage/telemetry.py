@@ -11,7 +11,6 @@ import httpx
 import rich
 import sentry_sdk
 
-from unpage.cli.options import DEFAULT_PROFILE
 from unpage.config.utils import CONFIG_ROOT, load_global_config
 
 
@@ -33,7 +32,7 @@ def hash_value(value: str) -> str:
 def prepare_profile_for_telemetry(profile: str) -> dict[str, Any]:
     return {
         "profile_sha256": hash_value(profile),
-        **({"profile": DEFAULT_PROFILE} if profile == DEFAULT_PROFILE else {}),
+        **({"profile": "default"} if profile == "default" else {}),
     }
 
 
