@@ -12,6 +12,7 @@ from rich import print
 from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
+from unpage.agent.utils import get_agents
 from unpage.config.utils import get_config_dir
 from unpage.telemetry import client as telemetry
 
@@ -105,11 +106,10 @@ async def listen(
     settings.UNPAGE_HOST = host
     settings.UNPAGE_PORT = port
 
-    config_dir = get_config_dir(profile)
     await telemetry.send_event(
         {
             "command": "agent_listen",
-            "num_agents": len(list(config_dir.glob("agents/**/*.yaml"))),
+            "num_agents": len(get_agents(profile)),
         }
     )
 
@@ -124,7 +124,7 @@ async def listen(
                 raise FileNotFoundError("Could not find the project root")
         reload_config = {
             "reload": True,
-            "reload_dirs": [str(project_root), str(config_dir)],
+            "reload_dirs": [str(project_root), str(get_config_dir(profile))],
             "reload_includes": ["**/*.py", "**/*.yaml"],
         }
 
