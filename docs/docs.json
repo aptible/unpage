@@ -67,5 +67,9 @@
         ]
       }
     ]
+  },
+  "logo": {
+    "light": "images/illustrations/unpage-logo-light.png",
+    "dark": "images/illustrations/unpage-logo-dark.png"
   }
 }
