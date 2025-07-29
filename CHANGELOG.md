@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.13 (2025-07-29)
+
+### Features
+
+- Intuitive subcommand structure [SC-34058] ([#19](https://github.com/aptible/unpage/pull/19),
+  [`142cdcf`](https://github.com/aptible/unpage/commit/142cdcf86109183a5c120bca6eca736aaaf064b2))
+
+
 ## v0.1.0-alpha.12 (2025-07-29)
 
 ### Documentation
