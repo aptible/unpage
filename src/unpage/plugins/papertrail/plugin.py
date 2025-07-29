@@ -10,8 +10,7 @@ from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
 from unpage.plugins.papertrail.client import PapertrailClient, PapertrailLogEvent
 
-CLAUDE_DESKTOP_RESULT_MAX_LENGTH = 1048576
-RESULT_LIMIT = int(CLAUDE_DESKTOP_RESULT_MAX_LENGTH * 0.9)
+RESULT_LIMIT = 75 * 1024
 
 
 class PapertrailSearchResult(BaseModel):
@@ -95,7 +94,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             continue_search=tt.under_time_out,
         ):
             content_length += len(log.model_dump_json(indent=6)) + 8
-            if content_length >= int(RESULT_LIMIT / 2):
+            if content_length >= RESULT_LIMIT:
                 truncated = True
                 break
             logs.append(log)
