@@ -49,6 +49,7 @@ class PagerDutyPlugin(Plugin, McpServerMixin):
             default_from=await questionary.text(
                 "Default User Email",
                 default=self.default_from or defaults.get("default_user_email", ""),
+                instruction="The email you provide will appear as the author for annotations left by the agent.",
             ).unsafe_ask_async(),
         ).model_dump()
 

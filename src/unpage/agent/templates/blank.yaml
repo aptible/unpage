@@ -13,7 +13,7 @@ prompt: >
 #
 # Use this to list all tools:
 #
-#    unpage tools list
+#    unpage mcp tools list
 #
 tools:
   - "*"

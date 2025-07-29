@@ -21,7 +21,7 @@ uv pip install --dev
 uv run unpage
 
 # Start the MCP server
-uv run unpage start
+uv run unpage mcp start
 
 # Build the infrastructure knowledge graph
 uv run unpage graph build
@@ -116,7 +116,7 @@ The MCP (Model Coupling Protocol) server enables LLM-powered applications to int
    - Graph is saved for later use
 
 2. **Using the MCP Server**:
-   - User runs `unpage start` to start the MCP server
+   - User runs `unpage mcp start` to start the MCP server
    - LLM clients connect to the server
    - LLMs use tools to query and interact with the infrastructure
 

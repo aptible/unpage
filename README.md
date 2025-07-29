@@ -43,10 +43,10 @@ This will get you up and running with your first agent, which will automatically
 
 The quickstart flow will walk you through:
 
-- Configuring your LLM, PagerDuty plugin, and logs and metrics plugins
-- Creating your first agent and prompt
+- Configuring your LLM, [PagerDuty plugin](https://docs.aptible.ai/plugins/pagerduty), and logs and metrics plugins
+- Creating your first [agent](https://docs.aptible.ai/concepts/agents) and prompt
 - Testing your agent with an existing incident ticket
-- Building your knowledge graph
+- Building your [knowledge graph](https://docs.aptible.ai/concepts/knowledge-graph)
 
 ### Running the Agent
 

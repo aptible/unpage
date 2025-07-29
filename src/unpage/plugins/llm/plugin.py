@@ -1,11 +1,13 @@
+import os
 from typing import Any
 
+import litellm
 import questionary
 from litellm import acompletion
 
 from unpage.config.utils import PluginSettings
 from unpage.plugins.base import Plugin
-from unpage.utils import classproperty
+from unpage.utils import classproperty, select
 
 
 class LlmPlugin(Plugin):
@@ -27,6 +29,12 @@ class LlmPlugin(Plugin):
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.cache = cache
+        if (
+            self.model.startswith("bedrock/")
+            and not os.environ.get("AWS_REGION")
+            and not os.environ.get("AWS_DEFAULT_REGION")
+        ):
+            os.environ["AWS_REGION"] = "us-east-1"
 
     @classproperty
     def default_plugin_settings(cls) -> PluginSettings:
@@ -41,41 +49,38 @@ class LlmPlugin(Plugin):
     async def interactive_configure(self) -> PluginSettings:
         """Interactive wizard for configuring the settings of this plugin."""
         defaults = self.default_plugin_settings
-
+        model_list = [
+            model if model.startswith(f"{provider}/") else f"{provider}/{model}"
+            for provider, models in litellm.models_by_provider.items()
+            for model in models
+        ]
         return {
-            "model": await questionary.text(
-                "Model", default=self.model or defaults["model"]
-            ).unsafe_ask_async(),
+            "model": await select(
+                "Model",
+                choices=model_list,
+                default=self.model or defaults["model"],
+                use_jk_keys=False,
+                use_search_filter=True,
+            ),
             "api_key": await questionary.password(
                 "API key",
                 default=self.api_key or defaults["api_key"],
             ).unsafe_ask_async(),
-            "temperature": float(
-                await questionary.text(
-                    "Model temperature (any float between 0 and 2)",
-                    default=str(self.temperature or defaults["temperature"]),
-                    validate=lambda v: v.replace(".", "").isdigit() and 0 <= float(v) <= 2,
-                ).unsafe_ask_async()
-            ),
-            "max_tokens": int(
-                await questionary.text(
-                    "Maximum number of tokens to generate for each response",
-                    default=str(self.max_tokens or defaults["max_tokens"]),
-                    validate=lambda v: v.isdigit() and 0 < int(v) <= 8192,
-                ).unsafe_ask_async()
-            ),
-            "cache": await questionary.confirm(
-                "Enable caching of responses",
-                default=self.cache or defaults["cache"],
-            ).unsafe_ask_async(),
+            "temperature": self.temperature or defaults["temperature"],
+            "max_tokens": self.max_tokens or defaults["max_tokens"],
+            "cache": self.cache or defaults["cache"],
         }
 
     async def validate_plugin_config(self) -> None:
+        params = {
+            "model": self.model,
+            "api_key": self.api_key,
+            **({"temperature": self.temperature} if not self.model.startswith("bedrock/") else {}),
+            "max_tokens": self.max_tokens,
+            "cache": self.cache,
+        }
         await acompletion(
-            model=self.model,
-            api_key=self.api_key,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
+            **params,
             messages=[
                 {
                     "role": "user",
