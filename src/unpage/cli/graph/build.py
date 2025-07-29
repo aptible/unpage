@@ -21,6 +21,7 @@ from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins import KnowledgeGraphMixin
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @graph_app.command()
@@ -67,6 +68,14 @@ def build(
         return
 
     async def _build_graph() -> None:
+        await telemetry.send_event(
+            {
+                "command": "graph build - starting",
+                **prepare_profile_for_telemetry(profile),
+                "interval": interval,
+                "background": background,
+            }
+        )
         print("Building graph...")
 
         start_time = time.perf_counter()
@@ -108,8 +117,8 @@ def build(
 
         await telemetry.send_event(
             {
-                "command": "build_graph",
-                "profile": profile,
+                "command": "graph build - finished",
+                **prepare_profile_for_telemetry(profile),
                 "duration_seconds": total_time,
                 "node_counts": node_counts,
                 "edge_counts": edge_counts,

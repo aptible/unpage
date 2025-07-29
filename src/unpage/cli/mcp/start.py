@@ -9,6 +9,7 @@ from unpage import mcp
 from unpage.cli.mcp._app import mcp_app
 from unpage.cli.options import PROFILE_OPTION
 from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @mcp_app.command()
@@ -45,8 +46,8 @@ def start(
     async def _start() -> None:
         await telemetry.send_event(
             {
-                "command": "start",
-                "profile": profile,
+                "command": "mcp start",
+                **prepare_profile_for_telemetry(profile),
                 "disable_sse": disable_sse,
                 "disable_stdio": disable_stdio,
                 "disable_http": disable_http,

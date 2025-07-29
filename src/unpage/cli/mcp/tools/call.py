@@ -13,6 +13,8 @@ from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @tools_app.command()
@@ -35,6 +37,16 @@ def call(
     """Call an MCP tool from the command line."""
 
     async def _call_tool() -> None:
+        await telemetry.send_event(
+            {
+                "command": "mcp tools call",
+                "tool": tool,
+                **prepare_profile_for_telemetry(profile),
+                "count_results": count_results,
+                "count_level": count_level,
+                "has_arguments": arguments is not None,
+            }
+        )
         config = load_config(profile)
         plugins = PluginManager(config=config)
         context = Context(

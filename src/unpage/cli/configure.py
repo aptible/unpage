@@ -13,6 +13,8 @@ from unpage.cli._app import app
 from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import Choice, checkbox, confirm
 
 
@@ -49,6 +51,7 @@ def configure(
     async def _recipe() -> None:
         welcome_to_unpage()
         await _configure_intro()
+        await _tell_it(profile, use_uv_run)
         cfg = _initial_config(profile)
         await _select_plugins_to_enable_disable(cfg)
         save_config(cfg, profile, create=True)
@@ -59,6 +62,16 @@ def configure(
         await _suggest_building_graph(profile, use_uv_run)
 
     anyio.run(_recipe)
+
+
+async def _tell_it(profile: str, use_uv_run: bool) -> None:
+    await telemetry.send_event(
+        {
+            "command": "configure",
+            **prepare_profile_for_telemetry(profile),
+            "use_uv_run": use_uv_run,
+        }
+    )
 
 
 def welcome_to_unpage() -> None:

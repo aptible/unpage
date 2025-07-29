@@ -5,6 +5,8 @@ import typer
 
 from unpage.agent.app import listen, settings
 from unpage.cli.agent._app import agent_app
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @agent_app.command()
@@ -29,6 +31,21 @@ def serve(
     """Run the Unpage Agent server, which loads all agents and routes between them. This is intended to be a webhook receiver for PagerDuty."""
 
     async def _serve() -> None:
+        await telemetry.send_event(
+            {
+                "command": "agent serve",
+                "host": host
+                if host.startswith("127")
+                else "0.0.0.0"  # noqa: S104 Possible binding to all interfaces
+                if host == "0.0.0.0"  # noqa: S104 Possible binding to all interfaces
+                else f"{host.split('.')[0]}.0.0.0",
+                "port": port,
+                "workers": workers,
+                **prepare_profile_for_telemetry(profile),
+                "reload": reload,
+                "tunnel": tunnel,
+            }
+        )
         await listen(
             host=host,
             port=port,

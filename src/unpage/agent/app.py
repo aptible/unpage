@@ -12,7 +12,9 @@ from rich import print
 from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
+from unpage.agent.utils import get_agents
 from unpage.config.utils import get_config_dir
+from unpage.telemetry import client as telemetry
 
 
 class Settings(BaseSettings):
@@ -103,6 +105,13 @@ async def listen(
     settings.NGROK_DOMAIN = ngrok_domain
     settings.UNPAGE_HOST = host
     settings.UNPAGE_PORT = port
+
+    await telemetry.send_event(
+        {
+            "command": "agent_listen",
+            "num_agents": len(get_agents(profile)),
+        }
+    )
 
     # Recurse up the directory tree until we find the pyproject.toml file (i.e.,
     # the project root).

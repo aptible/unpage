@@ -7,6 +7,8 @@ from rich import print
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.actions import create_agent
 from unpage.cli.options import PROFILE_OPTION
+from unpage.telemetry import client as telemetry
+from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import edit_file
 
 
@@ -24,6 +26,17 @@ def create(
     """Create a new agent configuration file and open it in your editor."""
 
     async def _create() -> None:
+        await telemetry.send_event(
+            {
+                "command": "agent create",
+                "agent_name_sha256": hash_value(agent_name),
+                **prepare_profile_for_telemetry(profile),
+                "overwrite": overwrite,
+                "template": template,
+                "editor": editor,
+                "no_edit": no_edit,
+            }
+        )
         agent_file = create_agent(
             agent_name=agent_name,
             profile=profile,
