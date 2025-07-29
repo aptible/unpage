@@ -18,8 +18,7 @@ from unpage.plugins.datadog.nodes.datadog_team import DatadogTeam
 from unpage.plugins.mixins import KnowledgeGraphMixin, tool
 from unpage.plugins.mixins.mcp import McpServerMixin
 
-CLAUDE_DESKTOP_RESULT_MAX_LENGTH = 1048576
-RESULT_LIMIT = int(CLAUDE_DESKTOP_RESULT_MAX_LENGTH * 0.9)
+RESULT_LIMIT = 9 * 1024
 
 
 class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
@@ -149,7 +148,7 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             continue_search=tt.under_time_out,
         ):
             content_length += len(log.model_dump_json(indent=6)) + 8
-            if content_length >= int(RESULT_LIMIT / 2):
+            if content_length >= RESULT_LIMIT:
                 truncated = True
                 break
             logs.append(log)
