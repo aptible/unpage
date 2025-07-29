@@ -15,7 +15,7 @@ dependencies = [
     "matplotlib>=3.10.1",
     "networkx>=3.4.2",
     "numpy<2.4",
-    "pydantic>=2.11.3,<2.12",
+    "pydantic>=2.11.3",
     "pydot>=3.0.4",
     "pyod==2.0.5",
     "pythonping>=1.1.4",
@@ -117,13 +117,7 @@ asyncio_default_fixture_loop_scope = "function"
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-build_command = """
-    pip install uv && \
-    uv lock --prerelease allow && \
-    git add uv.lock && \
-    uv build --prerelease allow
-"""
-
+build_command = "pip install uv && uv lock && git add uv.lock && uv build"
 commit_parser = "conventional"
 allow_zero_version = true
 major_on_zero = false
