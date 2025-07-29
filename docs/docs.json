@@ -9,6 +9,20 @@
     "dark": "#0F172A"
   },
   "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Community",
+          "icon": "headset",
+          "href": "https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw"
+        },
+        {
+          "anchor": "Changelog",
+          "icon": "sparkles",
+          "href": "https://www.aptible.ai/changelog"
+        }
+      ]
+    },
     "groups": [
       {
         "group": "About Unpage",
