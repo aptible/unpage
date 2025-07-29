@@ -3,6 +3,7 @@ import os
 import shlex
 import sys
 from pathlib import Path
+from typing import Any
 
 import anyio
 import questionary
@@ -37,6 +38,17 @@ def _resolve_default_use_uv_run() -> bool:
 _default_use_uv_run = _resolve_default_use_uv_run()
 
 
+async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | None = None) -> None:
+    await telemetry.send_event(
+        {
+            "command": "configure",
+            "step": step,
+            **prepare_profile_for_telemetry(profile),
+            **(extra_params if extra_params else {}),
+        }
+    )
+
+
 @app.command()
 def configure(
     profile: str = PROFILE_OPTION,
@@ -49,29 +61,28 @@ def configure(
     """Setup unpage including all plugins!"""
 
     async def _recipe() -> None:
+        await _send_event(
+            "start",
+            profile,
+            extra_params={
+                "use_uv_run": use_uv_run,
+            },
+        )
         welcome_to_unpage()
         await _configure_intro()
-        await _tell_it(profile, use_uv_run)
         cfg = _initial_config(profile)
         await _select_plugins_to_enable_disable(cfg)
         save_config(cfg, profile, create=True)
+        await _send_event("config_saved", profile)
         rich.print("")
-        await _configure_plugins(cfg)
+        await _configure_plugins(cfg, profile)
+        await _send_event("plugins_configured", profile)
         save_config(cfg, profile, create=True)
+        await _send_event("config_saved_2", profile)
         rich.print("")
         await _suggest_building_graph(profile, use_uv_run)
 
     anyio.run(_recipe)
-
-
-async def _tell_it(profile: str, use_uv_run: bool) -> None:
-    await telemetry.send_event(
-        {
-            "command": "configure",
-            **prepare_profile_for_telemetry(profile),
-            "use_uv_run": use_uv_run,
-        }
-    )
 
 
 def welcome_to_unpage() -> None:
@@ -201,7 +212,7 @@ async def _enable_disable_plugins(cfg: Config) -> None:
     rich.print("")
 
 
-async def _configure_plugins(cfg: Config) -> None:
+async def _configure_plugins(cfg: Config, profile: str) -> None:
     rich.print("> 2. Configure plugins")
     rich.print("")
     rich.print("> Now we will go through each plugin and configure it.")
@@ -219,7 +230,9 @@ async def _configure_plugins(cfg: Config) -> None:
     plugin_manager = PluginManager(cfg)
     for plugin_name in cfg.plugins:
         if not cfg.plugins[plugin_name].enabled:
+            await _send_event(f"plugin_disabled_{plugin_name}", profile)
             continue
+        attempts = 1
         while True:
             rich.print(f"> [bold]{plugin_name}[/bold] plugin configuration:")
             rich.print("")
@@ -228,10 +241,17 @@ async def _configure_plugins(cfg: Config) -> None:
             ).interactive_configure()
             plugin_manager = PluginManager(cfg)
             if await _plugin_valid(plugin_manager, plugin_name):
+                await _send_event(
+                    f"plugin_valid_{plugin_name}", profile, extra_params={"attempts": attempts}
+                )
                 break
             rich.print(f"> Validation failed for {plugin_name}")
             if not await confirm("Retry?"):
+                await _send_event(
+                    f"plugin_invalid_{plugin_name}", profile, extra_params={"attempts": attempts}
+                )
                 break
+            attempts += 1
             rich.print("")
         rich.print("")
     rich.print("> Wooooo you did it! All the plugins are configured and ready to use!")
@@ -286,8 +306,10 @@ async def _suggest_building_graph(profile: str, use_uv_run: bool) -> None:
     if not await confirm(
         "Would you like to launch `unpage graph build` now? (this can take 5min or up to an hour, or even more, depending on how large your infra is)"
     ):
+        await _send_event("done_no_graph_build", profile)
         return
     rich.print(">")
+    await _send_event("starting_graph_build", profile)
     _replace_current_proc_with_unpage_graph_build(graph_build_cmd)
 
 
