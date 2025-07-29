@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import os
@@ -10,6 +11,7 @@ import httpx
 import rich
 import sentry_sdk
 
+from unpage.cli.options import DEFAULT_PROFILE
 from unpage.config.utils import CONFIG_ROOT, load_global_config
 
 
@@ -23,18 +25,16 @@ def _get_or_create_user_id() -> str:
 
 
 def hash_value(value: str) -> str:
-    """Hash a value using SHA256 to protect sensitive data in telemetry."""
     hasher = hashlib.sha256()
     hasher.update(value.encode("utf-8"))
-    return hasher.hexdigest()
+    return base64.urlsafe_b64encode(hasher.digest()).decode("utf-8")
 
 
 def prepare_profile_for_telemetry(profile: str) -> dict[str, Any]:
-    """Prepare profile value for telemetry, hashing if not 'default'."""
-    result = {"profile": profile}
-    if profile != "default":
-        result["profile_sha256"] = hash_value(profile)
-    return result
+    return {
+        "profile_sha256": hash_value(profile),
+        **({"profile": DEFAULT_PROFILE} if profile == DEFAULT_PROFILE else {}),
+    }
 
 
 UNPAGE_TELEMETRY_DISABLED = os.getenv("UNPAGE_TELEMETRY_DISABLED", "false").lower() in (
