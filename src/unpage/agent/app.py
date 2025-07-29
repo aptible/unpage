@@ -13,6 +13,7 @@ from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.config.utils import get_config_dir
+from unpage.telemetry import client as telemetry
 
 
 class Settings(BaseSettings):
@@ -104,6 +105,14 @@ async def listen(
     settings.UNPAGE_HOST = host
     settings.UNPAGE_PORT = port
 
+    config_dir = get_config_dir(profile)
+    await telemetry.send_event(
+        {
+            "command": "agent_listen",
+            "num_agents": len(list(config_dir.glob("agents/**/*.yaml"))),
+        }
+    )
+
     # Recurse up the directory tree until we find the pyproject.toml file (i.e.,
     # the project root).
     reload_config = {}
@@ -115,7 +124,7 @@ async def listen(
                 raise FileNotFoundError("Could not find the project root")
         reload_config = {
             "reload": True,
-            "reload_dirs": [str(project_root), str(get_config_dir(profile))],
+            "reload_dirs": [str(project_root), str(config_dir)],
             "reload_includes": ["**/*.py", "**/*.yaml"],
         }
 
