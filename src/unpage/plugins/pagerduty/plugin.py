@@ -112,6 +112,27 @@ class PagerDutyPlugin(Plugin, McpServerMixin):
             },
         )
 
+    @tool()
+    async def resolve_incident(
+        self, incident_id: str, resolution_message: str | None = None
+    ) -> None:
+        """Resolve a PagerDuty incident
+
+        Args:
+            incident_id (str): The ID of the PagerDuty incident to resolve
+            resolution_message (str, optional): A message to include with the resolution
+        """
+        data = {"incident": {"type": "incident", "status": "resolved"}}
+
+        self._client.rput(
+            f"/incidents/{incident_id}",
+            json=data,
+        )
+
+        # If a resolution message was provided, add it as a status update
+        if resolution_message:
+            await self.post_status_update(incident_id, resolution_message)
+
     async def get_incident_by_id(self, incident_id: str) -> PagerDutyIncident:
         """Get a single incident by its id
 
