@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.16 (2025-07-30)
+
+### Documentation
+
+- Add logo images ([#33](https://github.com/aptible/unpage/pull/33),
+  [`4ac78f2`](https://github.com/aptible/unpage/commit/4ac78f25f71a6ca73d12b57503ff3e12d15005e7))
+
+- Add unpage favicon ([#35](https://github.com/aptible/unpage/pull/35),
+  [`9d10084`](https://github.com/aptible/unpage/commit/9d1008491b7d7bd5542da29546fb6460951be46f))
+
+- Community links ([#32](https://github.com/aptible/unpage/pull/32),
+  [`dc35b72`](https://github.com/aptible/unpage/commit/dc35b721109aa74c074494ee406054ddc89dd28f))
+
+### Features
+
+- Suppress all the warnings all the time [SC-34071]
+  ([#36](https://github.com/aptible/unpage/pull/36),
+  [`62f5ab8`](https://github.com/aptible/unpage/commit/62f5ab87afca2d33bfdbb36a9abd24e1435e83b7))
+
+
 ## v0.1.0-alpha.15 (2025-07-29)
 
 ### Features
