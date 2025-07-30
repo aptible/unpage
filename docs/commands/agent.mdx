@@ -35,6 +35,17 @@ Creates a new agent configuration file based on available templates and opens it
 unpage agent create [OPTIONS] AGENT_NAME
 ```
 
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--overwrite` | Overwrite the agent file if it already exists |
+| `--template TEXT` | The template to use to create the agent file [default: default] |
+| `--editor TEXT` | The editor to use to open the agent file [default: from $EDITOR env var] |
+| `--no-edit` | Do not open the agent file in your editor |
+| `-h, --help` | Show help message and exit |
+
 ## Subcommand: delete
 
 Deletes an existing agent.
@@ -94,6 +105,15 @@ Executes an agent with a provided payload and displays the analysis.
 ```shell
 unpage agent run [OPTIONS] AGENT_NAME [PAYLOAD]
 ```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--debug` | Enable debug mode to print the history of the agent |
+| `--pagerduty-incident TEXT` | PagerDuty incident ID or URL to use instead of payload or stdin |
+| `-h, --help` | Show help message and exit |
 
 ### Examples: Running an Agent with a Test Payload
 

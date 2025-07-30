@@ -136,6 +136,15 @@ Calls an MCP tool directly from the command line, allowing you to test and use t
 unpage mcp tools call [OPTIONS] TOOL_NAME [ARGS]
 ```
 
+#### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--count-results`, `-c` | Count the number of results returned by the tool instead of printing the results |
+| `--count-level INTEGER` | Count level for nested structures [min: 0, max: 1] |
+| `-h, --help` | Show help message and exit |
+
 #### Examples
 
 ```shell
