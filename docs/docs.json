@@ -8,6 +8,7 @@
     "light": "#F8FAFC",
     "dark": "#0F172A"
   },
+  "favicon": "images/favicon.png",
   "navigation": {
     "global": {
       "anchors": [
