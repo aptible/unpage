@@ -1,5 +1,5 @@
 # Unpage
-
+<img width="830" height="180" alt="unpage-banner" src="https://github.com/user-attachments/assets/2f0d2ee7-cbef-4bbb-9189-8a992b512c81" />
 
 > [!WARNING]
 > **ALPHA SOFTWARE**
@@ -7,7 +7,6 @@
 
 Unpage is an infrastructure knowledge graph builder, and an MCP server to enable your LLM-powered application to understand and query your infrastructure.
 
-<img width="830" height="180" alt="unpage-banner" src="https://github.com/user-attachments/assets/2f0d2ee7-cbef-4bbb-9189-8a992b512c81" />
 
 ## Installation
 
