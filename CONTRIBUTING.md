@@ -16,6 +16,10 @@ On macOS:
 brew install uv
 ```
 
+### UNPAGE_DEVELOPER
+
+Set the `UNPAGE_DEVELOPER=true` to see the python warnings that are typically suppressed.
+
 ### Linting & Formatting
 
 This project uses [pre-commit](https://pre-commit.com/) to manage linting and formatting via pre-commit hooks. To set it up:
