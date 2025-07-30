@@ -21,3 +21,10 @@ def warn_with_traceback(
 # Render warnings with traceback to make it easier to track down the culprit.
 if os.getenv("WARN_WITH_TRACEBACK", "false").lower() == "true":
     warnings.showwarning = warn_with_traceback
+
+
+def filter_all_warnings() -> None:
+    if not any(
+        os.getenv("UNPAGE_DEVELOPER", "false").lower().startswith(x) for x in ("1", "t", "y")
+    ):
+        warnings.filterwarnings("ignore")
