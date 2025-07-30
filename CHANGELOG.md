@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.17 (2025-07-30)
+
+### Bug Fixes
+
+- Pin pydantic and remove duplicate dependencies to support `--prerelease allow`
+  ([#37](https://github.com/aptible/unpage/pull/37),
+  [`44e1ba3`](https://github.com/aptible/unpage/commit/44e1ba3499d59c33ca838108504a93955adbcbef))
+
+
 ## v0.1.0-alpha.16 (2025-07-30)
 
 ### Documentation
