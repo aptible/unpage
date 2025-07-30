@@ -1,30 +1,16 @@
 import os
-import warnings
 from pathlib import Path
 
-import pydantic.warnings
 from pydantic_yaml import parse_yaml_file_as
 
 from unpage.agent.analysis import Agent
 from unpage.config.utils import get_config_dir
+from unpage.warnings import filter_all_warnings
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
 
-warnings.filterwarnings(
-    "ignore",
-    category=pydantic.warnings.PydanticDeprecatedSince20,
-)
-warnings.filterwarnings(
-    "ignore",
-    category=DeprecationWarning,
-    message="The request_id parameter is deprecated from the (?:\\S+) API and will be removed in a future version. Please use the `trace_id` parameter instead.",
-)
-warnings.filterwarnings(
-    "ignore",
-    category=DeprecationWarning,
-    message="There is no current event loop",
-)
+filter_all_warnings()
 
 
 if os.environ.get("MLFLOW_TRACKING_URI"):
