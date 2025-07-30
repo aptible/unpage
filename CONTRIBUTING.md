@@ -18,7 +18,7 @@ brew install uv
 
 ### UNPAGE_DEVELOPER
 
-Set the `UNPAGE_DEVELOPER=true` to see the python warnings that are typically suppressed.
+Set `UNPAGE_DEVELOPER=true` in your environment to see the python warnings that are typically suppressed.
 
 ### Linting & Formatting
 
