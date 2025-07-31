@@ -459,7 +459,7 @@ async def _optionally_launch_configure(next_step_count: int, profile: str) -> No
     rich.print(
         "> Unpage supports a rich infrastructure knowledge graph builder, which can be used on its own or automatically "
         "integrated with your Unpage Agents. The graph can be built from your infrastructure tools, like AWS or Aptible, and your "
-        "observability tools, like Datadog and Cloudwatch."
+        "observability tools, like Datadog and CloudWatch."
     )
     rich.print("")
     rich.print(
