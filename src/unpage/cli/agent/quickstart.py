@@ -142,7 +142,8 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         console = Console()
         console.print(
             Panel(
-                f"[bold]{i + 1}. {plugin.upper() if plugin == 'llm' else plugin.capitalize()} configuration[/bold]"
+                f"[bold]{i + 1}. {plugin.upper() if plugin == 'llm' else plugin.capitalize()} configuration[/bold]",
+                width=80,
             )
         )
         attempts = 1
@@ -181,7 +182,8 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         console = Console()
         console.print(
             Panel(
-                f"[bold]{i + len(required_plugins) + 1}. {optional_plugin.upper() if optional_plugin == 'llm' else optional_plugin.capitalize()} configuration (optional)[/bold]"
+                f"[bold]{i + len(required_plugins) + 1}. {optional_plugin.upper() if optional_plugin == 'llm' else optional_plugin.capitalize()} configuration (optional)[/bold]",
+                width=80,
             )
         )
         if await confirm(
@@ -235,7 +237,7 @@ async def _plugin_valid(plugin_manager: PluginManager, plugin: str) -> bool:
 
 async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
     console = Console()
-    console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]"))
+    console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]", width=80))
     agent_name = "demo-quickstart"
     template = "demo_quickstart"
     agent_file = create_agent(agent_name, profile, True, template)
@@ -348,7 +350,7 @@ async def _demo_an_incident(
     profile: str, agent_name: str, next_step_count: int, plugin_manager: PluginManager
 ) -> None:
     console = Console()
-    console.print(Panel(f"[bold]{next_step_count}. Demo time![/bold]"))
+    console.print(Panel(f"[bold]{next_step_count}. Demo time![/bold]", width=80))
     rich.print("")
     rich.print("Now we can test the agent output with one of your existing PagerDuty incidents!")
     rich.print("")
@@ -426,7 +428,9 @@ async def _demo_an_incident(
 
 async def _show_agent_commands(next_step_count: int) -> None:
     console = Console()
-    console.print(Panel(f"[bold]{next_step_count}. Create, test and refine your own agents[/bold]"))
+    console.print(
+        Panel(f"[bold]{next_step_count}. Create, test and refine your own agents[/bold]", width=80)
+    )
     rich.print("")
     rich.print(
         "> You can create, edit, run, and serve agents using the [bold deep_sky_blue1]uvx unpage agent[/bold deep_sky_blue1] subcommands:"
@@ -448,7 +452,9 @@ async def _show_agent_commands(next_step_count: int) -> None:
 
 async def _optionally_launch_configure(next_step_count: int, profile: str) -> None:
     console = Console()
-    console.print(Panel(f"[bold]{next_step_count}. Infrastructure Knowledge Graph[/bold]"))
+    console.print(
+        Panel(f"[bold]{next_step_count}. Infrastructure Knowledge Graph[/bold]", width=80)
+    )
     rich.print("")
     rich.print(
         "> Unpage supports a rich infrastructure knowledge graph builder, which can be used on its own or automatically "
