@@ -497,15 +497,23 @@ async def edit_file(file_path: str | Path, editor: str | None = None) -> None:
     if not editor:
         raise ValueError("No editor specified")
 
-    editor_path = shutil.which(editor)
+    # Split editor command into command and arguments
+    editor_parts = editor.strip().split()
+    editor_cmd = editor_parts[0]
+    editor_args = editor_parts[1:]
+
+    # Check if the editor command exists in PATH
+    editor_path = shutil.which(editor_cmd)
     if not editor_path:
-        rich.print(f"[red]Editor {editor!r} not found in $PATH[/red]")
+        rich.print(f"[red]Editor '{editor_cmd}' not found in $PATH[/red]")
         rich.print(f"[blue]Please manually open: {str(file_path)!r}[/blue]")
         return
 
     try:
+        # Combine editor path, args, and file path into the command
+        command = [editor_path, *editor_args, str(file_path)]
         await anyio.run_process(
-            [editor_path, str(file_path)],
+            command,
             # Set the standard streams so that the editor process can properly interact with the terminal.
             stdin=sys.stdin,
             stdout=sys.stdout,
@@ -515,7 +523,7 @@ async def edit_file(file_path: str | Path, editor: str | None = None) -> None:
         rich.print(f"[red]Failed to open {str(file_path)!r} with {editor!r}[/red]")
         rich.print(f"[blue]Please manually open: {str(file_path)!r}[/blue]")
     except FileNotFoundError:
-        rich.print(f"[red]Editor '{editor!r}' not found[/red]")
+        rich.print(f"[red]Editor '{editor_cmd}' not found[/red]")
         rich.print(f"[blue]Please manually open: {str(file_path)!r}[/blue]")
 
 
