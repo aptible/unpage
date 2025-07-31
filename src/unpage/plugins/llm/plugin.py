@@ -7,7 +7,7 @@ from litellm import acompletion
 
 from unpage.config.utils import PluginSettings
 from unpage.plugins.base import Plugin
-from unpage.utils import classproperty, select
+from unpage.utils import Choice, classproperty, select
 
 
 class LlmPlugin(Plugin):
@@ -49,26 +49,58 @@ class LlmPlugin(Plugin):
     async def interactive_configure(self) -> PluginSettings:
         """Interactive wizard for configuring the settings of this plugin."""
         defaults = self.default_plugin_settings
-        model_list = [
-            model if model.startswith(f"{provider}/") else f"{provider}/{model}"
-            for provider, models in litellm.models_by_provider.items()
-            for model in models
-        ]
+        recommended_models = {
+            "openai": {
+                "description": "Models from OpenAI https://platform.openai.com/docs/models",
+                "models": {
+                    "gpt-4o": "Fast, intelligent, flexible GPT model https://platform.openai.com/docs/models/gpt-4o",
+                    "gpt-4o-mini": "Fast, affordable small model for focused tasks https://platform.openai.com/docs/models/gpt-4o-mini",
+                },
+            },
+            "anthropic": {
+                "description": "Models from Anthropic https://www.anthropic.com/claude",
+                "models": {
+                    "claude-4-sonnet-20250514": "High intelligence and balanced performance https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                    "claude-4-opus-20250514": "Highest level of intelligence and capability https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                },
+            },
+            "bedrock": {
+                "description": "Models from the Amazon Bedrock marketplace https://aws.amazon.com/bedrock/",
+                "models": {
+                    "us.anthropic.claude-sonnet-4-20250514-v1:0": "High intelligence and balanced performance, billed and run through your AWS account",
+                    "us.anthropic.claude-opus-4-20250514-v1:0": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    "eu.anthropic.claude-sonnet-4-20250514-v1:0": "High intelligence and balanced performance, billed and run through your AWS account",
+                    "eu.anthropic.claude-opus-4-20250514-v1:0": "Highest level of intelligence and capability, billed and run through your AWS account",
+                },
+            },
+        }
+        provider = await select(
+            "Which LLM provider would you like to use?",
+            choices=[
+                Choice(
+                    provider,
+                    description=d["description"],
+                )
+                for provider, d in recommended_models.items()
+            ],
+        )
+        model = await select(
+            f"Which {provider} LLM model would you like to use?",
+            choices=[
+                Choice(model, description=desc)
+                for model, desc in recommended_models[provider]["models"].items()
+            ],
+        )
+        max_tokens_for_model = litellm.model_cost[model]["max_tokens"]
         return {
-            "model": await select(
-                "Model",
-                choices=model_list,
-                default=self.model or defaults["model"],
-                use_jk_keys=False,
-                use_search_filter=True,
-            ),
+            "model": f"{provider}/{model}",
             "api_key": await questionary.password(
                 "API key",
                 default=self.api_key or defaults["api_key"],
             ).unsafe_ask_async(),
-            "temperature": self.temperature or defaults["temperature"],
-            "max_tokens": self.max_tokens or defaults["max_tokens"],
-            "cache": self.cache or defaults["cache"],
+            "temperature": defaults["temperature"],
+            "max_tokens": max_tokens_for_model,
+            "cache": defaults["cache"],
         }
 
     async def validate_plugin_config(self) -> None:
