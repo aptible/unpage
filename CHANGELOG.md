@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.18 (2025-07-31)
+
+### Features
+
+- Add `pagerduty_resolve_incident` tool [sc-34092]
+  ([#38](https://github.com/aptible/unpage/pull/38),
+  [`daed569`](https://github.com/aptible/unpage/commit/daed569f8b9b2ae3eba4153d5bc7c17d635dfeea))
+
+
 ## v0.1.0-alpha.17 (2025-07-30)
 
 ### Bug Fixes
