@@ -58,4 +58,5 @@ tools:
   - "pagerduty_get_alert_details_for_incident"
   - "pagerduty_get_incident_details"
   - "pagerduty_post_status_update"
+  - "pagerduty_resolve_incident"
   - "papertrail_search_logs"
