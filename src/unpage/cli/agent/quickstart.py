@@ -13,6 +13,7 @@ import typer
 from pydantic import BaseModel
 from questionary import Choice
 from rich.console import Console
+from rich.panel import Panel
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import load_agent
@@ -72,17 +73,19 @@ def quickstart(
 
 def _quickstart_intro() -> None:
     rich.print("""This interactive tool will walk through the configuration of your system.
-We'll setup Unpage plugins, configuration, and configure AWS Bedrock to use the Unpage MCP server...
+We'll setup basic plugins so your LLM can use the Unpage MCP server.
 
 
 Here's what the quickstart will entail:
 
 1. Configure LLM (Amazon Bedrock, OpenAI, Anthropic Claude, and many more!)
 2. Configure Pagerduty plugin
-3. Optionally configure logs & metrics
-4. Create and edit a demo agent
-5. Test the demo agent against a PagerDuty incident
-6. Configure and build an infrastructure knowledge graph
+3. Optionally configure Papertrail
+4. Optionally configure Datadog
+5. Create and edit a demo agent
+6. Test the demo agent against a PagerDuty incident
+7. See how to create, test and refine your own agents
+8. Configure and build an infrastructure knowledge graph
 """)
 
 
@@ -136,7 +139,12 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         "pagerduty",
     ]
     for i, plugin in enumerate(required_plugins):
-        rich.print(f"> {i + 1}. {plugin} configuration")
+        console = Console()
+        console.print(
+            Panel(
+                f"[bold]{i + 1}. {plugin.upper() if plugin == 'llm' else plugin.capitalize()} configuration[/bold]"
+            )
+        )
         attempts = 1
         while True:
             cfg.plugins[plugin].settings = await plugin_manager.get_plugin(
@@ -170,9 +178,15 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         "datadog",
     ]
     for i, optional_plugin in enumerate(optional_plugins):
-        rich.print(f"> {i + len(required_plugins) + 1}. {optional_plugin} configuration")
+        console = Console()
+        console.print(
+            Panel(
+                f"[bold]{i + len(required_plugins) + 1}. {optional_plugin.upper() if optional_plugin == 'llm' else optional_plugin.capitalize()} configuration (optional)[/bold]"
+            )
+        )
         if await confirm(
-            f"Would you like to enable and configure {optional_plugin}", default=False
+            f"Would you like to enable and configure {optional_plugin.upper() if optional_plugin == 'llm' else optional_plugin.capitalize()}",
+            default=False,
         ):
             cfg.plugins[optional_plugin].enabled = True
             attempts = 1
@@ -220,7 +234,8 @@ async def _plugin_valid(plugin_manager: PluginManager, plugin: str) -> bool:
 
 
 async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
-    rich.print(f"> {next_step_count}. Create and edit demo agent")
+    console = Console()
+    console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]"))
     agent_name = "demo-quickstart"
     template = "demo_quickstart"
     agent_file = create_agent(agent_name, profile, True, template)
@@ -234,7 +249,9 @@ async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
     )
     rich.print("")
     rich.print(f"> We created a new agent called {agent_name}!")
-    rich.print("> When you're ready, we'll open this agent's yaml file in your editor...")
+    rich.print(
+        "> When you're ready, we'll open the agent template in your editor so you can preview it and optionally make changes before testing."
+    )
     rich.print("")
     await questionary.press_any_key_to_continue().unsafe_ask_async()
     await edit_file(agent_file)
@@ -330,9 +347,10 @@ async def _select_pagerduty_incident(pd: PagerDutyPlugin, profile: str) -> Pager
 async def _demo_an_incident(
     profile: str, agent_name: str, next_step_count: int, plugin_manager: PluginManager
 ) -> None:
-    rich.print(f"> {next_step_count}. Demo time!")
+    console = Console()
+    console.print(Panel(f"[bold]{next_step_count}. Demo time![/bold]"))
     rich.print("")
-    rich.print("Now let's try the agent on one of your existing PagerDuty incidents!")
+    rich.print("Now we can test the agent output with one of your existing PagerDuty incidents!")
     rich.print("")
     pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
     incident = await _select_pagerduty_incident(pd, profile)
@@ -392,7 +410,7 @@ async def _demo_an_incident(
         rich.print("You can re-run this demo at any point with:")
         rich.print("")
         rich.print(
-            f"  uvx unpage{f' --profile {profile}' if profile != DEFAULT_PROFILE else ''} agent run --pagerduty-incident {incident.id} demo-quickstart"
+            f"  [bold deep_sky_blue1]uvx unpage{f' --profile {profile}' if profile != DEFAULT_PROFILE else ''} agent run --pagerduty-incident {incident.id} demo-quickstart[/bold deep_sky_blue1]"
         )
         rich.print("")
     except Exception as ex:
@@ -407,45 +425,49 @@ async def _demo_an_incident(
 
 
 async def _show_agent_commands(next_step_count: int) -> None:
-    rich.print(f"> {next_step_count}. Next steps")
+    console = Console()
+    console.print(Panel(f"[bold]{next_step_count}. Create, test and refine your own agents[/bold]"))
     rich.print("")
     rich.print(
-        "> You can create, edit, run, and serve agents using the `unpage agent` subcommands:"
+        "> You can create, edit, run, and serve agents using the [bold deep_sky_blue1]uvx unpage agent[/bold deep_sky_blue1] subcommands:"
     )
     rich.print("> ")
     agent_help_cmd = " ".join([a if a != "quickstart" else "--help" for a in sys.argv])
-    rich.print("> $ unpage agent --help")
+    rich.print("> $ [bold deep_sky_blue1]uvx unpage agent --help[/bold deep_sky_blue1]")
     rich.print("")
     await (await asyncio.subprocess.create_subprocess_shell(agent_help_cmd)).wait()
     rich.print("> ")
     rich.print("")
-    rich.print("> Ready to chat about the knowledge graph?")
+    rich.print(
+        "> Next, you can build the knowledge graph of your infrastructure. This will give your agents more tools and context, so you get better results. Ready to learn more about the knowledge graph?"
+    )
     rich.print("")
     await questionary.press_any_key_to_continue().unsafe_ask_async()
     rich.print("")
 
 
 async def _optionally_launch_configure(next_step_count: int, profile: str) -> None:
-    rich.print(f"> {next_step_count}. Infrastructure Knowledge Graph")
+    console = Console()
+    console.print(Panel(f"[bold]{next_step_count}. Infrastructure Knowledge Graph[/bold]"))
     rich.print("")
     rich.print(
-        "> Unpage supports a rich infrastructure knowledge graph builder, which can be used on its own or automatically integrated with your Unpage Agents"
+        "> Unpage supports a rich infrastructure knowledge graph builder, which can be used on its own or automatically "
+        "integrated with your Unpage Agents. The graph can be built from your infrastructure tools, like AWS or Aptible, and your "
+        "observability tools, like Datadog and Cloudwatch."
     )
     rich.print("")
     rich.print(
-        "> The infrastructure knowledge graph can be built from your infrastructure tools, like AWS or Aptible, and your observability tools, like Datadog and Cloudwatch."
+        "> Use the [bold deep_sky_blue1]uvx unpage configure[/bold deep_sky_blue1] command to configure all plugins required for graph building."
     )
-    rich.print("")
     rich.print(
-        "> Use the `unpage configure` command to configure all plugins required for graph building."
+        "> Then use [bold deep_sky_blue1]uvx unpage graph build[/bold deep_sky_blue1] to build the infrastructure knowledge graph."
     )
-    rich.print("> Then use `unpage graph build` to build the infrastructure knowledge graph.")
     rich.print(">")
     rich.print(
         "> Your Unpage Agents will automatically begin using the knowledge graph once it is built."
     )
     rich.print(">")
-    if not await confirm("Would you like to run `unpage configure` now?"):
+    if not await confirm("Would you like to run uvx unpage configure now?"):
         await _send_event("done_no_configure", profile)
         return
     rich.print(">")
@@ -455,6 +477,6 @@ async def _optionally_launch_configure(next_step_count: int, profile: str) -> No
 
 def _replace_current_proc_with_unpage_configure() -> None:
     configure_cmd = [a if a != "agent" else "configure" for a in sys.argv if a != "quickstart"]
-    rich.print("> Running: unpage configure")
+    rich.print("> Running: [bold deep_sky_blue1]uvx unpage configure[/bold deep_sky_blue1]")
     rich.print("")
     os.execvp(configure_cmd[0], configure_cmd)  # noqa: S606 Starting a process without a shell
