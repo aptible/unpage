@@ -138,6 +138,12 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         "llm",
         "pagerduty",
     ]
+    rich.print(
+        "Next we're going to configure plugins! Plugins are vendor specific integrations to Unpage"
+    )
+    rich.print("")
+    await questionary.press_any_key_to_continue().unsafe_ask_async()
+    rich.print("")
     for i, plugin in enumerate(required_plugins):
         console = Console()
         console.print(
