@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.19 (2025-08-04)
+
+### Features
+
+- Simplify llm configuration and provide more links! [SC-34094] [SC-34097]
+  ([#41](https://github.com/aptible/unpage/pull/41),
+  [`953a488`](https://github.com/aptible/unpage/commit/953a4889992b3a64f2f855dfcc576c80bf92464d))
+
+
 ## v0.1.0-alpha.18 (2025-07-31)
 
 ### Features
