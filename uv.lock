@@ -3276,11 +3276,11 @@ wheels = [
 
 [[package]]
 name = "types-boltons"
-version = "25.0.0.20250516"
+version = "25.0.0.20250703"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/10/9d/24b29d12ce6e7773625e1d746aa3f244f64c3b4732434eb4e4910c4db398/types_boltons-25.0.0.20250516.tar.gz", hash = "sha256:1a415bd7651bca7ef5257dfbfb84ec1856fd8dfee3f7af9201ec98bbe1d3df00", size = 21473, upload-time = "2025-05-16T03:06:46.689Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/8e/4ce8c9c96827d918f7d480eb95c36b4cbadbe7da7ed617a74eb029e72f59/types_boltons-25.0.0.20250703.tar.gz", hash = "sha256:6badeb33040e3bded3b28b725abe47d7bceb6db38c0351589ec6b1bae14ee4ee", size = 21509, upload-time = "2025-07-03T03:13:58.393Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/a2/b6104862613bf749a2890f548e3f7019aa1448f6ada4fc97a583eacb501c/types_boltons-25.0.0.20250516-py3-none-any.whl", hash = "sha256:c7f013ee8eaf02cbd24e05508011d08dd3ae0c7ec09fd9fddbd29d79fb7a9fe6", size = 28231, upload-time = "2025-05-16T03:06:45.508Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/e3/39c6c7bb2c886ca098fe5eb92def1b7e6f21e5fb5b2efc59d927e4612c0a/types_boltons-25.0.0.20250703-py3-none-any.whl", hash = "sha256:c0ad11b85970a0519ac0b4de33f569bb81f35acf8f62d1cf8505b9e04417954b", size = 28233, upload-time = "2025-07-03T03:13:57.095Z" },
 ]
 
 [[package]]
