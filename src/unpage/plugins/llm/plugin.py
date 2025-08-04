@@ -51,26 +51,48 @@ class LlmPlugin(Plugin):
         defaults = self.default_plugin_settings
         recommended_models = {
             "openai": {
+                "title": "OpenAI (recommended)",
                 "description": "Models from OpenAI https://platform.openai.com/docs/models",
                 "models": {
-                    "gpt-4o": "Fast, intelligent, flexible GPT model https://platform.openai.com/docs/models/gpt-4o",
-                    "gpt-4o-mini": "Fast, affordable small model for focused tasks https://platform.openai.com/docs/models/gpt-4o-mini",
+                    "gpt-4o": {
+                        "title": "gpt-4o (recommended)",
+                        "description": "Fast, intelligent, flexible GPT model https://platform.openai.com/docs/models/gpt-4o",
+                    },
+                    "gpt-4o-mini": {
+                        "description": "Fast, affordable small model for focused tasks https://platform.openai.com/docs/models/gpt-4o-mini",
+                    },
                 },
             },
             "anthropic": {
+                "title": "Anthropic",
                 "description": "Models from Anthropic https://www.anthropic.com/claude",
                 "models": {
-                    "claude-4-sonnet-20250514": "High intelligence and balanced performance https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
-                    "claude-4-opus-20250514": "Highest level of intelligence and capability https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                    "claude-4-sonnet-20250514": {
+                        "title": "claude-4-sonnet-20250514 (recommended)",
+                        "description": "High intelligence and balanced performance https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                    },
+                    "claude-4-opus-20250514": {
+                        "description": "Highest level of intelligence and capability https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                    },
                 },
             },
             "bedrock": {
+                "title": "Amazon Bedrock",
                 "description": "Models from the Amazon Bedrock marketplace https://aws.amazon.com/bedrock/",
                 "models": {
-                    "us.anthropic.claude-sonnet-4-20250514-v1:0": "High intelligence and balanced performance, billed and run through your AWS account",
-                    "us.anthropic.claude-opus-4-20250514-v1:0": "Highest level of intelligence and capability, billed and run through your AWS account",
-                    "eu.anthropic.claude-sonnet-4-20250514-v1:0": "High intelligence and balanced performance, billed and run through your AWS account",
-                    "eu.anthropic.claude-opus-4-20250514-v1:0": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    "us.anthropic.claude-sonnet-4-20250514-v1:0": {
+                        "title": "us.anthropic.claude-sonnet-4-20250514-v1:0 (recommended)",
+                        "description": "High intelligence and balanced performance, billed and run through your AWS account",
+                    },
+                    "us.anthropic.claude-opus-4-20250514-v1:0": {
+                        "description": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    },
+                    "eu.anthropic.claude-sonnet-4-20250514-v1:0": {
+                        "description": "High intelligence and balanced performance, billed and run through your AWS account",
+                    },
+                    "eu.anthropic.claude-opus-4-20250514-v1:0": {
+                        "description": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    },
                 },
             },
         }
@@ -78,7 +100,8 @@ class LlmPlugin(Plugin):
             "Which LLM provider would you like to use?",
             choices=[
                 Choice(
-                    provider,
+                    title=d.get("title", provider),
+                    value=provider,
                     description=d["description"],
                 )
                 for provider, d in recommended_models.items()
@@ -87,8 +110,12 @@ class LlmPlugin(Plugin):
         model = await select(
             f"Which {provider} LLM model would you like to use?",
             choices=[
-                Choice(model, description=desc)
-                for model, desc in recommended_models[provider]["models"].items()
+                Choice(
+                    title=d.get("title", model),
+                    value=model,
+                    description=d["description"],
+                )
+                for model, d in recommended_models[provider]["models"].items()
             ],
         )
         max_tokens_for_model = litellm.model_cost[model]["max_tokens"]
