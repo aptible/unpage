@@ -50,6 +50,7 @@
           "plugins/datadog",
           "plugins/graph",
           "plugins/kubernetes",
+          "plugins/llm",
           "plugins/metrics",
           "plugins/networking",
           "plugins/pagerduty",
