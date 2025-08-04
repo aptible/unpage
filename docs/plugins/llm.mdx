@@ -1,0 +1,88 @@
+---
+title: LLM Configuration
+---
+
+The LLM plugin allows you to configure which Large Language Model (LLM) Unpage uses for its [Agents](/concepts/agents) and other AI-powered features.
+
+Unpage uses [LiteLLM](https://github.com/BerriAI/litellm) as its LLM provider interface, which supports multiple model providers including OpenAI, Anthropic, and Amazon Bedrock.
+
+## Configuration
+
+You can configure the LLM plugin using the `unpage configure` command, which will guide you through selecting a provider and model.
+
+```bash
+$ uv run unpage configure
+```
+
+Alternatively, you can manually edit your Unpage config file at `~/.unpage/profiles/<profile_name>/config.yaml`:
+
+```yaml
+plugins:
+  # ...
+  llm:
+    enabled: true
+    settings:
+      model: "openai/gpt-4o"  # Provider/model format
+      api_key: "your-api-key"
+      temperature: 0          # 0-1, lower is more deterministic
+      max_tokens: 8192        # Maximum output tokens
+      cache: true             # Enable response caching
+```
+
+### Model Selection
+
+The LLM plugin supports the following model providers and recommended models:
+
+#### OpenAI
+
+```yaml
+model: "openai/gpt-4o"           # Fast, intelligent, flexible GPT model (recommended)
+model: "openai/gpt-4o-mini"      # Fast, affordable small model for focused tasks
+```
+
+You'll need an [OpenAI API key](https://platform.openai.com/api-keys) to use these models.
+
+#### Anthropic
+
+```yaml
+model: "anthropic/claude-4-sonnet-20250514"  # High intelligence and balanced performance (recommended)
+model: "anthropic/claude-4-opus-20250514"    # Highest level of intelligence and capability
+```
+
+You'll need an [Anthropic API key](https://console.anthropic.com/settings/keys) to use these models.
+
+#### Amazon Bedrock
+
+```yaml
+model: "bedrock/us.anthropic.claude-sonnet-4-20250514-v1:0"  # US region, Claude 4 Sonnet (recommended)
+model: "bedrock/us.anthropic.claude-opus-4-20250514-v1:0"    # US region, Claude 4 Opus
+model: "bedrock/eu.anthropic.claude-sonnet-4-20250514-v1:0"  # EU region, Claude 4 Sonnet
+model: "bedrock/eu.anthropic.claude-opus-4-20250514-v1:0"    # EU region, Claude 4 Opus
+```
+
+For Amazon Bedrock models, you'll need [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html). If not set, the plugin will default to the AWS credentials in your environment using the AWS SDK credential provider discovery. We default to `us-east-1` region if no region is set in the environment.
+
+### Advanced Configuration
+
+The LLM plugin uses sensible defaults for most settings:
+
+- `temperature`: 0 (most deterministic responses)
+- `max_tokens`: Set to the model's maximum context length
+- `cache`: true (enables response caching for efficiency)
+
+You can adjust these settings in your config file based on your specific requirements.
+
+## Supported Models
+
+In addition to the recommended models listed above, the LLM plugin supports all models supported by LiteLLM. You can view the full list of supported models in the [LiteLLM documentation](https://docs.litellm.ai/docs/providers).
+
+To use a model not included in the interactive configuration, directly edit your config.yaml file with the appropriate provider/model string format.
+
+## Environment Variables
+
+You can also configure the LLM plugin using environment variables:
+
+- `OPENAI_API_KEY`: For OpenAI models
+- `ANTHROPIC_API_KEY`: For Anthropic models
+- `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: For Amazon Bedrock models
+- `AWS_REGION` or `AWS_DEFAULT_REGION`: Region for Amazon Bedrock (defaults to `us-east-1`)
