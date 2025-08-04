@@ -3,6 +3,7 @@ from typing import Any
 
 import litellm
 import questionary
+import rich
 from litellm import acompletion
 
 from unpage.config.utils import PluginSettings
@@ -96,6 +97,12 @@ class LlmPlugin(Plugin):
                 },
             },
         }
+        rich.print("Unpage uses LiteLLM and supports all models that LiteLLM supports.")
+        rich.print(
+            "To configure a model not referenced in this quickstart, you can directly edit Unpage's config.yaml."
+        )
+        rich.print("More information here: https://docs.aptible.ai/plugins/llm")
+        rich.print("")
         provider = await select(
             "Which LLM provider would you like to use?",
             choices=[
