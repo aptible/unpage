@@ -8,7 +8,6 @@ from typing import Annotated, Any, cast
 import human_readable
 import questionary
 import rich
-import typer
 from pydantic import BaseModel
 from questionary import Choice
 from rich.console import Console
@@ -242,7 +241,7 @@ async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
     console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]", width=80))
     agent_name = "demo-quickstart"
     template = "demo_quickstart"
-    agent_file = create_agent(agent_name, profile, True, template)
+    agent_file = await create_agent(agent_name, profile, True, template)
     await _send_event(
         "created_agent",
         profile,
@@ -419,7 +418,7 @@ async def _demo_an_incident(
         rich.print("")
     except Exception as ex:
         rich.print(f"[red] Demo failed:[/red] {ex}")
-        raise typer.Exit(1) from ex
+        sys.exit(1)
     rich.print("> Congrats on completing the demo agent! You did it! 🎉")
     rich.print("")
     rich.print("> Ready to move on?")
