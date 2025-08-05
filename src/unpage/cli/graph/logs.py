@@ -1,22 +1,31 @@
 import asyncio
 import shutil
+from typing import Annotated
 
 import anyio
-import typer
 
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import get_log_file
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@graph_app.command()
+@graph_app.command
 def logs(
-    profile: str = PROFILE_OPTION,
-    follow: bool = typer.Option(False, "--follow", "-f", help="Follow log output"),
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    follow: bool = False,
 ) -> None:
-    """View graph build logs"""
+    """View graph build logs
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    follow
+        Follow log output
+    """
 
     async def _run() -> None:
         await telemetry.send_event(

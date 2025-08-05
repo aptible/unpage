@@ -1,7 +1,9 @@
+from typing import Annotated
+
 import anyio
 
 from unpage.cli.mcp.tools._app import tools_app
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config import load_config
 from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
@@ -11,11 +13,18 @@ from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@tools_app.command("list")
+@tools_app.command
 def list_tools(
-    profile: str = PROFILE_OPTION,
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
-    """List all MCP tools available from enabled plugins."""
+    """List all MCP tools available from enabled plugins.
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    """
 
     async def _list_tools() -> None:
         await telemetry.send_event(

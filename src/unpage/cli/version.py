@@ -2,16 +2,19 @@ import inspect
 
 import anyio
 import rich
-import typer
 
 from unpage.cli._app import app
 from unpage.telemetry import client as telemetry
 
 
-@app.command()
-def version(json: bool = typer.Option(False, help="return json output")) -> None:
-    """
-    Display the version of the Unpage CLI.
+@app.command
+def version(*, json: bool = False) -> None:
+    """Display the version of the Unpage CLI.
+
+    Parameters
+    ----------
+    json
+        Return the version information as JSON
     """
 
     async def _version() -> None:

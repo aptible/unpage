@@ -3,7 +3,7 @@ import os
 import sys
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
-from typing import Any, cast
+from typing import Annotated, Any, cast
 
 import anyio
 import human_readable
@@ -20,7 +20,7 @@ from unpage.agent.utils import load_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
-from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
 from unpage.plugins.datadog.plugin import DatadogPlugin
@@ -44,9 +44,10 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
     )
 
 
-@agent_app.command()
+@agent_app.command
 def quickstart(
-    profile: str = PROFILE_OPTION,
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
 

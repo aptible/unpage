@@ -9,8 +9,9 @@ from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@agent_app.command()
+@agent_app.command
 def serve(
+    *,
     host: str = typer.Option(settings.UNPAGE_HOST, help="The host to bind to"),
     port: int = typer.Option(settings.UNPAGE_PORT, help="The port to bind to"),
     workers: int = typer.Option(settings.UNPAGE_WORKERS, help="The number of workers to use"),

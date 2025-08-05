@@ -1,15 +1,27 @@
+from typing import Annotated
+
 import anyio
 
 from unpage.agent.utils import delete_agent
 from unpage.cli.agent._app import agent_app
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 
 
-@agent_app.command()
-def delete(agent_name: str, profile: str = PROFILE_OPTION) -> None:
-    """Delete an agent."""
+@agent_app.command
+def delete(
+    agent_name: str, /, *, profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE
+) -> None:
+    """Delete an agent.
+
+    Parameters
+    ----------
+    agent_name
+        The name of the agent to delete
+    profile
+        The profile to use
+    """
 
     async def _run() -> None:
         await telemetry.send_event(

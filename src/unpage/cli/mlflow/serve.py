@@ -1,23 +1,34 @@
 import asyncio
 import shlex
+from typing import Annotated
 
 import anyio
-import typer
 from rich import print
 
 from unpage.cli.mlflow._app import mlflow_app
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config.utils import get_config_dir
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import confirm
 
 
-@mlflow_app.command()
+@mlflow_app.command
 def serve(
-    profile: str = PROFILE_OPTION,
-    port: int = typer.Option(default=5566, help="Port for MLflow server to listen on"),
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    port: int = 5566,
 ) -> None:
+    """Start MLflow tracking server
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    port
+        Port for MLflow server to listen on
+    """
+
     async def _server() -> None:
         await telemetry.send_event(
             {

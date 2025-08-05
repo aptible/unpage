@@ -3,15 +3,15 @@ import os
 import shlex
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 import anyio
+from cyclopts import Parameter
 import questionary
 import rich
-import typer
 
 from unpage.cli._app import app
-from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
@@ -49,16 +49,21 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
     )
 
 
-@app.command()
+@app.command
 def configure(
-    profile: str = PROFILE_OPTION,
-    use_uv_run: bool = typer.Option(
-        _default_use_uv_run,
-        "--use-uv-run",
-        help="Use uv run instead of uvx to start the Unpage MCP server (useful for develping Unpage)",
-    ),
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    use_uv_run: bool = _default_use_uv_run,
 ) -> None:
-    """Setup unpage including all plugins!"""
+    """Setup unpage including all plugins!
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    use_uv_run
+        Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage)
+    """
 
     async def _recipe() -> None:
         await _send_event(
