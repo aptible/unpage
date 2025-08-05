@@ -1,39 +1,44 @@
 import sys
 import warnings
+from typing import Annotated
 
 import anyio
-import typer
 from fastmcp import settings as fastmcp_settings
 
 from unpage import mcp
 from unpage.cli.mcp._app import mcp_app
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@mcp_app.command()
+@mcp_app.command
 def start(
-    profile: str = PROFILE_OPTION,
-    disable_sse: bool = typer.Option(
-        False,
-        "--disable-sse",
-        help="Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead)",
-    ),
-    disable_stdio: bool = typer.Option(
-        False, "--disable-stdio", help="Disable the stdio transport for the MCP Server"
-    ),
-    disable_http: bool = typer.Option(
-        False, "--disable-http", help="Disable the HTTP transport for the MCP Server"
-    ),
-    http_host: str = typer.Option(
-        fastmcp_settings.host, "--http-host", help="The host to bind the HTTP transport to"
-    ),
-    http_port: int = typer.Option(
-        fastmcp_settings.port, "--http-port", help="The port to bind the HTTP transport to"
-    ),
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    disable_sse: bool = False,
+    disable_stdio: bool = False,
+    disable_http: bool = False,
+    http_host: str = fastmcp_settings.host,
+    http_port: int = fastmcp_settings.port,
 ) -> None:
-    """Start the Unpage MCP Server"""
+    """Start the Unpage MCP Server
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    disable_sse
+        Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead)
+    disable_stdio
+        Disable the stdio transport for the MCP Server
+    disable_http
+        Disable the HTTP transport for the MCP Server
+    http_host
+        The host to bind the HTTP transport to
+    http_port
+        The port to bind the HTTP transport to
+    """
     # Deprecate --disable-sse in favor of --disable-http
     if "--disable-sse" in sys.argv:
         disable_http = disable_sse

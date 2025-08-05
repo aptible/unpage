@@ -1,13 +1,13 @@
 import json
+import sys
 from typing import Annotated
 
 import anyio
-import typer
 from fastmcp import Client
 from mcp.types import TextContent
 
 from unpage.cli.mcp.tools._app import tools_app
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config import load_config
 from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
@@ -17,24 +17,32 @@ from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@tools_app.command()
+@tools_app.command
 def call(
     tool: str,
-    count_results: Annotated[
-        bool,
-        typer.Option(
-            "--count-results",
-            "-c",
-            help="Count the number of results returned by the tool instead of printing the results (works best with list or dict tool responses)",
-        ),
-    ] = False,
-    count_level: Annotated[
-        int, typer.Option("--count-level", help="Count level for nested structures", min=0, max=1)
-    ] = 0,
-    arguments: Annotated[list[str] | None, typer.Argument()] = None,
-    profile: str = PROFILE_OPTION,
+    /,
+    *,
+    count_results: bool = False,
+    count_level: int = 0,
+    arguments: list[str] | None = None,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
-    """Call an MCP tool from the command line."""
+    """Call an MCP tool from the command line.
+
+    Parameters
+    ----------
+    tool
+        The tool name to call
+    count_results
+        Count the number of results returned by the tool instead of printing the results
+        (works best with list or dict tool responses)
+    count_level
+        Count level for nested structures (0 or 1)
+    arguments
+        Arguments to pass to the tool
+    profile
+        The profile to use
+    """
 
     async def _call_tool() -> None:
         await telemetry.send_event(
@@ -59,7 +67,8 @@ def call(
 
         tools = await mcp.get_tools()
         if tool not in tools:
-            raise typer.Abort(f"Tool {tool} not found")
+            print(f"Tool {tool} not found")
+            sys.exit(1)
 
         tool_def = tools[tool]
         tool_args = {}

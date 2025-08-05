@@ -3,9 +3,9 @@ import subprocess
 import sys
 import time
 from collections import Counter
+from typing import Annotated
 
 import anyio
-import typer
 
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import (
@@ -14,7 +14,7 @@ from unpage.cli.graph._background import (
     create_pid_file,
     get_log_file,
 )
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config import load_config
 from unpage.config.utils import get_config_dir
 from unpage.knowledge import Graph
@@ -24,19 +24,24 @@ from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@graph_app.command()
+@graph_app.command
 def build(
-    profile: str = PROFILE_OPTION,
-    interval: int | None = typer.Option(
-        None,
-        "--interval",
-        help="Rebuild the graph continuously, pausing for the specified seconds between builds",
-    ),
-    background: bool = typer.Option(
-        False, "--background", help="Run in background and return immediately"
-    ),
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    interval: int | None = None,
+    background: bool = False,
 ) -> None:
-    """Build a knowledge graph for your cloud infrastructure"""
+    """Build a knowledge graph for your cloud infrastructure
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    interval
+        Rebuild the graph continuously, pausing for the specified seconds between builds
+    background
+        Run in background and return immediately
+    """
     # Check if already running
     if not check_and_create_lock(profile):
         return

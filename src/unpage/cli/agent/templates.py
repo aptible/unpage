@@ -6,7 +6,7 @@ from unpage.cli.agent._app import agent_app
 from unpage.telemetry import client as telemetry
 
 
-@agent_app.command()
+@agent_app.command
 def templates() -> None:
     """List the available agent templates."""
 

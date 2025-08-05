@@ -1,18 +1,25 @@
 import os
 import signal
+from typing import Annotated
 
 import anyio
 
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import cleanup_pid_file, get_pid_file, is_process_running
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@graph_app.command()
-def stop(profile: str = PROFILE_OPTION) -> None:
-    """Stop running graph build"""
+@graph_app.command
+def stop(*, profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE) -> None:
+    """Stop running graph build
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    """
 
     async def _stop() -> None:
         await telemetry.send_event(

@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import anyio
 
 from unpage.cli.graph._app import graph_app
@@ -7,14 +9,20 @@ from unpage.cli.graph._background import (
     get_pid_file,
     is_process_running,
 )
-from unpage.cli.options import PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@graph_app.command()
-def status(profile: str = PROFILE_OPTION) -> None:
-    """Check if graph build is running"""
+@graph_app.command
+def status(*, profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE) -> None:
+    """Check if graph build is running
+
+    Parameters
+    ----------
+    profile
+        The profile to use
+    """
 
     async def _status() -> None:
         await telemetry.send_event(
