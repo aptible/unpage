@@ -2,7 +2,6 @@ import json
 import sys
 from typing import Annotated
 
-import anyio
 from fastmcp import Client
 from mcp.types import TextContent
 
@@ -18,7 +17,7 @@ from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @tools_app.command
-def call(
+async def call(
     tool: str,
     /,
     *,
@@ -43,76 +42,72 @@ def call(
     profile
         The profile to use
     """
+    await telemetry.send_event(
+        {
+            "command": "mcp tools call",
+            "tool": tool,
+            **prepare_profile_for_telemetry(profile),
+            "count_results": count_results,
+            "count_level": count_level,
+            "has_arguments": arguments is not None,
+        }
+    )
+    config = load_config(profile)
+    plugins = PluginManager(config=config)
+    context = Context(
+        profile=profile,
+        config=config,
+        plugins=plugins,
+        graph=Graph(get_config_dir(profile) / "graph.json"),
+    )
+    mcp = await build_mcp_server(context)
 
-    async def _call_tool() -> None:
-        await telemetry.send_event(
-            {
-                "command": "mcp tools call",
-                "tool": tool,
-                **prepare_profile_for_telemetry(profile),
-                "count_results": count_results,
-                "count_level": count_level,
-                "has_arguments": arguments is not None,
-            }
-        )
-        config = load_config(profile)
-        plugins = PluginManager(config=config)
-        context = Context(
-            profile=profile,
-            config=config,
-            plugins=plugins,
-            graph=Graph(get_config_dir(profile) / "graph.json"),
-        )
-        mcp = await build_mcp_server(context)
+    tools = await mcp.get_tools()
+    if tool not in tools:
+        print(f"Tool {tool} not found")
+        sys.exit(1)
 
-        tools = await mcp.get_tools()
-        if tool not in tools:
-            print(f"Tool {tool} not found")
-            sys.exit(1)
-
-        tool_def = tools[tool]
-        tool_args = {}
-        if arguments:
-            # Convert a list of arguments into a dict
-            for k, v in zip(tool_def.parameters["properties"].keys(), arguments, strict=True):
-                # Try decoding as JSON to handle complex arguments (lists, dicts, etc.)
-                try:
-                    tool_args[k] = json.loads(v)
-                except json.JSONDecodeError:
-                    tool_args[k] = v
-
-        client = Client(mcp)
-        async with client:
-            result = await client.call_tool(tool, tool_args)
+    tool_def = tools[tool]
+    tool_args = {}
+    if arguments:
+        # Convert a list of arguments into a dict
+        for k, v in zip(tool_def.parameters["properties"].keys(), arguments, strict=True):
+            # Try decoding as JSON to handle complex arguments (lists, dicts, etc.)
             try:
-                content = next(r.text for r in result.content if isinstance(r, TextContent))
-                if count_results and count_level == 0:
-                    print(
-                        json.dumps(
-                            {"count": len(json.loads(content)), "content_length": len(content)},
-                            indent=2,
-                        )
-                    )
-                elif count_results and count_level == 1:
-                    print(
-                        json.dumps(
-                            {
-                                k: (
-                                    {
-                                        "count": len(v),
-                                        "content_length": len(json.dumps(v)),
-                                    }
-                                    if isinstance(v, list | dict)
-                                    else v
-                                )
-                                for k, v in json.loads(content).items()
-                            },
-                            indent=2,
-                        )
-                    )
-                else:
-                    print(content)
-            except StopIteration:
-                print(f"{tool} returned no printable results")
+                tool_args[k] = json.loads(v)
+            except json.JSONDecodeError:
+                tool_args[k] = v
 
-    anyio.run(_call_tool)
+    client = Client(mcp)
+    async with client:
+        result = await client.call_tool(tool, tool_args)
+        try:
+            content = next(r.text for r in result.content if isinstance(r, TextContent))
+            if count_results and count_level == 0:
+                print(
+                    json.dumps(
+                        {"count": len(json.loads(content)), "content_length": len(content)},
+                        indent=2,
+                    )
+                )
+            elif count_results and count_level == 1:
+                print(
+                    json.dumps(
+                        {
+                            k: (
+                                {
+                                    "count": len(v),
+                                    "content_length": len(json.dumps(v)),
+                                }
+                                if isinstance(v, list | dict)
+                                else v
+                            )
+                            for k, v in json.loads(content).items()
+                        },
+                        indent=2,
+                    )
+                )
+            else:
+                print(content)
+        except StopIteration:
+            print(f"{tool} returned no printable results")

@@ -5,8 +5,6 @@ import sys
 from pathlib import Path
 from typing import Annotated, Any
 
-import anyio
-from cyclopts import Parameter
 import questionary
 import rich
 
@@ -50,7 +48,7 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
 
 
 @app.command
-def configure(
+async def configure(
     *,
     profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     use_uv_run: bool = _default_use_uv_run,
@@ -64,30 +62,26 @@ def configure(
     use_uv_run
         Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage)
     """
-
-    async def _recipe() -> None:
-        await _send_event(
-            "start",
-            profile,
-            extra_params={
-                "use_uv_run": use_uv_run,
-            },
-        )
-        welcome_to_unpage()
-        await _configure_intro()
-        cfg = _initial_config(profile)
-        await _select_plugins_to_enable_disable(cfg)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved", profile)
-        rich.print("")
-        await _configure_plugins(cfg, profile)
-        await _send_event("plugins_configured", profile)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved_2", profile)
-        rich.print("")
-        await _suggest_building_graph(profile, use_uv_run)
-
-    anyio.run(_recipe)
+    await _send_event(
+        "start",
+        profile,
+        extra_params={
+            "use_uv_run": use_uv_run,
+        },
+    )
+    welcome_to_unpage()
+    await _configure_intro()
+    cfg = _initial_config(profile)
+    await _select_plugins_to_enable_disable(cfg)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved", profile)
+    rich.print("")
+    await _configure_plugins(cfg, profile)
+    await _send_event("plugins_configured", profile)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved_2", profile)
+    rich.print("")
+    await _suggest_building_graph(profile, use_uv_run)
 
 
 def welcome_to_unpage() -> None:
