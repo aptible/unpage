@@ -498,9 +498,7 @@ async def edit_file(file_path: str | Path, editor: str | None = None) -> None:
         raise ValueError("No editor specified")
 
     # Split editor command into command and arguments
-    editor_parts = editor.strip().split()
-    editor_cmd = editor_parts[0]
-    editor_args = editor_parts[1:]
+    editor_cmd, *editor_args = shlex.split(editor)
 
     # Check if the editor command exists in PATH
     editor_path = shutil.which(editor_cmd)
