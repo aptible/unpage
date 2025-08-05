@@ -47,10 +47,12 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             "api_key": await questionary.password(
                 "Enter your Datadog API key",
                 default=self._api_key or os.getenv("DATADOG_API_KEY", ""),
+                instruction="Generate an API key with https://docs.aptible.ai/plugins/datadog#prerequisites",
             ).unsafe_ask_async(),
             "application_key": await questionary.password(
                 "Enter your Datadog application key",
                 default=self._application_key or os.getenv("DATADOG_APP_KEY", ""),
+                instruction="Generate an application key with https://docs.aptible.ai/plugins/datadog#prerequisites",
             ).unsafe_ask_async(),
         }
 

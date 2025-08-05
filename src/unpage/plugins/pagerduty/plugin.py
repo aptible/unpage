@@ -45,6 +45,7 @@ class PagerDutyPlugin(Plugin, McpServerMixin):
             api_key=await questionary.password(
                 "API Key",
                 default=self._api_key or defaults.get("api_key", ""),
+                instruction="Generate a token with https://docs.aptible.ai/plugins/pagerduty#prerequisites",
             ).unsafe_ask_async(),
             default_from=await questionary.text(
                 "Default User Email",
