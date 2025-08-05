@@ -50,7 +50,7 @@ async def create(
             "no_edit": no_edit,
         }
     )
-    agent_file = create_agent(
+    agent_file = await create_agent(
         agent_name=agent_name,
         profile=profile,
         overwrite=overwrite,
