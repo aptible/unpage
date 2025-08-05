@@ -5,7 +5,6 @@ from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Annotated, Any, cast
 
-import anyio
 import human_readable
 import questionary
 import rich
@@ -45,31 +44,27 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
 
 
 @agent_app.command
-def quickstart(
+async def quickstart(
     *,
     profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
-
-    async def _quickstart() -> None:
-        await _send_event("start", profile)
-        welcome_to_unpage()
-        _quickstart_intro()
-        cfg, next_step_count = await _create_config(
-            Config(plugins=_initial_plugin_settings(profile)), profile
-        )
-        plugin_manager = PluginManager(cfg)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved", profile)
-        agent_name = await _create_and_edit_agent(profile, next_step_count)
-        await _send_event("agent_created", profile)
-        await _demo_an_incident(profile, agent_name, next_step_count + 1, plugin_manager)
-        await _send_event("incident_demoed", profile)
-        await _show_agent_commands(next_step_count + 2)
-        await _send_event("shown_agent_commands", profile)
-        await _optionally_launch_configure(next_step_count + 3, profile)
-
-    anyio.run(_quickstart)
+    await _send_event("start", profile)
+    welcome_to_unpage()
+    _quickstart_intro()
+    cfg, next_step_count = await _create_config(
+        Config(plugins=_initial_plugin_settings(profile)), profile
+    )
+    plugin_manager = PluginManager(cfg)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved", profile)
+    agent_name = await _create_and_edit_agent(profile, next_step_count)
+    await _send_event("agent_created", profile)
+    await _demo_an_incident(profile, agent_name, next_step_count + 1, plugin_manager)
+    await _send_event("incident_demoed", profile)
+    await _show_agent_commands(next_step_count + 2)
+    await _send_event("shown_agent_commands", profile)
+    await _optionally_launch_configure(next_step_count + 3, profile)
 
 
 def _quickstart_intro() -> None:

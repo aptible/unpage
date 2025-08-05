@@ -2,7 +2,6 @@ import sys
 import warnings
 from typing import Annotated
 
-import anyio
 from fastmcp import settings as fastmcp_settings
 
 from unpage import mcp
@@ -13,7 +12,7 @@ from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @mcp_app.command
-def start(
+async def start(
     *,
     profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     disable_sse: bool = False,
@@ -48,24 +47,21 @@ def start(
             stacklevel=2,
         )
 
-    async def _start() -> None:
-        await telemetry.send_event(
-            {
-                "command": "mcp start",
-                **prepare_profile_for_telemetry(profile),
-                "disable_sse": disable_sse,
-                "disable_stdio": disable_stdio,
-                "disable_http": disable_http,
-                "http_host": http_host,
-                "http_port": http_port,
-            }
-        )
-        await mcp.start(
-            profile=profile,
-            disable_stdio=disable_stdio,
-            disable_http=disable_http,
-            http_host=http_host,
-            http_port=http_port,
-        )
-
-    anyio.run(_start)
+    await telemetry.send_event(
+        {
+            "command": "mcp start",
+            **prepare_profile_for_telemetry(profile),
+            "disable_sse": disable_sse,
+            "disable_stdio": disable_stdio,
+            "disable_http": disable_http,
+            "http_host": http_host,
+            "http_port": http_port,
+        }
+    )
+    await mcp.start(
+        profile=profile,
+        disable_stdio=disable_stdio,
+        disable_http=disable_http,
+        http_host=http_host,
+        http_port=http_port,
+    )

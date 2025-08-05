@@ -1,5 +1,6 @@
+import asyncio
 import os
-import subprocess
+import shlex
 import sys
 import time
 from collections import Counter
@@ -25,7 +26,7 @@ from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @graph_app.command
-def build(
+async def build(
     *,
     profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     interval: int | None = None,
@@ -61,7 +62,9 @@ def build(
             f.write("=" * 50 + "\n\n")
             f.flush()
 
-            subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
+            await asyncio.create_subprocess_shell(
+                shlex.join(cmd), stdout=f, stderr=asyncio.subprocess.STDOUT, start_new_session=True
+            )
 
         print(f"Graph building started in background for profile '{profile}'")
         print(f"Check progress: unpage graph logs --profile {profile} --follow")
@@ -135,10 +138,10 @@ def build(
 
         if interval:
             while True:
-                anyio.run(_build_graph)
+                await _build_graph()
                 print(f"Sleeping for {interval} seconds before next build...")
-                time.sleep(interval)
+                await anyio.sleep(interval)
         else:
-            anyio.run(_build_graph)
+            await _build_graph()
     finally:
         cleanup_pid_file(profile)

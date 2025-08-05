@@ -1,8 +1,6 @@
-import os
 import sys
 from typing import Annotated
 
-import anyio
 from rich import print
 
 from unpage.cli.agent._app import agent_app
@@ -14,7 +12,7 @@ from unpage.utils import edit_file, get_editor
 
 
 @agent_app.command
-def create(
+async def create(
     agent_name: str,
     /,
     *,
@@ -41,34 +39,30 @@ def create(
     no_edit
         Do not open the agent file in your editor
     """
-
-    async def _create() -> None:
-        await telemetry.send_event(
-            {
-                "command": "agent create",
-                "agent_name_sha256": hash_value(agent_name),
-                **prepare_profile_for_telemetry(profile),
-                "overwrite": overwrite,
-                "template": template,
-                "editor": editor,
-                "no_edit": no_edit,
-            }
-        )
-        agent_file = create_agent(
-            agent_name=agent_name,
-            profile=profile,
-            overwrite=overwrite,
-            template=template,
-        )
-        # Open the file in the user's editor
-        if editor and not no_edit:
-            try:
-                await edit_file(agent_file, editor)
-            except ValueError:
-                print(
-                    "[red]No editor specified. Set the $EDITOR environment variable or use --editor option.[/red]"
-                )
-                print(f"[blue]Please manually open {str(agent_file)!r} in your editor.[/blue]")
-                sys.exit(1)
-
-    anyio.run(_create)
+    await telemetry.send_event(
+        {
+            "command": "agent create",
+            "agent_name_sha256": hash_value(agent_name),
+            **prepare_profile_for_telemetry(profile),
+            "overwrite": overwrite,
+            "template": template,
+            "editor": editor,
+            "no_edit": no_edit,
+        }
+    )
+    agent_file = create_agent(
+        agent_name=agent_name,
+        profile=profile,
+        overwrite=overwrite,
+        template=template,
+    )
+    # Open the file in the user's editor
+    if editor and not no_edit:
+        try:
+            await edit_file(agent_file, editor)
+        except ValueError:
+            print(
+                "[red]No editor specified. Set the $EDITOR environment variable or use --editor option.[/red]"
+            )
+            print(f"[blue]Please manually open {str(agent_file)!r} in your editor.[/blue]")
+            sys.exit(1)
