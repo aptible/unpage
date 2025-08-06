@@ -4,6 +4,7 @@ import json
 import os
 import pkgutil
 import re
+import shlex
 import shutil
 import subprocess
 import sys
