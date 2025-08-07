@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.20 (2025-08-07)
+
+### Bug Fixes
+
+- [sc-34008] Support arguments in EDITOR env variable
+  ([#42](https://github.com/aptible/unpage/pull/42),
+  [`ea20f91`](https://github.com/aptible/unpage/commit/ea20f919ae2ac7188ab774d39f7ac52cc59bb0d3))
+
+### Documentation
+
+- Add links to generate tokens for datadog, pagerduty, papertrail [SC-34055]
+  ([#54](https://github.com/aptible/unpage/pull/54),
+  [`7121649`](https://github.com/aptible/unpage/commit/712164978a9934aba17d75bb50692159b47d2dac))
+
+- Update community anchor text ([#56](https://github.com/aptible/unpage/pull/56),
+  [`85547b3`](https://github.com/aptible/unpage/commit/85547b3a77b9a0b3d1c63512a6b3b0820949e955))
+
+
 ## v0.1.0-alpha.19 (2025-08-04)
 
 ### Features
