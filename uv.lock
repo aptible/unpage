@@ -1334,11 +1334,11 @@ wheels = [
 
 [[package]]
 name = "joblib"
-version = "1.5.0"
+version = "1.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/30/08/8bd4a0250247861420a040b33ccf42f43c426ac91d99405374ef117e5872/joblib-1.5.0.tar.gz", hash = "sha256:d8757f955389a3dd7a23152e43bc297c2e0c2d3060056dad0feefc88a06939b5", size = 330234, upload-time = "2025-05-03T21:09:39.553Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dc/fe/0f5a938c54105553436dbff7a61dc4fed4b1b2c98852f8833beaf4d5968f/joblib-1.5.1.tar.gz", hash = "sha256:f4f86e351f39fe3d0d32a9f2c3d8af1ee4cec285aafcb27003dda5205576b444", size = 330475, upload-time = "2025-05-23T12:04:37.097Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/d3/13ee227a148af1c693654932b8b0b02ed64af5e1f7406d56b088b57574cd/joblib-1.5.0-py3-none-any.whl", hash = "sha256:206144b320246485b712fc8cc51f017de58225fa8b414a1fe1764a7231aca491", size = 307682, upload-time = "2025-05-03T21:09:37.892Z" },
+    { url = "https://files.pythonhosted.org/packages/7d/4f/1195bbac8e0c2acc5f740661631d8d750dc38d4a32b23ee5df3cde6f4e0d/joblib-1.5.1-py3-none-any.whl", hash = "sha256:4719a31f054c7d766948dcd83e9613686b27114f190f717cec7eaa2084f8a74a", size = 307746, upload-time = "2025-05-23T12:04:35.124Z" },
 ]
 
 [[package]]
