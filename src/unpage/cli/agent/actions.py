@@ -1,20 +1,20 @@
+import sys
 from pathlib import Path
-
-import typer
 
 from unpage.agent.utils import get_agent_template
 from unpage.config.utils import get_config_dir
+from unpage.utils import confirm
 
 
-def create_agent(agent_name: str, profile: str, overwrite: bool, template: str) -> Path:
+async def create_agent(agent_name: str, profile: str, overwrite: bool, template: str) -> Path:
     # Create the default YAML content
     try:
         agent_template = get_agent_template(template)
-    except FileNotFoundError as ex:
+    except FileNotFoundError:
         print(
             f"Template '{template}' not found at {Path(__file__).parent / 'templates' / f'{template}.yaml'}"
         )
-        raise typer.Abort() from ex
+        sys.exit(1)
 
     # Get the config directory for the profile
     config_dir = get_config_dir(profile, create=True)
@@ -32,8 +32,8 @@ def create_agent(agent_name: str, profile: str, overwrite: bool, template: str) 
             print(f"Overwriting agent '{agent_name}' at {agent_file}")
         else:
             print(f"Agent '{agent_name}' already exists at {agent_file}")
-            if not typer.confirm("Do you want to overwrite it?"):
-                raise typer.Abort()
+            if not await confirm("Do you want to overwrite it?"):
+                sys.exit(1)
 
     # Write the YAML content to the file
     agent_file.write_text(agent_template, encoding="utf-8")

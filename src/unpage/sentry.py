@@ -1,7 +1,6 @@
 import asyncio
 
 import sentry_sdk
-from sentry_sdk.integrations.typer import TyperIntegration
 
 
 async def init() -> None:
@@ -10,7 +9,6 @@ async def init() -> None:
         # Add data like request headers and IP for users,
         # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
         send_default_pii=True,
-        integrations=[TyperIntegration()],
     )
 
 

@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.12"
 
 [[package]]
@@ -530,7 +530,7 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.22.2"
+version = "3.22.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -538,9 +538,9 @@ dependencies = [
     { name = "rich" },
     { name = "rich-rst" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cc/2e/8c45ef5b00bd48d7cabbf6f90b7f12df4c232755cd46e6dbc6690f9ac0c5/cyclopts-3.22.2.tar.gz", hash = "sha256:d3495231af6ae86479579777d212ddf77b113200f828badeaf401162ed87227d", size = 74520, upload-time = "2025-07-09T12:21:46.866Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/d5/24c6c894f3833bc93d4944c2064309dfd633c0becf93e16fc79d76edd388/cyclopts-3.22.5.tar.gz", hash = "sha256:fa2450b9840abc41c6aa37af5eaeafc7a1264e08054e3a2fe39d49aa154f592a", size = 74890, upload-time = "2025-07-31T18:18:37.336Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/5b/5939e05d87def1612c494429bee705d6b852fad1d21dd2dee1e3ce39997e/cyclopts-3.22.2-py3-none-any.whl", hash = "sha256:6681b0815fa2de2bccc364468fd25b15aa9617cb505c0b16ca62e2b18a57619e", size = 84578, upload-time = "2025-07-09T12:21:44.878Z" },
+    { url = "https://files.pythonhosted.org/packages/df/e5/a7b6db64f08cfe065e531ec6b508fa7dac704fab70d05adb5bc0c2c1d1b6/cyclopts-3.22.5-py3-none-any.whl", hash = "sha256:92efb4a094d9812718d7efe0bffa319a19cb661f230dbf24406c18cd8809fb82", size = 84994, upload-time = "2025-07-31T18:18:35.939Z" },
 ]
 
 [[package]]
@@ -3388,6 +3388,7 @@ dependencies = [
     { name = "boltons" },
     { name = "cachetools" },
     { name = "cloudpickle" },
+    { name = "cyclopts" },
     { name = "datadog-api-client", extra = ["async"] },
     { name = "datasets" },
     { name = "diskcache" },
@@ -3432,7 +3433,6 @@ dependencies = [
     { name = "sparklines" },
     { name = "tenacity" },
     { name = "tqdm" },
-    { name = "typer" },
     { name = "ujson" },
     { name = "uvicorn", extra = ["standard"] },
     { name = "whoosh-reloaded" },
@@ -3460,6 +3460,7 @@ requires-dist = [
     { name = "boltons", specifier = ">=25.0.0" },
     { name = "cachetools", specifier = ">=5.5.0" },
     { name = "cloudpickle", specifier = ">=3.0.0" },
+    { name = "cyclopts", specifier = ">=3.22.5" },
     { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
     { name = "datasets", specifier = ">=2.14.6" },
     { name = "diskcache", specifier = ">=5.6.0" },
@@ -3504,7 +3505,6 @@ requires-dist = [
     { name = "sparklines", specifier = ">=0.5.0" },
     { name = "tenacity", specifier = ">=8.2.3" },
     { name = "tqdm", specifier = ">=4.66.1" },
-    { name = "typer", specifier = ">=0.15.2" },
     { name = "ujson", specifier = ">=5.8.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
     { name = "whoosh-reloaded", specifier = ">=2.7.5" },

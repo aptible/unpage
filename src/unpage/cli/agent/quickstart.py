@@ -3,13 +3,11 @@ import os
 import sys
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
-from typing import Any, cast
+from typing import Annotated, Any, cast
 
-import anyio
 import human_readable
 import questionary
 import rich
-import typer
 from pydantic import BaseModel
 from questionary import Choice
 from rich.console import Console
@@ -20,7 +18,7 @@ from unpage.agent.utils import load_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
-from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
 from unpage.plugins.datadog.plugin import DatadogPlugin
@@ -44,31 +42,28 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
     )
 
 
-@agent_app.command()
-def quickstart(
-    profile: str = PROFILE_OPTION,
+@agent_app.command
+async def quickstart(
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
-
-    async def _quickstart() -> None:
-        await _send_event("start", profile)
-        welcome_to_unpage()
-        _quickstart_intro()
-        cfg, next_step_count = await _create_config(
-            Config(plugins=_initial_plugin_settings(profile)), profile
-        )
-        plugin_manager = PluginManager(cfg)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved", profile)
-        agent_name = await _create_and_edit_agent(profile, next_step_count)
-        await _send_event("agent_created", profile)
-        await _demo_an_incident(profile, agent_name, next_step_count + 1, plugin_manager)
-        await _send_event("incident_demoed", profile)
-        await _show_agent_commands(next_step_count + 2)
-        await _send_event("shown_agent_commands", profile)
-        await _optionally_launch_configure(next_step_count + 3, profile)
-
-    anyio.run(_quickstart)
+    await _send_event("start", profile)
+    welcome_to_unpage()
+    _quickstart_intro()
+    cfg, next_step_count = await _create_config(
+        Config(plugins=_initial_plugin_settings(profile)), profile
+    )
+    plugin_manager = PluginManager(cfg)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved", profile)
+    agent_name = await _create_and_edit_agent(profile, next_step_count)
+    await _send_event("agent_created", profile)
+    await _demo_an_incident(profile, agent_name, next_step_count + 1, plugin_manager)
+    await _send_event("incident_demoed", profile)
+    await _show_agent_commands(next_step_count + 2)
+    await _send_event("shown_agent_commands", profile)
+    await _optionally_launch_configure(next_step_count + 3, profile)
 
 
 def _quickstart_intro() -> None:
@@ -246,7 +241,7 @@ async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
     console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]", width=80))
     agent_name = "demo-quickstart"
     template = "demo_quickstart"
-    agent_file = create_agent(agent_name, profile, True, template)
+    agent_file = await create_agent(agent_name, profile, True, template)
     await _send_event(
         "created_agent",
         profile,
@@ -423,7 +418,7 @@ async def _demo_an_incident(
         rich.print("")
     except Exception as ex:
         rich.print(f"[red] Demo failed:[/red] {ex}")
-        raise typer.Exit(1) from ex
+        sys.exit(1)
     rich.print("> Congrats on completing the demo agent! You did it! 🎉")
     rich.print("")
     rich.print("> Ready to move on?")
