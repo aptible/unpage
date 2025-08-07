@@ -1,9 +1,9 @@
 ---
-title: unpage mcp
-description: MCP server commands for LLM interaction with infrastructure
+title: "unpage mcp"
+description: "MCP server commands for LLM interaction with infrastructure"
 ---
 
-The `mcp` command group provides functionality to start the MCP (Model Coupling Protocol) Server and interact with the tools exposed by plugins.
+The `mcp` command group provides functionality to start the MCP (Model Context Protocol) Server and interact with the tools exposed by plugins.
 
 ## Usage
 
@@ -13,11 +13,11 @@ unpage mcp [OPTIONS] COMMAND [ARGS]...
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `start` | Start the Unpage MCP Server |
-| `tools` | List and call MCP tools available from enabled plugins |
-| `client` | Debugging tools for clients of the Unpage MCP Server |
+| Command  | Description                                            |
+| -------- | ------------------------------------------------------ |
+| `start`  | Start the Unpage MCP Server                            |
+| `tools`  | List and call MCP tools available from enabled plugins |
+| `client` | Debugging tools for clients of the Unpage MCP Server   |
 
 ## Subcommand: start
 
@@ -31,15 +31,15 @@ unpage mcp start [OPTIONS]
 
 ### Options
 
-| Option | Description |
-|--------|-------------|
-| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
-| `--disable-stdio` | Disable the stdio transport for the MCP Server |
-| `--disable-http` | Disable the HTTP transport for the MCP Server |
-| `--disable-sse` | Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead) |
-| `--http-host TEXT` | The host to bind the HTTP transport to [default: 127.0.0.1] |
-| `--http-port INTEGER` | The port to bind the HTTP transport to [default: 8000] |
-| `-h, --help` | Show help message and exit |
+| Option                | Description                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `--profile TEXT`      | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default]    |
+| `--disable-stdio`     | Disable the stdio transport for the MCP Server                                         |
+| `--disable-http`      | Disable the HTTP transport for the MCP Server                                          |
+| `--disable-sse`       | Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead) |
+| `--http-host TEXT`    | The host to bind the HTTP transport to [default: 127.0.0.1]                            |
+| `--http-port INTEGER` | The port to bind the HTTP transport to [default: 8000]                                 |
+| `-h, --help`          | Show help message and exit                                                             |
 
 ### Transport Protocols
 
@@ -94,10 +94,10 @@ unpage mcp tools [OPTIONS] COMMAND [ARGS]...
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `list` | List all MCP tools available from enabled plugins |
-| `call` | Call an MCP tool from the command line |
+| Command | Description                                       |
+| ------- | ------------------------------------------------- |
+| `list`  | List all MCP tools available from enabled plugins |
+| `call`  | Call an MCP tool from the command line            |
 
 ### Subcommand: tools list
 
@@ -111,10 +111,10 @@ unpage mcp tools list [OPTIONS]
 
 #### Options
 
-| Option | Description |
-|--------|-------------|
+| Option           | Description                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------- |
 | `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
-| `-h, --help` | Show help message and exit |
+| `-h, --help`     | Show help message and exit                                                          |
 
 #### Examples
 
@@ -138,12 +138,12 @@ unpage mcp tools call [OPTIONS] TOOL_NAME [ARGS]
 
 #### Options
 
-| Option | Description |
-|--------|-------------|
-| `--profile TEXT` | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
-| `--count-results`, `-c` | Count the number of results returned by the tool instead of printing the results |
-| `--count-level INTEGER` | Count level for nested structures [min: 0, max: 1] |
-| `-h, --help` | Show help message and exit |
+| Option                  | Description                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `--profile TEXT`        | Use profiles to manage multiple graphs [env var: UNPAGE_PROFILE] [default: default] |
+| `--count-results`, `-c` | Count the number of results returned by the tool instead of printing the results    |
+| `--count-level INTEGER` | Count level for nested structures [min: 0, max: 1]                                  |
+| `-h, --help`            | Show help message and exit                                                          |
 
 #### Examples
 
@@ -168,9 +168,9 @@ unpage mcp client [OPTIONS] COMMAND [ARGS]...
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `logs` | Show logs for a client of the Unpage MCP Server |
+| Command | Description                                     |
+| ------- | ----------------------------------------------- |
+| `logs`  | Show logs for a client of the Unpage MCP Server |
 
 ### Subcommand: client logs
 
@@ -184,8 +184,8 @@ unpage mcp client logs [OPTIONS] COMMAND [ARGS]...
 
 #### Commands
 
-| Command | Description |
-|---------|-------------|
+| Command  | Description                                    |
+| -------- | ---------------------------------------------- |
 | `claude` | Show logs for Claude Desktop Unpage MCP Server |
 
 ### Subcommand: client logs claude
