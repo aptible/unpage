@@ -29,8 +29,7 @@ async def version(*, json: bool = False) -> None:
 
     dspy_parse_function_tool_source = inspect.getsource(Tool._parse_function)
     dspy_tool_no_input_args_bugfix_present = all(
-        " is not None else " in line
-        for line in dspy_parse_function_tool_source.splitlines()[-3:-1]
+        " is not None else " in line for line in dspy_parse_function_tool_source.splitlines()[-3:-1]
     )
 
     if json:
@@ -42,6 +41,4 @@ async def version(*, json: bool = False) -> None:
             }
         )
         return
-    print(
-        f"unpage {__version__} (dspy {dspy_version} {dspy_tool_no_input_args_bugfix_present=})"
-    )
+    print(f"unpage {__version__} (dspy {dspy_version} {dspy_tool_no_input_args_bugfix_present=})")

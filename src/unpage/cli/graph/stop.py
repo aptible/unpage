@@ -24,7 +24,7 @@ async def stop(*, profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE) -
             **prepare_profile_for_telemetry(profile),
         }
     )
-    
+
     pid_file = get_pid_file(profile)
 
     if not pid_file.exists():

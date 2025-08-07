@@ -1,5 +1,3 @@
-import os
-
 from unpage.agent.app import listen, settings
 from unpage.cli.agent._app import agent_app
 from unpage.telemetry import client as telemetry
