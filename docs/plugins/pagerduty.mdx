@@ -131,3 +131,19 @@ The PagerDuty plugin provides the following tools to Agents and MCP Clients:
 
   **Returns** `None`
 </Card>
+<br />
+
+<Card title="pagerduty_resolve_incident">
+  Resolve a PagerDuty incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the PagerDuty incident. Typically a string of uppercase letters and
+    numbers. For example "PGR0VU2", "PF9KMXH", or "Q2K78SNJ5U1VE1".
+  </ParamField>
+  <ParamField path="resolution_message" type="string">
+    An optional message to include with the resolution.
+  </ParamField>
+
+  **Returns** `None`
+</Card>
