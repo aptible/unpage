@@ -81,3 +81,43 @@ plugins:
 ```
 
 If no profile is specified, the plugin will use the default AWS credential providers.
+
+## Tools
+The AWS plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_realtime_instance_status">
+  Get real-time status information for an EC2 instance directly from AWS API.
+
+  **Arguments**
+  <ParamField path="instance_id" type="string" required>
+    The EC2 instance ID (e.g., "i-0abcd1234efgh5678").
+  </ParamField>
+  <ParamField path="region" type="string" required>
+    The AWS region where the instance is located (e.g., "us-east-1").
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing instance status information or an error message if the instance couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "InstanceId": "i-0abcd1234efgh5678",
+    "InstanceState": { "Code": 16, "Name": "running" },
+    "AvailabilityZone": "us-east-1a",
+    "SystemStatus": { "Status": "ok" },
+    "InstanceStatus": { "Status": "ok" }
+  }
+  ```
+</Card>
+<br />
+
+<Card title="get_realtime_instance_status_by_node">
+  Get real-time status information for an EC2 instance using a node ID from the knowledge graph.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The node ID from the knowledge graph (e.g., "aws_ec2_instance:i-0abcd1234efgh5678").
+  </ParamField>
+
+  **Returns** `dict | string`: Same as `get_realtime_instance_status` or an error message if the node doesn't exist, isn't an EC2 instance, or the instance couldn't be found.
+</Card>

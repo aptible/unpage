@@ -12,6 +12,7 @@ from pydantic_core import to_jsonable_python
 from unpage.config.utils import PluginSettings
 from unpage.knowledge import Graph
 from unpage.plugins import Plugin
+from unpage.plugins.aptible.nodes.aptible_aws_instance import AptibleAwsInstance
 from unpage.plugins.aws.nodes.aws_alb_target_group import AwsAlbTargetGroup
 from unpage.plugins.aws.nodes.aws_application_load_balancer import (
     AwsApplicationLoadBalancer,
@@ -27,7 +28,7 @@ from unpage.plugins.aws.utils import (
     list_accessible_regions_for_service,
     swallow_boto_client_access_errors,
 )
-from unpage.plugins.mixins import KnowledgeGraphMixin
+from unpage.plugins.mixins import KnowledgeGraphMixin, McpServerMixin, tool
 from unpage.utils import Choice, confirm, print, select
 
 warnings.filterwarnings(
@@ -47,7 +48,7 @@ class AwsPluginSettings(BaseModel):
         return next(iter(self.accounts.values()))
 
 
-class AwsPlugin(Plugin, KnowledgeGraphMixin):
+class AwsPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
     aws_settings: AwsPluginSettings = Field(default_factory=AwsPluginSettings)
 
     def init_plugin(self) -> None:
@@ -306,6 +307,55 @@ class AwsPlugin(Plugin, KnowledgeGraphMixin):
                     s3_bucket_count += 1
 
         print(f"Initialized {s3_bucket_count} S3 buckets")
+
+    @tool()
+    async def get_realtime_instance_status(self, instance_id: str, region: str) -> dict | str:
+        """
+        Get real-time status information for an EC2 instance directly from AWS API.
+
+        Args:
+            instance_id: Optional AWS EC2 instance ID
+            region: AWS region where the instance is located
+
+        Returns:
+            dict containing current instance state and status details
+        """
+        async with (
+            swallow_boto_client_access_errors(service_name="ec2", region=region),
+            self.session.client("ec2", region_name=region) as client,
+        ):
+            try:
+                response = await client.describe_instance_status(InstanceIds=[instance_id])
+                if not response["InstanceStatuses"]:
+                    return f"No instance found with ID '{instance_id}' in region '{region}'"
+                return response["InstanceStatuses"][0]
+            except Exception as e:
+                return f"Error retrieving instance status: {e!s}"
+
+    @tool()
+    async def get_realtime_instance_status_by_node(self, node_id: str) -> dict | str:
+        """
+        Get real-time status information for an EC2 instance node directly from AWS API.
+
+        Args:
+            node_id: node ID from the knowledge graph
+
+        Returns:
+            dict containing current instance state and status details
+        """
+        node = await self.context.graph.get_node_safe(node_id)
+        if not node:
+            return f"Resource with node ID '{node_id}' not found"
+        if isinstance(node, AwsEc2Instance):
+            return await self.get_realtime_instance_status(
+                node.raw_data["InstanceId"], node.raw_data["Placement"]["AvailabilityZone"][:-1]
+            )
+        elif isinstance(node, AptibleAwsInstance) and "instance_id" in node.raw_data:
+            return await self.get_realtime_instance_status(
+                node.raw_data["instance_id"], node.raw_data["availability_zone"][:-1]
+            )
+        else:
+            return f"Node {node_id} is not an EC2 instance or does not have an instance ID"
 
     async def _paginate(
         self,

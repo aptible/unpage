@@ -38,6 +38,8 @@ prompt: >
 #    unpage mcp tools list
 #
 tools:
+  - "aws_get_realtime_instance_status"
+  - "aws_get_realtime_instance_status_by_node"
   - "core_calculate"
   - "core_convert_to_timezone"
   - "core_current_datetime"
