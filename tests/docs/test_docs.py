@@ -12,7 +12,7 @@ async def test_docs_have_all_tools(mcp_client: Client) -> None:
         if plugin not in tool_info:
             tool_info[plugin] = []
         tool_info[plugin].append(tool_name)
-    docs_dir = Path(__file__).parent.parent.parent / "docs"
+    docs_dir = Path(__file__).parent.parent.parent / "docs" / "plugins"
     for filename in docs_dir.glob("**/*.mdx"):
         for plugin in tool_info:
             if filename.name == f"{plugin}.mdx":
