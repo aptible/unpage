@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.21 (2025-08-08)
+
+### Documentation
+
+- Add pagerduty_resolve_incident tool [SC-34309] ([#59](https://github.com/aptible/unpage/pull/59),
+  [`76c2960`](https://github.com/aptible/unpage/commit/76c29607a0ba4f18b9e9f96599da5ee9627eaf7d))
+
+- Fix typo on command reference ([#58](https://github.com/aptible/unpage/pull/58),
+  [`97ee5db`](https://github.com/aptible/unpage/commit/97ee5dbe036b134cbe524187cecfa75ecc2394f3))
+
+- Update docs with recent changes to subcommand arguments
+  ([#39](https://github.com/aptible/unpage/pull/39),
+  [`fff21d0`](https://github.com/aptible/unpage/commit/fff21d0ed9b6cbe5f74c59836cd15a5e2a8f1087))
+
+### Features
+
+- Aws instance status tools [SC-33981] ([#60](https://github.com/aptible/unpage/pull/60),
+  [`f32d4ad`](https://github.com/aptible/unpage/commit/f32d4ade25776608b7d0301224da6353450ba65e))
+
+
 ## v0.1.0-alpha.20 (2025-08-07)
 
 ### Bug Fixes
