@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.12"
 
 [[package]]
@@ -577,39 +577,6 @@ async = [
 ]
 
 [[package]]
-name = "datasets"
-version = "4.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dill" },
-    { name = "filelock" },
-    { name = "fsspec", extra = ["http"] },
-    { name = "huggingface-hub" },
-    { name = "multiprocess" },
-    { name = "numpy" },
-    { name = "packaging" },
-    { name = "pandas" },
-    { name = "pyarrow" },
-    { name = "pyyaml" },
-    { name = "requests" },
-    { name = "tqdm" },
-    { name = "xxhash" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e3/9d/348ed92110ba5f9b70b51ca1078d4809767a835aa2b7ce7e74ad2b98323d/datasets-4.0.0.tar.gz", hash = "sha256:9657e7140a9050db13443ba21cb5de185af8af944479b00e7ff1e00a61c8dbf1", size = 569566, upload-time = "2025-07-09T14:35:52.431Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/62/eb8157afb21bd229c864521c1ab4fa8e9b4f1b06bafdd8c4668a7a31b5dd/datasets-4.0.0-py3-none-any.whl", hash = "sha256:7ef95e62025fd122882dbce6cb904c8cd3fbc829de6669a5eb939c77d50e203d", size = 494825, upload-time = "2025-07-09T14:35:50.658Z" },
-]
-
-[[package]]
-name = "dill"
-version = "0.3.8"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/17/4d/ac7ffa80c69ea1df30a8aa11b3578692a5118e7cd1aa157e3ef73b092d15/dill-0.3.8.tar.gz", hash = "sha256:3ebe3c479ad625c4553aca177444d89b486b1d84982eeacded644afc0cf797ca", size = 184847, upload-time = "2024-01-27T23:42:16.145Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c9/7a/cef76fd8438a42f96db64ddaa85280485a9c395e7df3db8158cfec1eee34/dill-0.3.8-py3-none-any.whl", hash = "sha256:c36ca9ffb54365bdd2f8eb3eff7d2a21237f8452b57ace88b1ac615b7e815bd7", size = 116252, upload-time = "2024-01-27T23:42:14.239Z" },
-]
-
-[[package]]
 name = "diskcache"
 version = "5.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -686,6 +653,38 @@ dependencies = [
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/b7/545d2c10c1fc15e48653c91efde329a790f2eecfbbf2bd16003b5db2bab0/dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9", size = 1892, upload-time = "2025-02-19T22:15:01.647Z" },
+]
+
+[[package]]
+name = "dspy"
+version = "3.0.0b4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncer" },
+    { name = "backoff" },
+    { name = "cachetools" },
+    { name = "cloudpickle" },
+    { name = "diskcache" },
+    { name = "joblib" },
+    { name = "json-repair" },
+    { name = "litellm" },
+    { name = "magicattr" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "optuna" },
+    { name = "pydantic" },
+    { name = "regex" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "tenacity" },
+    { name = "tqdm" },
+    { name = "ujson" },
+    { name = "xxhash" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/38/50/56cb31bda58edbcfcabbfa556622508ffddf33bb17e789f2f48e723d4c7f/dspy-3.0.0b4.tar.gz", hash = "sha256:a3a35e34121f08ce17b772dbe7d98596b232afff5485b13d5732dcbe19b01ebc", size = 205000, upload-time = "2025-08-11T16:44:39.959Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/7d/880f66243ac35b75e5ef383f558fc2ceb21a42e4b80e2931ff5a12013077/dspy-3.0.0b4-py3-none-any.whl", hash = "sha256:32ff7eab0b1f3cffdc7d80cacc201191194ad2a499f683ccd12c29cef9707b72", size = 249455, upload-time = "2025-08-11T16:44:38.284Z" },
 ]
 
 [[package]]
@@ -923,11 +922,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/34/f4/5721faf47b8c499e776bc34c6a8fc17efdf7fdef0b00f398128bc5dcb4ac/fsspec-2025.3.0.tar.gz", hash = "sha256:a935fd1ea872591f2b5148907d103488fc523295e6c64b835cfad8c3eca44972", size = 298491, upload-time = "2025-03-07T21:47:56.461Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/56/53/eb690efa8513166adef3e0669afd31e95ffde69fb3c52ec2ac7223ed6018/fsspec-2025.3.0-py3-none-any.whl", hash = "sha256:efb87af3efa9103f94ca91a7f8cb7a4df91af9f74fc106c9c7ea0efd7277c1b3", size = 193615, upload-time = "2025-03-07T21:47:54.809Z" },
-]
-
-[package.optional-dependencies]
-http = [
-    { name = "aiohttp" },
 ]
 
 [[package]]
@@ -1794,22 +1788,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b9/3b/1599631f59024b75c4d6e3069f4502409970a336647502aaf6b62fb7ac98/multidict-6.4.3-cp313-cp313t-win32.whl", hash = "sha256:0ecdc12ea44bab2807d6b4a7e5eef25109ab1c82a8240d86d3c1fc9f3b72efd5", size = 41775, upload-time = "2025-04-10T22:19:43.707Z" },
     { url = "https://files.pythonhosted.org/packages/e8/4e/09301668d675d02ca8e8e1a3e6be046619e30403f5ada2ed5b080ae28d02/multidict-6.4.3-cp313-cp313t-win_amd64.whl", hash = "sha256:7146a8742ea71b5d7d955bffcef58a9e6e04efba704b52a460134fefd10a8208", size = 45946, upload-time = "2025-04-10T22:19:45.071Z" },
     { url = "https://files.pythonhosted.org/packages/96/10/7d526c8974f017f1e7ca584c71ee62a638e9334d8d33f27d7cdfc9ae79e4/multidict-6.4.3-py3-none-any.whl", hash = "sha256:59fe01ee8e2a1e8ceb3f6dbb216b09c8d9f4ef1c22c4fc825d045a147fa2ebc9", size = 10400, upload-time = "2025-04-10T22:20:16.445Z" },
-]
-
-[[package]]
-name = "multiprocess"
-version = "0.70.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dill" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/ae/04f39c5d0d0def03247c2893d6f2b83c136bf3320a2154d7b8858f2ba72d/multiprocess-0.70.16.tar.gz", hash = "sha256:161af703d4652a0e1410be6abccecde4a7ddffd19341be0a7011b94aeb171ac1", size = 1772603, upload-time = "2024-01-28T18:52:34.85Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/f7/7ec7fddc92e50714ea3745631f79bd9c96424cb2702632521028e57d3a36/multiprocess-0.70.16-py310-none-any.whl", hash = "sha256:c4a9944c67bd49f823687463660a2d6daae94c289adff97e0f9d696ba6371d02", size = 134824, upload-time = "2024-01-28T18:52:26.062Z" },
-    { url = "https://files.pythonhosted.org/packages/50/15/b56e50e8debaf439f44befec5b2af11db85f6e0f344c3113ae0be0593a91/multiprocess-0.70.16-py311-none-any.whl", hash = "sha256:af4cabb0dac72abfb1e794fa7855c325fd2b55a10a44628a3c1ad3311c04127a", size = 143519, upload-time = "2024-01-28T18:52:28.115Z" },
-    { url = "https://files.pythonhosted.org/packages/0a/7d/a988f258104dcd2ccf1ed40fdc97e26c4ac351eeaf81d76e266c52d84e2f/multiprocess-0.70.16-py312-none-any.whl", hash = "sha256:fc0544c531920dde3b00c29863377f87e1632601092ea2daca74e4beb40faa2e", size = 146741, upload-time = "2024-01-28T18:52:29.395Z" },
-    { url = "https://files.pythonhosted.org/packages/ea/89/38df130f2c799090c978b366cfdf5b96d08de5b29a4a293df7f7429fa50b/multiprocess-0.70.16-py38-none-any.whl", hash = "sha256:a71d82033454891091a226dfc319d0cfa8019a4e888ef9ca910372a446de4435", size = 132628, upload-time = "2024-01-28T18:52:30.853Z" },
-    { url = "https://files.pythonhosted.org/packages/da/d9/f7f9379981e39b8c2511c9e0326d212accacb82f12fbfdc1aa2ce2a7b2b6/multiprocess-0.70.16-py39-none-any.whl", hash = "sha256:a0bafd3ae1b732eac64be2e72038231c1ba97724b60b09400d68f229fcc2fbf3", size = 133351, upload-time = "2024-01-28T18:52:31.981Z" },
 ]
 
 [[package]]
@@ -3383,36 +3361,25 @@ source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },
     { name = "anyio" },
-    { name = "asyncer" },
-    { name = "backoff" },
     { name = "boltons" },
-    { name = "cachetools" },
-    { name = "cloudpickle" },
     { name = "datadog-api-client", extra = ["async"] },
-    { name = "datasets" },
-    { name = "diskcache" },
     { name = "dnspython" },
     { name = "dotenv" },
+    { name = "dspy" },
     { name = "fastapi", extra = ["standard"] },
     { name = "fastmcp" },
     { name = "graphviz" },
     { name = "httpx" },
     { name = "human-readable" },
-    { name = "joblib" },
-    { name = "json-repair" },
     { name = "jsonpickle" },
     { name = "kr8s" },
-    { name = "litellm" },
     { name = "logparser" },
-    { name = "magicattr" },
     { name = "matplotlib" },
     { name = "mlflow" },
     { name = "msgspec" },
     { name = "networkx" },
     { name = "numba" },
     { name = "numpy" },
-    { name = "openai" },
-    { name = "optuna" },
     { name = "pagerduty" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -3423,17 +3390,12 @@ dependencies = [
     { name = "pythonping" },
     { name = "pyyaml" },
     { name = "questionary" },
-    { name = "regex" },
     { name = "requests" },
-    { name = "rich" },
     { name = "scapy" },
     { name = "sentry-sdk" },
     { name = "sh" },
     { name = "sparklines" },
-    { name = "tenacity" },
-    { name = "tqdm" },
     { name = "typer" },
-    { name = "ujson" },
     { name = "uvicorn", extra = ["standard"] },
     { name = "whoosh-reloaded" },
 ]
@@ -3455,36 +3417,25 @@ dev = [
 requires-dist = [
     { name = "aioboto3", specifier = ">=14.1.0" },
     { name = "anyio", specifier = ">=4.9.0" },
-    { name = "asyncer", specifier = "==0.0.8" },
-    { name = "backoff", specifier = ">=2.2" },
     { name = "boltons", specifier = ">=25.0.0" },
-    { name = "cachetools", specifier = ">=5.5.0" },
-    { name = "cloudpickle", specifier = ">=3.0.0" },
     { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
-    { name = "datasets", specifier = ">=2.14.6" },
-    { name = "diskcache", specifier = ">=5.6.0" },
     { name = "dnspython", specifier = ">=2.7.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
+    { name = "dspy", specifier = ">=3.0.0b4,<4.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
     { name = "fastmcp", specifier = ">=2.10.1" },
     { name = "graphviz", specifier = ">=0.20.3" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "human-readable", specifier = ">=2.0.0" },
-    { name = "joblib", specifier = "~=1.3" },
-    { name = "json-repair", specifier = ">=0.30.0" },
     { name = "jsonpickle" },
     { name = "kr8s", specifier = ">=0.20.7" },
-    { name = "litellm", specifier = ">=1.64.0" },
     { name = "logparser", specifier = ">=0.8.4" },
-    { name = "magicattr", specifier = ">=0.1.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "mlflow", specifier = ">=3.1.4" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "networkx", specifier = ">=3.4.2" },
     { name = "numba", specifier = ">=0.61.2" },
     { name = "numpy", specifier = "<2.4" },
-    { name = "openai", specifier = ">=0.28.1" },
-    { name = "optuna", specifier = ">=3.4.0" },
     { name = "pagerduty", specifier = ">=3.1.0" },
     { name = "pydantic", specifier = ">=2.11.3,<2.12.0" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
@@ -3495,17 +3446,12 @@ requires-dist = [
     { name = "pythonping", specifier = ">=1.1.4" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "questionary", specifier = ">=2.1.0" },
-    { name = "regex", specifier = ">=2023.10.3" },
     { name = "requests", specifier = ">=2.32.3" },
-    { name = "rich", specifier = ">=13.7.1" },
     { name = "scapy", specifier = ">=2.6.1" },
     { name = "sentry-sdk", specifier = ">=2.29.1" },
     { name = "sh", specifier = ">=2.2.2" },
     { name = "sparklines", specifier = ">=0.5.0" },
-    { name = "tenacity", specifier = ">=8.2.3" },
-    { name = "tqdm", specifier = ">=4.66.1" },
     { name = "typer", specifier = ">=0.15.2" },
-    { name = "ujson", specifier = ">=5.8.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
     { name = "whoosh-reloaded", specifier = ">=2.7.5" },
 ]
