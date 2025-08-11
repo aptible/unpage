@@ -27,10 +27,6 @@ dependencies = [
     "whoosh-reloaded>=2.7.5",
     "boltons>=25.0.0",
     "logparser>=0.8.4",
-    # start: drain3 dependencies
-    "jsonpickle",
-    # "cachetools",
-    # end: drain3 dependencies
     "sparklines>=0.5.0",
     "pydantic-yaml>=1.5.1",
     "questionary>=2.1.0",
