@@ -647,38 +647,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dspy"
-version = "3.0.0b4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "asyncer" },
-    { name = "backoff" },
-    { name = "cachetools" },
-    { name = "cloudpickle" },
-    { name = "diskcache" },
-    { name = "joblib" },
-    { name = "json-repair" },
-    { name = "litellm" },
-    { name = "magicattr" },
-    { name = "numpy" },
-    { name = "openai" },
-    { name = "optuna" },
-    { name = "pydantic" },
-    { name = "regex" },
-    { name = "requests" },
-    { name = "rich" },
-    { name = "tenacity" },
-    { name = "tqdm" },
-    { name = "ujson" },
-    { name = "xxhash" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/38/50/56cb31bda58edbcfcabbfa556622508ffddf33bb17e789f2f48e723d4c7f/dspy-3.0.0b4.tar.gz", hash = "sha256:a3a35e34121f08ce17b772dbe7d98596b232afff5485b13d5732dcbe19b01ebc", size = 205000, upload-time = "2025-08-11T16:44:39.959Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/7d/880f66243ac35b75e5ef383f558fc2ceb21a42e4b80e2931ff5a12013077/dspy-3.0.0b4-py3-none-any.whl", hash = "sha256:32ff7eab0b1f3cffdc7d80cacc201191194ad2a499f683ccd12c29cef9707b72", size = 249455, upload-time = "2025-08-11T16:44:38.284Z" },
-]
-
-[[package]]
 name = "email-validator"
 version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3199,7 +3167,6 @@ dependencies = [
     { name = "datadog-api-client", extra = ["async"] },
     { name = "dnspython" },
     { name = "dotenv" },
-    { name = "dspy" },
     { name = "fastapi", extra = ["standard"] },
     { name = "fastmcp" },
     { name = "graphviz" },
@@ -3220,6 +3187,7 @@ dependencies = [
     { name = "requests" },
     { name = "scapy" },
     { name = "sentry-sdk" },
+    { name = "unpage-dspy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -3245,7 +3213,6 @@ requires-dist = [
     { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
     { name = "dnspython", specifier = ">=2.7.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "dspy", specifier = ">=3.0.0b4" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
     { name = "fastmcp", specifier = ">=2.10.1" },
     { name = "graphviz", specifier = ">=0.20.3" },
@@ -3266,6 +3233,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.3" },
     { name = "scapy", specifier = ">=2.6.1" },
     { name = "sentry-sdk", specifier = ">=2.29.1" },
+    { name = "unpage-dspy", specifier = ">=3.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
 ]
 
@@ -3280,6 +3248,38 @@ dev = [
     { name = "types-aioboto3", extras = ["aioboto3"], specifier = ">=14.1.0" },
     { name = "types-boltons", specifier = ">=25.0.0.20250516" },
     { name = "types-networkx", specifier = ">=3.4.2.20250515" },
+]
+
+[[package]]
+name = "unpage-dspy"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncer" },
+    { name = "backoff" },
+    { name = "cachetools" },
+    { name = "cloudpickle" },
+    { name = "diskcache" },
+    { name = "joblib" },
+    { name = "json-repair" },
+    { name = "litellm" },
+    { name = "magicattr" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "optuna" },
+    { name = "pydantic" },
+    { name = "regex" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "tenacity" },
+    { name = "tqdm" },
+    { name = "ujson" },
+    { name = "xxhash" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4e/6d/7b092cfaa1363440d5e5814e8c2816770c035e18f7d8b586eb9409e5ddc8/unpage_dspy-3.0.0.tar.gz", hash = "sha256:c56005a8c171ee6aec445629189e953d3f3762c7aa466917f151fcdae0a36e9d", size = 205203, upload-time = "2025-08-11T23:34:10.016Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2f/35/b10672439745b1af76f37990c1e9dedc1c28ddfb30a9d7eba0dd015c6af1/unpage_dspy-3.0.0-py3-none-any.whl", hash = "sha256:14b9bc86e7b8b0b66c7ed4a5fae07efa830f3dbdfac1227e29fa0ecb17ba0cea", size = 249605, upload-time = "2025-08-11T23:34:08.472Z" },
 ]
 
 [[package]]

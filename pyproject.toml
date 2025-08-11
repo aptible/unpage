@@ -34,7 +34,7 @@ dependencies = [
     "mlflow>=3.1.4",
     "human-readable>=2.0.0",
     "litellm>=1.75.5.post1",
-    "dspy>=3.0.0b4",
+    "unpage-dspy>=3.0.0",
 ]
 
 [tool.hatch.metadata]
