@@ -2,7 +2,6 @@ import colorsys
 import importlib
 import json
 import os
-import pkgutil
 import re
 import shlex
 import shutil
@@ -256,8 +255,11 @@ async def checkbox(
 def import_submodules(
     package: str | ModuleType,
     recursive: bool = True,
-) -> dict[str, ModuleType]:
+) -> None:
     """Import all submodules of a module, recursively, including subpackages
+
+    Uses filesystem scanning to avoid namespace pollution from installed packages
+    with similar names.
 
     :param package: package (name or actual module)
     :type package: str | module
@@ -265,16 +267,27 @@ def import_submodules(
     """
     if isinstance(package, str):
         package = importlib.import_module(package)
-    results: dict[str, ModuleType] = {}
-    for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
-        full_name = f"{package.__name__}.{name}"
-        try:
-            results[full_name] = importlib.import_module(full_name)
-        except ModuleNotFoundError:
+
+    # Get the actual filesystem modules only to avoid namespace pollution
+    package_dir = Path(package.__path__[0])  # Get the first path
+
+    for item_path in package_dir.iterdir():
+        # Skip hidden files and private modules.
+        if item_path.name[0] in ("_", "."):
             continue
-        if recursive and is_pkg:
-            results.update(import_submodules(full_name))
-    return results
+
+        name = item_path.stem
+        is_pkg = item_path.is_dir() and (item_path / "__init__.py").exists()
+
+        # Skip non-Python files and folders.
+        if not is_pkg and item_path.suffix != ".py":
+            continue
+
+        full_name = f"{package.__name__}.{name}"
+        importlib.import_module(full_name)
+
+        if is_pkg and recursive:
+            import_submodules(full_name)
 
 
 class classproperty[T]:
