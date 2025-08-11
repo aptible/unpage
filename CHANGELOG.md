@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.22 (2025-08-11)
+
+### Bug Fixes
+
+- **deps**: Clean up dependencies and eliminate vendored packages
+  ([#78](https://github.com/aptible/unpage/pull/78),
+  [`87fec00`](https://github.com/aptible/unpage/commit/87fec001635be5881d46050ad77d671ab4f09b27))
+
+
 ## v0.1.0-alpha.21 (2025-08-08)
 
 ### Documentation
