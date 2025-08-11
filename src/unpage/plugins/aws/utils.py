@@ -4,7 +4,6 @@ import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-import sh
 from aioboto3 import Session
 from botocore.exceptions import ClientError, SSOTokenLoadError, TokenRetrievalError
 
@@ -70,10 +69,21 @@ async def run_sso_login(profile: str | None = None) -> None:
         print(f"Attempting to login using AWS SSO for profile '{profile}'")
         print(f"Running 'aws sso login --profile {profile}'")
         print("Please complete the SSO authentication in your browser...")
-        await sh.aws.sso.login(profile=profile, _async=True)  # type: ignore
-    except sh.ErrorReturnCode as e:
-        print(f"Error during SSO login: {e}")
-        raise RuntimeError(f"Failed to authenticate with AWS SSO: {e}") from e
+
+        cmd = ["aws", "sso", "login"]
+        if profile:
+            cmd.extend(["--profile", profile])
+
+        process = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            error_msg = stderr.decode() if stderr else "Unknown error"
+            print(f"Error during SSO login: {error_msg}")
+            raise RuntimeError(f"Failed to authenticate with AWS SSO: {error_msg}")
+
     except Exception as e:
         print(f"Unexpected error during SSO login: {e}")
         raise
