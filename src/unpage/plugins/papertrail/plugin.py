@@ -64,7 +64,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         query: str,
         min_time: AwareDatetime,
         max_time: AwareDatetime,
-        timeout: timedelta = timedelta(seconds=10),  # noqa: ASYNC109 Async function definition with a `timeout` parameter
+        timeout_seconds: int = 10,
     ) -> PapertrailSearchResult | str:
         """Search Papertrail for logs within a given time range
 
@@ -72,7 +72,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             query (str): The search query.
             min_time (AwareDatetime): The starting time for the range within which to search.
             max_time (AwareDatetime): The ending time for the range within which to search.
-            timeout (timedelta): The maximum time to wait for the search to complete. Defaults to 10 seconds.
+            timeout_seconds (int): The maximum seconds to wait for the search to complete. Defaults to 10 seconds.
 
         Returns:
             PapertrailSearchResult: logs that matched the query and fit within response limit
@@ -86,7 +86,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         class timeoutTracker:
             timed_out: bool = False
             start_time: AwareDatetime = datetime.now(UTC)
-            time_out: timedelta = timeout
+            time_out: timedelta = timedelta(seconds=timeout_seconds)
 
             def under_time_out(self, _: AwareDatetime | None) -> bool:
                 self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
