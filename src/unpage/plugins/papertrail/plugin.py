@@ -18,6 +18,8 @@ class PapertrailSearchResult(BaseModel):
 
     """True when the search results were truncated due to the response size limit or single search time limit"""
     truncated: bool = False
+    """True when the search timed out due to the overall time limit"""
+    timed_out: bool = False
     """The log events that were found"""
     results: list[PapertrailLogEvent]
 
@@ -62,6 +64,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         query: str,
         min_time: AwareDatetime,
         max_time: AwareDatetime,
+        timeout: timedelta = timedelta(seconds=10),  # noqa: ASYNC109 Async function definition with a `timeout` parameter
     ) -> PapertrailSearchResult | str:
         """Search Papertrail for logs within a given time range
 
@@ -69,6 +72,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             query (str): The search query.
             min_time (AwareDatetime): The starting time for the range within which to search.
             max_time (AwareDatetime): The ending time for the range within which to search.
+            timeout (timedelta): The maximum time to wait for the search to complete. Defaults to 10 seconds.
 
         Returns:
             PapertrailSearchResult: logs that matched the query and fit within response limit
@@ -82,9 +86,10 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         class timeoutTracker:
             timed_out: bool = False
             start_time: AwareDatetime = datetime.now(UTC)
+            time_out: timedelta = timeout
 
             def under_time_out(self, _: AwareDatetime | None) -> bool:
-                self.timed_out = (datetime.now(UTC) - self.start_time) > timedelta(seconds=10)
+                self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
                 return not self.timed_out
 
         tt = timeoutTracker()
@@ -101,5 +106,6 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             logs.append(log)
         return PapertrailSearchResult(
             results=logs,
-            truncated=truncated or tt.timed_out,
+            truncated=truncated,
+            timed_out=tt.timed_out,
         )
