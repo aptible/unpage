@@ -1,3 +1,3 @@
-import typer
+from cyclopts import App
 
-graph_app = typer.Typer(help="Build a knowledge graph", no_args_is_help=True)
+graph_app = App(help="Build a knowledge graph")

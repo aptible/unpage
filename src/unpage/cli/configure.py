@@ -3,15 +3,13 @@ import os
 import shlex
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
-import anyio
 import questionary
 import rich
-import typer
 
 from unpage.cli._app import app
-from unpage.cli.options import DEFAULT_PROFILE, PROFILE_OPTION
+from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
 from unpage.config.utils import Config, PluginConfig, load_config, save_config
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
@@ -49,40 +47,41 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
     )
 
 
-@app.command()
-def configure(
-    profile: str = PROFILE_OPTION,
-    use_uv_run: bool = typer.Option(
-        _default_use_uv_run,
-        "--use-uv-run",
-        help="Use uv run instead of uvx to start the Unpage MCP server (useful for develping Unpage)",
-    ),
+@app.command
+async def configure(
+    *,
+    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
+    use_uv_run: bool = _default_use_uv_run,
 ) -> None:
-    """Setup unpage including all plugins!"""
+    """Setup unpage including all plugins!
 
-    async def _recipe() -> None:
-        await _send_event(
-            "start",
-            profile,
-            extra_params={
-                "use_uv_run": use_uv_run,
-            },
-        )
-        welcome_to_unpage()
-        await _configure_intro()
-        cfg = _initial_config(profile)
-        await _select_plugins_to_enable_disable(cfg)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved", profile)
-        rich.print("")
-        await _configure_plugins(cfg, profile)
-        await _send_event("plugins_configured", profile)
-        save_config(cfg, profile, create=True)
-        await _send_event("config_saved_2", profile)
-        rich.print("")
-        await _suggest_building_graph(profile, use_uv_run)
-
-    anyio.run(_recipe)
+    Parameters
+    ----------
+    profile
+        The profile to use
+    use_uv_run
+        Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage)
+    """
+    await _send_event(
+        "start",
+        profile,
+        extra_params={
+            "use_uv_run": use_uv_run,
+        },
+    )
+    welcome_to_unpage()
+    await _configure_intro()
+    cfg = _initial_config(profile)
+    await _select_plugins_to_enable_disable(cfg)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved", profile)
+    rich.print("")
+    await _configure_plugins(cfg, profile)
+    await _send_event("plugins_configured", profile)
+    save_config(cfg, profile, create=True)
+    await _send_event("config_saved_2", profile)
+    rich.print("")
+    await _suggest_building_graph(profile, use_uv_run)
 
 
 def welcome_to_unpage() -> None:
