@@ -10,6 +10,15 @@ providers depending on the node type (for example when asked for metrics for
 an EC2 instance, it will get the metrics from the [AWS Plugin](/plugins/aws),
 which calls out to Cloudwatch).
 
+<AccordionGroup>
+  <Accordion title="MCP Tools" icon="wrench">
+    - **list_node_types_that_support_metrics**: List node types supporting metrics retrieval
+    - **list_available_metrics_for_node**: List available metrics for a specific node
+    - **get_metrics_for_node**: Get metrics data for a resource using its node ID
+    - **get_anomalies_for_metrics**: Detect anomalies in metric data
+  </Accordion>
+</AccordionGroup>
+
 ## Configuration
 Configure the Metrics plugin by running `uv run unpage configure` or by editing
 the `~/.unpage/profiles/<profile_name>/config.yaml` file:
