@@ -1,3 +1,7 @@
+from typing import Annotated
+
+from cyclopts import Parameter
+
 from unpage.agent.app import listen, settings
 from unpage.cli.agent._app import agent_app
 from unpage.telemetry import client as telemetry
@@ -13,7 +17,9 @@ async def serve(
     profile: str = settings.UNPAGE_PROFILE,
     reload: bool = settings.UNPAGE_RELOAD,
     tunnel: bool = settings.UNPAGE_TUNNEL,
-    ngrok_token: str = settings.NGROK_TOKEN,
+    ngrok_token: Annotated[
+        str, Parameter(show_default=lambda v: v if not v else f"{v[:3]}<redacted>")
+    ] = settings.NGROK_TOKEN,
     ngrok_domain: str = settings.NGROK_DOMAIN,
 ) -> None:
     """Run the Unpage Agent server, which loads all agents and routes between them. This is intended to be a webhook receiver for PagerDuty.
