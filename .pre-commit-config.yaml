@@ -13,8 +13,10 @@ repos:
       - id: check-json
       # Make sure files end with a newline.
       - id: end-of-file-fixer
+        exclude: src/unpage/vendor/.*
       # Remove trailing whitespace.
       - id: trailing-whitespace
+        exclude: src/unpage/vendor/.*
       # Ensure that scripts with shebangs are executable
       - id: check-shebang-scripts-are-executable
       # Ensure that executable files have shebangs
