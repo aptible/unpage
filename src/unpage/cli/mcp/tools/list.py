@@ -11,7 +11,7 @@ from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
-@tools_app.command
+@tools_app.command(name="list")
 async def list_tools(
     *,
     profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
