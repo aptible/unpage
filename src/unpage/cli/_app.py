@@ -1,4 +1,4 @@
-import typer
+from cyclopts import App, Parameter
 
 from unpage.cli.agent._app import agent_app
 from unpage.cli.graph._app import graph_app
@@ -8,8 +8,14 @@ from unpage.warnings import filter_all_warnings
 
 filter_all_warnings()
 
-app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]}, no_args_is_help=True)
-app.add_typer(mcp_app, name="mcp")
-app.add_typer(graph_app, name="graph")
-app.add_typer(agent_app, name="agent")
-app.add_typer(mlflow_app, name="mlflow")
+app = App(
+    default_parameter=Parameter(
+        # Disable automatic creation of "negative" options (e.g. --no-foo)
+        negative=()
+    )
+)
+
+app.command(agent_app, name="agent")
+app.command(graph_app, name="graph")
+app.command(mcp_app, name="mcp")
+app.command(mlflow_app, name="mlflow")
