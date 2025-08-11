@@ -1,7 +1,5 @@
-import typer
+from cyclopts import App
 
-tools_app = typer.Typer(
-    context_settings={"help_option_names": ["-h", "--help"]},
-    no_args_is_help=True,
+tools_app = App(
     help="List and debug MCP tools",
 )

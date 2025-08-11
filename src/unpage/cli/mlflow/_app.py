@@ -1,7 +1,5 @@
-import typer
+from cyclopts import App
 
-mlflow_app = typer.Typer(
-    context_settings={"help_option_names": ["-h", "--help"]},
-    no_args_is_help=True,
+mlflow_app = App(
     help="Debug with MLflow",
 )
