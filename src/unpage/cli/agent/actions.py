@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from unpage.agent.utils import get_agent_template
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.utils import confirm
 
 

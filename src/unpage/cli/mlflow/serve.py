@@ -6,7 +6,7 @@ from rich import print
 
 from unpage.cli.mlflow._app import mlflow_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import confirm

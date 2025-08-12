@@ -6,7 +6,7 @@ from rich import print
 from unpage.agent.utils import get_agent_template
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import edit_file, get_editor

@@ -7,7 +7,7 @@ from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
 
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins.base import PluginManager

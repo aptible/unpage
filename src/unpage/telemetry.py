@@ -11,7 +11,7 @@ import httpx
 import rich
 import sentry_sdk
 
-from unpage.config.manager import manager
+from unpage.config import manager
 
 
 def _get_or_create_user_id() -> str:

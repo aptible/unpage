@@ -1,7 +1,7 @@
 import rich
 
 from unpage.cli.profile._app import profile_app
-from unpage.config.manager import manager
+from unpage.config import manager
 
 
 @profile_app.command

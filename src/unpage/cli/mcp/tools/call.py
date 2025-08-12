@@ -7,7 +7,7 @@ from mcp.types import TextContent
 
 from unpage.cli.mcp.tools._app import tools_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
