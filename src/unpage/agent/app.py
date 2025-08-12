@@ -20,6 +20,7 @@ from unpage.telemetry import client as telemetry
 class Settings(BaseSettings):
     NGROK_TOKEN: str = ""
     NGROK_DOMAIN: str = ""
+    UNPAGE_DEBUG: bool = False
 
     UNPAGE_TUNNEL: bool = False
     UNPAGE_RELOAD: bool = False
@@ -63,9 +64,13 @@ app = FastAPI(lifespan=lifespan)
 app.state.analysis_tasks = set()
 
 
-async def analyze(payload: dict[str, Any], profile: str) -> None:
+async def analyze(payload: dict[str, Any], profile: str, debug: bool) -> None:
     analysis_agent = AnalysisAgent(profile)
     analysis = await analysis_agent.acall(payload=payload)
+    if debug:
+        print("\n\n===== DEBUG OUTPUT =====\n")
+        analysis_agent.inspect_history(n=1000)
+        print("\n===== END DEBUG OUTPUT =====\n\n")
     print(analysis)
 
 
@@ -77,7 +82,7 @@ async def webhook(request: Request) -> dict[str, Any]:
     payload = await request.json()
 
     # Start a background task to analyze the payload.
-    task = asyncio.create_task(analyze(payload, settings.UNPAGE_PROFILE))
+    task = asyncio.create_task(analyze(payload, settings.UNPAGE_PROFILE, settings.UNPAGE_DEBUG))
 
     # Add task to the set to create a strong reference.
     analysis_tasks.add(task)
@@ -97,6 +102,7 @@ async def listen(
     tunnel: bool = False,
     ngrok_token: str = "",
     ngrok_domain: str = "",
+    debug: bool = False,
 ) -> None:
     # Set environment variables to make them accessible to FastAPI's lifespan.
     settings.UNPAGE_PROFILE = profile
@@ -105,6 +111,7 @@ async def listen(
     settings.NGROK_DOMAIN = ngrok_domain
     settings.UNPAGE_HOST = host
     settings.UNPAGE_PORT = port
+    settings.UNPAGE_DEBUG = debug
 
     await telemetry.send_event(
         {
