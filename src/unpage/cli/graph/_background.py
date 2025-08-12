@@ -1,17 +1,17 @@
 import os
 from pathlib import Path
 
-from unpage.config.utils import get_config_dir
+from unpage.config.manager import manager
 
 
 def get_pid_file(profile: str) -> Path:
     """Get the PID file path for a given profile graph build"""
-    return get_config_dir(profile) / "graph_build.pid"
+    return manager.get_profile_directory(profile) / "graph_build.pid"
 
 
 def get_log_file(profile: str) -> Path:
     """Get the log file path for a given profile graph build"""
-    return get_config_dir(profile) / "graph_build.log"
+    return manager.get_profile_directory(profile) / "graph_build.log"
 
 
 def is_process_running(pid: int) -> bool:

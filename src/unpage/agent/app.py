@@ -13,7 +13,7 @@ from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import get_agents
-from unpage.config.utils import get_config_dir
+from unpage.config.manager import manager
 from unpage.telemetry import client as telemetry
 
 
@@ -131,7 +131,7 @@ async def listen(
                 raise FileNotFoundError("Could not find the project root")
         reload_config = {
             "reload": True,
-            "reload_dirs": [str(project_root), str(get_config_dir(profile))],
+            "reload_dirs": [str(project_root), str(manager.get_profile_directory(profile))],
             "reload_includes": ["**/*.py", "**/*.yaml"],
         }
 

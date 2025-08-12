@@ -16,8 +16,7 @@ from unpage.cli.graph._background import (
     get_log_file,
 )
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config import load_config
-from unpage.config.utils import get_config_dir
+from unpage.config.manager import manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins import KnowledgeGraphMixin
@@ -89,8 +88,8 @@ async def build(
         start_time = time.perf_counter()
 
         graph = Graph()
-        config = load_config(profile, create=True)
-        output_path = (get_config_dir(profile) / "graph.json").resolve()
+        config = manager.get_profile_config(profile)
+        output_path = (manager.get_profile_directory(profile) / "graph.json").resolve()
         plugin_manager = PluginManager(config)
 
         async with anyio.create_task_group() as tg:
