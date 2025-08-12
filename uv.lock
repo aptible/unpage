@@ -3157,7 +3157,7 @@ wheels = [
 
 [[package]]
 name = "unpage"
-version = "0.1.0a23"
+version = "0.1.0a24"
 source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },
