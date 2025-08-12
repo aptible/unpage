@@ -4,7 +4,7 @@ import anyio
 import questionary
 import rich
 
-from unpage.config.utils import PluginSettings
+from unpage.config.manager import PluginSettings
 from unpage.knowledge import Graph, Node
 from unpage.knowledge.edges import Edge
 from unpage.plugins import Plugin
