@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.12"
 
 [[package]]
@@ -647,6 +647,39 @@ wheels = [
 ]
 
 [[package]]
+name = "dspy"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncer" },
+    { name = "backoff" },
+    { name = "cachetools" },
+    { name = "cloudpickle" },
+    { name = "diskcache" },
+    { name = "gepa" },
+    { name = "joblib" },
+    { name = "json-repair" },
+    { name = "litellm" },
+    { name = "magicattr" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "optuna" },
+    { name = "pydantic" },
+    { name = "regex" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "tenacity" },
+    { name = "tqdm" },
+    { name = "ujson" },
+    { name = "xxhash" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b2/6a/5f99c7f5fc5b856e9fa4b7dd8d9d69b1dda5939536a3ce40c26a244f117c/dspy-3.0.0.tar.gz", hash = "sha256:14dc37fe10d78bf6413f9a39158e278f391ac514ea72feb0e86f413bd963162f", size = 212846, upload-time = "2025-08-12T21:05:01.399Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/41/0013881c534022b13ad3c0c1e3a41c8e4f43ccdb21d76535d71a1a3a822c/dspy-3.0.0-py3-none-any.whl", hash = "sha256:06b0e2df3b94930d4738ef4ff456e51095493acabe1a3949a2b38fc8d3128b4a", size = 258559, upload-time = "2025-08-12T21:04:59.982Z" },
+]
+
+[[package]]
 name = "email-validator"
 version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -881,6 +914,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/34/f4/5721faf47b8c499e776bc34c6a8fc17efdf7fdef0b00f398128bc5dcb4ac/fsspec-2025.3.0.tar.gz", hash = "sha256:a935fd1ea872591f2b5148907d103488fc523295e6c64b835cfad8c3eca44972", size = 298491, upload-time = "2025-03-07T21:47:56.461Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/56/53/eb690efa8513166adef3e0669afd31e95ffde69fb3c52ec2ac7223ed6018/fsspec-2025.3.0-py3-none-any.whl", hash = "sha256:efb87af3efa9103f94ca91a7f8cb7a4df91af9f74fc106c9c7ea0efd7277c1b3", size = 193615, upload-time = "2025-03-07T21:47:54.809Z" },
+]
+
+[[package]]
+name = "gepa"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/74/8b/2aba83c1a85d1260151c7b0ec57c4b34901ae7a74f27eba4e7532c2f80c8/gepa-0.0.2.tar.gz", hash = "sha256:0fa8ca333e4a69eec68087a68cdd651c9e4b8df0c147009f42a5563f1b9702dc", size = 32253, upload-time = "2025-08-12T02:26:49.112Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/9c/a1111dfc06e1f4b3adac51670b76b45b8385ed510f35bca6c002ca25eef8/gepa-0.0.2-py3-none-any.whl", hash = "sha256:9894ceefd53d46a6811cf8737b698c99f626777a773307dafc5f8e0038007e53", size = 34191, upload-time = "2025-08-12T02:26:47.625Z" },
 ]
 
 [[package]]
@@ -3167,6 +3209,7 @@ dependencies = [
     { name = "datadog-api-client", extra = ["async"] },
     { name = "dnspython" },
     { name = "dotenv" },
+    { name = "dspy" },
     { name = "fastapi", extra = ["standard"] },
     { name = "fastmcp" },
     { name = "graphviz" },
@@ -3187,7 +3230,6 @@ dependencies = [
     { name = "requests" },
     { name = "scapy" },
     { name = "sentry-sdk" },
-    { name = "unpage-dspy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -3213,6 +3255,7 @@ requires-dist = [
     { name = "datadog-api-client", extras = ["async"], specifier = ">=2.34.0" },
     { name = "dnspython", specifier = ">=2.7.0" },
     { name = "dotenv", specifier = ">=0.9.9" },
+    { name = "dspy", specifier = ">=3.0.0,<4.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
     { name = "fastmcp", specifier = ">=2.10.1" },
     { name = "graphviz", specifier = ">=0.20.3" },
@@ -3233,7 +3276,6 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.3" },
     { name = "scapy", specifier = ">=2.6.1" },
     { name = "sentry-sdk", specifier = ">=2.29.1" },
-    { name = "unpage-dspy", specifier = ">=3.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.35.0" },
 ]
 
@@ -3248,38 +3290,6 @@ dev = [
     { name = "types-aioboto3", extras = ["aioboto3"], specifier = ">=14.1.0" },
     { name = "types-boltons", specifier = ">=25.0.0.20250516" },
     { name = "types-networkx", specifier = ">=3.4.2.20250515" },
-]
-
-[[package]]
-name = "unpage-dspy"
-version = "3.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "asyncer" },
-    { name = "backoff" },
-    { name = "cachetools" },
-    { name = "cloudpickle" },
-    { name = "diskcache" },
-    { name = "joblib" },
-    { name = "json-repair" },
-    { name = "litellm" },
-    { name = "magicattr" },
-    { name = "numpy" },
-    { name = "openai" },
-    { name = "optuna" },
-    { name = "pydantic" },
-    { name = "regex" },
-    { name = "requests" },
-    { name = "rich" },
-    { name = "tenacity" },
-    { name = "tqdm" },
-    { name = "ujson" },
-    { name = "xxhash" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/6d/7b092cfaa1363440d5e5814e8c2816770c035e18f7d8b586eb9409e5ddc8/unpage_dspy-3.0.0.tar.gz", hash = "sha256:c56005a8c171ee6aec445629189e953d3f3762c7aa466917f151fcdae0a36e9d", size = 205203, upload-time = "2025-08-11T23:34:10.016Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/35/b10672439745b1af76f37990c1e9dedc1c28ddfb30a9d7eba0dd015c6af1/unpage_dspy-3.0.0-py3-none-any.whl", hash = "sha256:14b9bc86e7b8b0b66c7ed4a5fae07efa830f3dbdfac1227e29fa0ecb17ba0cea", size = 249605, upload-time = "2025-08-11T23:34:08.472Z" },
 ]
 
 [[package]]
