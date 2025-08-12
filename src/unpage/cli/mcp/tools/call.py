@@ -7,8 +7,7 @@ from mcp.types import TextContent
 
 from unpage.cli.mcp.tools._app import tools_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config import load_config
-from unpage.config.utils import get_config_dir
+from unpage.config.manager import manager
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
@@ -52,13 +51,13 @@ async def call(
             "has_arguments": arguments is not None,
         }
     )
-    config = load_config(profile)
+    config = manager.get_profile_config(profile)
     plugins = PluginManager(config=config)
     context = Context(
         profile=profile,
         config=config,
         plugins=plugins,
-        graph=Graph(get_config_dir(profile) / "graph.json"),
+        graph=Graph(manager.get_profile_directory(profile) / "graph.json"),
     )
     mcp = await build_mcp_server(context)
 
