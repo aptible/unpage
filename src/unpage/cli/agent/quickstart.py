@@ -51,7 +51,7 @@ async def quickstart(
     await _send_event("start", profile)
     welcome_to_unpage()
     _quickstart_intro()
-    config = manager.get_profile_config(profile)
+    config = manager.get_empty_config(profile, plugins=_initial_plugin_settings(profile))
     cfg, next_step_count = await _create_config(config, config.profile)
     plugin_manager = PluginManager(cfg)
     cfg.save()
@@ -87,11 +87,7 @@ def _initial_plugin_settings(profile: str) -> dict[str, PluginConfig]:
     try:
         existing_config = manager.get_profile_config(profile)
     except FileNotFoundError:
-        existing_config = Config(
-            profile=profile,
-            file_path=manager.get_profile_directory(profile) / "config.yaml",
-            plugins={},
-        )
+        existing_config = manager.get_empty_config(profile)
 
     return {
         "core": PluginConfig(enabled=True),
