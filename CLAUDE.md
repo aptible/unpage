@@ -137,6 +137,7 @@ User-facing documentation lives under docs/ and is built and published using Min
 
 ### Project context
 - Format: MDX files with YAML frontmatter
+- Mintlify hosts our documentation, and their MDX format is a superset of markdown with components like Cards and Accordians
 - Config: docs.json for navigation, theme, settings
 - Components: Mintlify components
 

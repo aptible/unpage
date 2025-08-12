@@ -57,8 +57,16 @@ The Papertrail plugin provides the following tools to Agents and MCP Clients:
     The ending time for the search range (ISO 8601 timestamp). Logs generated
     at or before this time will be included in the results.
   </ParamField>
+  <ParamField path="timeout_seconds" type="integer" default="10">
+    The maximum number of seconds to wait for the search to complete. Defaults to 10 seconds.
+    Increase this value for more comprehensive results in large log volumes, or decrease it
+    for faster response times.
+  </ParamField>
 
-  **Returns** `list[dict]`: log events with details including timestamp, hostname, program, message, and metadata.
+  **Returns** `PapertrailSearchResult`: An object containing:
+  - `results`: Log events with details including timestamp, hostname, program, message, and metadata.
+  - `truncated`: Boolean indicating if results were truncated due to response size limits.
+  - `timed_out`: Boolean indicating if the search timed out based on the specified timeout.
 
   **Note**: Results are automatically truncated if they exceed response size limits to ensure optimal performance.
 </Card>
