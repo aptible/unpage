@@ -28,4 +28,6 @@ jobs:
         uses: github/combine-prs@2909f404763c3177a456e052bdb7f2e85d3a7cb3 # v5.2.0
         with:
           ignore_label: "nocombine"
-          labels: ${{ github.event.inputs.pr_type_filter }}
+          select_label: ${{ github.event.inputs.pr_type_filter }}
+          labels: "dependencies, combined-pr"
+          pr_title: "chore(deps): Combine Dependabot PRs"
