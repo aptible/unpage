@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.23 (2025-08-12)
+
+### Bug Fixes
+
+- **deps**: Depend on our own (non-pre-release) version of dspy
+  ([#81](https://github.com/aptible/unpage/pull/81),
+  [`23fe079`](https://github.com/aptible/unpage/commit/23fe0795e8623c294057b452789322f35848bb57))
+
+
+## v0.1.0-alpha.22 (2025-08-11)
+
+### Bug Fixes
+
+- **deps**: Clean up dependencies and eliminate vendored packages
+  ([#78](https://github.com/aptible/unpage/pull/78),
+  [`87fec00`](https://github.com/aptible/unpage/commit/87fec001635be5881d46050ad77d671ab4f09b27))
+
+
 ## v0.1.0-alpha.21 (2025-08-08)
 
 ### Documentation
