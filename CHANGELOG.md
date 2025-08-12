@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.24 (2025-08-12)
+
+### Bug Fixes
+
+- Papertrail_search_logs configurable timeout [SC-33981]
+  ([#74](https://github.com/aptible/unpage/pull/74),
+  [`6674d88`](https://github.com/aptible/unpage/commit/6674d88afd88a1cedbbe6bd7d12f92dd16742472))
+
+
 ## v0.1.0-alpha.23 (2025-08-12)
 
 ### Bug Fixes
