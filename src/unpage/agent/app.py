@@ -13,7 +13,7 @@ from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import get_agents
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 
 

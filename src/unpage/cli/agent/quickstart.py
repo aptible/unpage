@@ -19,7 +19,7 @@ from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import Config, PluginConfig, manager
+from unpage.config import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.plugins.datadog.plugin import DatadogPlugin
 from unpage.plugins.llm.plugin import LlmPlugin

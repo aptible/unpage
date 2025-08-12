@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from fastmcp import Client, FastMCP
 
-from unpage.config.manager import Config, manager
+from unpage.config import Config, manager
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager

@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic_yaml import parse_yaml_file_as
 
 from unpage.agent.analysis import Agent
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.warnings import filter_all_warnings
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"

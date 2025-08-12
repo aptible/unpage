@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from unpage.config.manager import manager
+from unpage.config import manager
 
 
 def get_pid_file(profile: str) -> Path:

@@ -10,7 +10,7 @@ from mcp import ServerResult, types
 from pydantic import BaseModel, ConfigDict
 from pydantic_core import to_jsonable_python
 
-from unpage.config.manager import Config, manager
+from unpage.config import Config, manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins.mcp import McpServerMixin

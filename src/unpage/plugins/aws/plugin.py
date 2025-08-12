@@ -9,7 +9,7 @@ from aioboto3 import Session
 from pydantic import BaseModel, Field, ValidationError
 from pydantic_core import to_jsonable_python
 
-from unpage.config.manager import PluginSettings
+from unpage.config import PluginSettings
 from unpage.knowledge import Graph
 from unpage.plugins import Plugin
 from unpage.plugins.aptible.nodes.aptible_aws_instance import AptibleAwsInstance

@@ -16,7 +16,7 @@ from unpage.cli.graph._background import (
     get_log_file,
 )
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import manager
+from unpage.config import manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins import KnowledgeGraphMixin

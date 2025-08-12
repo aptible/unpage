@@ -10,7 +10,7 @@ import rich
 
 from unpage.cli._app import app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.manager import Config, PluginConfig, manager
+from unpage.config import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
