@@ -51,8 +51,7 @@ async def build(
 
         # Start subprocess with logging
         with log_file.open("w") as f:
-            active_profile = manager.get_active_profile()
-            f.write(f"Starting graph build for profile '{active_profile}' in background\n")
+            f.write("Starting graph build in background\n")
             f.write(f"Command: {' '.join(cmd)}\n")
             f.write("=" * 50 + "\n\n")
             f.flush()
@@ -61,9 +60,9 @@ async def build(
                 shlex.join(cmd), stdout=f, stderr=asyncio.subprocess.STDOUT, start_new_session=True
             )
 
-        print(f"Graph building started in background for profile '{active_profile}'")
-        print(f"Check progress: unpage graph logs --profile {active_profile} --follow")
-        print(f"Stop with: unpage graph stop --profile {active_profile}")
+        print("Graph building started in background")
+        print("Check progress: unpage graph logs --follow")
+        print("Stop with: unpage graph stop")
         return
 
     # For foreground execution, also check for conflicts
