@@ -24,21 +24,21 @@ async def status() -> None:
     pid_file = get_pid_file()
 
     if not pid_file.exists():
-        print(f"No graph build running for profile '{active_profile}'")
+        print("No graph build running")
         return
 
     try:
         pid = int(pid_file.read_text().strip())
         if is_process_running(pid):
-            print(f"Graph build running for profile '{active_profile}' (PID: {pid})")
+            print(f"Graph build running (PID: {pid})")
 
             # Show log file info if it exists
             log_file = get_log_file()
             if log_file.exists():
-                print(f"View logs: unpage graph logs --profile {active_profile} --follow")
+                print("View logs: unpage graph logs --follow")
         else:
-            print(f"Stale PID file found for profile '{active_profile}', cleaning up...")
+            print("Stale PID file found, cleaning up...")
             cleanup_pid_file()
     except ValueError:
-        print(f"Corrupted PID file found for profile '{active_profile}', cleaning up...")
+        print("Corrupted PID file found, cleaning up...")
         cleanup_pid_file()

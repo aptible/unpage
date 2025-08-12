@@ -35,12 +35,12 @@ async def logs(
         return
 
     if not log_file.exists():
-        print(f"No log file found for profile '{active_profile}'")
+        print("No log file found")
         print(f"Expected location: {log_file}")
         return
 
     if follow:
-        print(f"Following logs for profile '{active_profile}' (Ctrl+C to stop)")
+        print("Following logs (Ctrl+C to stop)")
         print(f"Log file: {log_file}")
 
         try:
@@ -49,7 +49,7 @@ async def logs(
         except KeyboardInterrupt:
             print("\nStopped following logs")
     else:
-        print(f"Recent logs for profile '{active_profile}':")
+        print("Recent logs:")
         print(f"Log file: {log_file}")
 
         proc = await asyncio.create_subprocess_shell(f"{tail_cmd} -n 50 {log_file!s}")

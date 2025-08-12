@@ -32,11 +32,8 @@ def check_and_create_lock() -> bool:
         try:
             existing_pid = int(pid_file.read_text().strip())
             if is_process_running(existing_pid):
-                active_profile = manager.get_active_profile()
-                print(
-                    f"Graph build already running for profile '{active_profile}' (PID: {existing_pid})"
-                )
-                print(f"Use 'unpage graph stop --profile {active_profile}' to stop it if needed")
+                print(f"Graph build already running (PID: {existing_pid})")
+                print("Use 'unpage graph stop' to stop it if needed")
                 return False
             else:
                 # Stale PID file, remove it

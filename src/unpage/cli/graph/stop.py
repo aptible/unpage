@@ -22,20 +22,18 @@ async def stop() -> None:
     pid_file = get_pid_file()
 
     if not pid_file.exists():
-        print(f"No graph build running for profile '{active_profile}'")
+        print("No graph build running")
         return
 
     try:
         pid = int(pid_file.read_text().strip())
         if is_process_running(pid):
-            print(f"Stopping graph build for profile '{active_profile}' (PID: {pid})...")
+            print(f"Stopping graph build (PID: {pid})...")
             os.kill(pid, signal.SIGTERM)
             print("Graph build stopped successfully")
         else:
-            print(
-                f"Process not found for profile '{active_profile}', cleaning up stale PID file..."
-            )
+            print("Process not found, cleaning up stale PID file...")
         cleanup_pid_file()
     except (ValueError, ProcessLookupError):
         cleanup_pid_file()
-        print(f"No running process found for profile '{active_profile}', cleaned up stale PID file")
+        print("No running process found, cleaned up stale PID file")
