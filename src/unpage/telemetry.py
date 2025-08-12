@@ -11,11 +11,11 @@ import httpx
 import rich
 import sentry_sdk
 
-from unpage.config.utils import CONFIG_ROOT, load_global_config
+from unpage.config.manager import manager
 
 
 def _get_or_create_user_id() -> str:
-    identity_file = CONFIG_ROOT / ".identity"
+    identity_file = manager.config_root / ".identity"
     if not identity_file.exists():
         if not identity_file.parent.exists():
             identity_file.parent.mkdir(parents=True)
@@ -72,8 +72,8 @@ class TunaClient(httpx.AsyncClient):
         self._run_id = str(uuid.uuid4())
 
         # Check if telemetry is disabled globally
-        global_config = load_global_config()
-        self._telemetry_enabled = global_config.telemetry_enabled and not UNPAGE_TELEMETRY_DISABLED
+        active_config = manager.get_active_profile_config()
+        self._telemetry_enabled = active_config.telemetry_enabled and not UNPAGE_TELEMETRY_DISABLED
         if not self._telemetry_enabled:
             # Let the user know that their preference is being respected
             print("Telemetry is disabled")
