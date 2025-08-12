@@ -19,7 +19,7 @@ from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import Config, PluginConfig, load_config, save_config
+from unpage.config.manager import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.plugins.datadog.plugin import DatadogPlugin
 from unpage.plugins.llm.plugin import LlmPlugin
@@ -51,11 +51,10 @@ async def quickstart(
     await _send_event("start", profile)
     welcome_to_unpage()
     _quickstart_intro()
-    cfg, next_step_count = await _create_config(
-        Config(plugins=_initial_plugin_settings(profile)), profile
-    )
+    config = manager.get_profile_config(profile)
+    cfg, next_step_count = await _create_config(config, config.profile)
     plugin_manager = PluginManager(cfg)
-    save_config(cfg, profile, create=True)
+    cfg.save()
     await _send_event("config_saved", profile)
     agent_name = await _create_and_edit_agent(profile, next_step_count)
     await _send_event("agent_created", profile)
@@ -86,9 +85,14 @@ Here's what the quickstart will entail:
 
 def _initial_plugin_settings(profile: str) -> dict[str, PluginConfig]:
     try:
-        existing_config = load_config(profile, create=False)
-    except Exception:
-        existing_config = Config(plugins={})
+        existing_config = manager.get_profile_config(profile)
+    except FileNotFoundError:
+        existing_config = Config(
+            profile=profile,
+            file_path=manager.get_profile_directory(profile) / "config.yaml",
+            plugins={},
+        )
+
     return {
         "core": PluginConfig(enabled=True),
         "networking": PluginConfig(enabled=True),
