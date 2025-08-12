@@ -1,11 +1,10 @@
 import sys
-from typing import Annotated
 
 from rich import print
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.cli.agent._app import agent_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
@@ -15,7 +14,6 @@ async def route(
     payload: str | None = None,
     /,
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     debug: bool = False,
 ) -> None:
     """Determine which agent will be used to analyze the given payload.
@@ -26,15 +24,13 @@ async def route(
     ----------
     payload
         The alert payload to analyze. Alternatively, you can pipe the payload to stdin.
-    profile
-        The profile to use
     debug
         Enable debug mode to print the history of the routing agent.
     """
     await telemetry.send_event(
         {
             "command": "agent route",
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "debug": debug,
         }
     )
@@ -57,7 +53,7 @@ async def route(
 
     # Run the analysis with the specific agent
     try:
-        analysis_agent = AnalysisAgent(profile)
+        analysis_agent = AnalysisAgent()
         result = await analysis_agent.acall(payload=data, route_only=True)
         if debug:
             print("\n\n===== DEBUG OUTPUT =====\n")

@@ -4,14 +4,14 @@ from pathlib import Path
 from unpage.config import manager
 
 
-def get_pid_file(profile: str) -> Path:
-    """Get the PID file path for a given profile graph build"""
-    return manager.get_profile_directory(profile) / "graph_build.pid"
+def get_pid_file() -> Path:
+    """Get the PID file path for the active profile graph build"""
+    return manager.get_active_profile_directory() / "graph_build.pid"
 
 
-def get_log_file(profile: str) -> Path:
-    """Get the log file path for a given profile graph build"""
-    return manager.get_profile_directory(profile) / "graph_build.log"
+def get_log_file() -> Path:
+    """Get the log file path for the active profile graph build"""
+    return manager.get_active_profile_directory() / "graph_build.log"
 
 
 def is_process_running(pid: int) -> bool:
@@ -24,16 +24,16 @@ def is_process_running(pid: int) -> bool:
         return False
 
 
-def check_and_create_lock(profile: str) -> bool:
+def check_and_create_lock() -> bool:
     """Returns True if we can proceed, False if already running"""
-    pid_file = get_pid_file(profile)
+    pid_file = get_pid_file()
 
     if pid_file.exists():
         try:
             existing_pid = int(pid_file.read_text().strip())
             if is_process_running(existing_pid):
-                print(f"Graph build already running for profile '{profile}' (PID: {existing_pid})")
-                print(f"Use 'unpage graph stop --profile {profile}' to stop it if needed")
+                print(f"Graph build already running (PID: {existing_pid})")
+                print("Use 'unpage graph stop' to stop it if needed")
                 return False
             else:
                 # Stale PID file, remove it
@@ -46,12 +46,12 @@ def check_and_create_lock(profile: str) -> bool:
     return True
 
 
-def create_pid_file(profile: str, pid: int) -> None:
+def create_pid_file(pid: int) -> None:
     """Create PID file with given process ID"""
-    pid_file = get_pid_file(profile)
+    pid_file = get_pid_file()
     pid_file.parent.mkdir(parents=True, exist_ok=True)
     pid_file.write_text(str(pid))
 
 
-def cleanup_pid_file(profile: str) -> None:
-    get_pid_file(profile).unlink(missing_ok=True)
+def cleanup_pid_file() -> None:
+    get_pid_file().unlink(missing_ok=True)

@@ -1,6 +1,8 @@
 """Configuration management for unpage CLI."""
 
 import shutil
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -105,6 +107,7 @@ class ConfigManager:
         self.config_root = config_root or env.get_config_root()
         self.profiles_dir = self.config_root / "profiles"
         self.active_profile_file = self.config_root / ".profile"
+        self.active_profile_override = None
         self._ensure_config_structure()
 
     def _ensure_config_structure(self) -> None:
@@ -216,6 +219,9 @@ class ConfigManager:
         Returns:
             Name of active profile
         """
+        if self.active_profile_override:
+            return self.active_profile_override
+
         if not self.active_profile_file.exists():
             return "default"
 
@@ -235,6 +241,15 @@ class ConfigManager:
             raise FileNotFoundError(f"Profile {name!r} not found")
 
         self.active_profile_file.write_text(name)
+
+    @contextmanager
+    def active_profile(self, name: str) -> Generator[None, None, None]:
+        """Context manager for setting the active profile."""
+        self.active_profile_override = name
+        try:
+            yield
+        finally:
+            self.active_profile_override = None
 
     def get_active_profile_directory(self) -> Path:
         """Get the directory for the currently active profile.
