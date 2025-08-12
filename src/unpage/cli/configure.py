@@ -150,7 +150,7 @@ async def _configure_intro() -> None:
 
 
 def _initial_config(profile: str) -> Config:
-    default_config = PluginManager.default_config
+    default_config = manager.get_empty_config(profile)
     try:
         existing_config = manager.get_profile_config(profile)
     except Exception:
@@ -169,14 +169,10 @@ def _initial_config(profile: str) -> Config:
                 else existing_config.plugins[plugin_name].settings
             ),
         )
-    
+
     # Create config with file path for saving
     config_file = manager.get_profile_directory(profile) / "config.yaml"
-    return Config(
-        plugins=plugin_settings,
-        profile=profile,
-        file_path=config_file
-    )
+    return Config(plugins=plugin_settings, profile=profile, file_path=config_file)
 
 
 async def _select_plugins_to_enable_disable(
