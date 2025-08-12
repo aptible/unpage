@@ -38,18 +38,18 @@ def get_agent_template(agent_name: str) -> str:
     return (Path(__file__).parent / "templates" / f"{agent_name}.yaml").read_text()
 
 
-def get_agents(profile: str) -> list[str]:
-    """Get the names of the agents in the config directory."""
-    agents_dir = manager.get_profile_directory(profile) / "agents"
+def get_agents() -> list[str]:
+    """Get the names of the agents in the active profile's config directory."""
+    agents_dir = manager.get_active_profile_directory() / "agents"
     return [
         str(agent_file.relative_to(agents_dir).with_suffix(""))
         for agent_file in agents_dir.glob("**/*.yaml")
     ]
 
 
-def load_agent(agent_name: str, profile: str) -> Agent:
-    """Load the agent with the given name from the profile."""
-    agent_file = manager.get_profile_directory(profile) / "agents" / f"{agent_name}.yaml"
+def load_agent(agent_name: str) -> Agent:
+    """Load the agent with the given name from the active profile."""
+    agent_file = manager.get_active_profile_directory() / "agents" / f"{agent_name}.yaml"
 
     # If they're trying to load the default agent and it doesn't exist, create it.
     if not agent_file.exists() and agent_name == "default":
@@ -60,7 +60,7 @@ def load_agent(agent_name: str, profile: str) -> Agent:
     return parse_yaml_file_as(Agent, agent_file)
 
 
-def delete_agent(agent_name: str, profile: str) -> None:
-    """Delete the agent with the given name from the profile."""
-    agent_file = manager.get_profile_directory(profile) / "agents" / f"{agent_name}.yaml"
+def delete_agent(agent_name: str) -> None:
+    """Delete the agent with the given name from the active profile."""
+    agent_file = manager.get_active_profile_directory() / "agents" / f"{agent_name}.yaml"
     agent_file.unlink()

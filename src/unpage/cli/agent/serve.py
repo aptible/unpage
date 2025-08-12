@@ -4,6 +4,7 @@ from cyclopts import Parameter
 
 from unpage.agent.app import listen, settings
 from unpage.cli.agent._app import agent_app
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
@@ -14,7 +15,6 @@ async def serve(
     host: str = settings.UNPAGE_HOST,
     port: int = settings.UNPAGE_PORT,
     workers: int = settings.UNPAGE_WORKERS,
-    profile: str = settings.UNPAGE_PROFILE,
     reload: bool = settings.UNPAGE_RELOAD,
     tunnel: bool = settings.UNPAGE_TUNNEL,
     ngrok_token: Annotated[
@@ -33,8 +33,6 @@ async def serve(
         The port to bind to
     workers
         The number of workers to use
-    profile
-        The profile to use
     reload
         Reload the server when the code changes
     tunnel
@@ -54,7 +52,7 @@ async def serve(
             else f"{host.split('.')[0]}.0.0.0",
             "port": port,
             "workers": workers,
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "reload": reload,
             "tunnel": tunnel,
         }
@@ -63,7 +61,6 @@ async def serve(
         host=host,
         port=port,
         workers=workers,
-        profile=profile,
         tunnel=tunnel,
         ngrok_token=ngrok_token,
         ngrok_domain=ngrok_domain,
