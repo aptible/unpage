@@ -6,7 +6,7 @@ import anyio
 import questionary
 from pydantic import AwareDatetime
 
-from unpage.config.utils import PluginSettings
+from unpage.config.manager import PluginSettings
 from unpage.knowledge import Graph
 from unpage.plugins.base import Plugin
 from unpage.plugins.datadog.client import DatadogClient

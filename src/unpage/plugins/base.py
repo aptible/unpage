@@ -1,7 +1,8 @@
 from collections.abc import Iterator
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
-from unpage.config.utils import Config, PluginConfig, PluginSettings
+from unpage.config.manager import Config, PluginConfig, PluginSettings
 from unpage.utils import classproperty
 
 if TYPE_CHECKING:
