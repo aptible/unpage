@@ -5,7 +5,7 @@ import_submodules("unpage.cli")
 
 
 def main() -> None:
-    app()
+    app.meta()
 
 
 if __name__ == "__main__":
