@@ -7,7 +7,7 @@ from unpage.cli.agent._app import agent_app
 from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
-from unpage.utils import edit_file, get_editor
+from unpage.utils import edit_file
 
 
 @agent_app.command
@@ -15,7 +15,7 @@ async def edit(
     agent_name: str,
     /,
     *,
-    editor: str | None = get_editor(),
+    editor: str | None = None,
 ) -> None:
     """Edit an existing agent configuration file.
 

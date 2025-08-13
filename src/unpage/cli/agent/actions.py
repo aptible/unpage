@@ -12,7 +12,8 @@ async def create_agent(agent_name: str, overwrite: bool, template: str) -> Path:
         agent_template = get_agent_template(template)
     except FileNotFoundError:
         print(
-            f"Template '{template}' not found at {Path(__file__).parent / 'templates' / f'{template}.yaml'}"
+            f"Template '{template}' not found at {Path(__file__).parent / 'templates' / f'{template}.yaml'}",
+            file=sys.stderr,
         )
         sys.exit(1)
 

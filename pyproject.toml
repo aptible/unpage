@@ -80,7 +80,7 @@ typeCheckingMode = "standard"
 line-length = 100
 
 [tool.ruff.lint]
-exclude = ["tests/**/test_*.py"]
+exclude = ["tests/**/test_*.py", "tests/**/conftest.py"]
 ignore = [
     "S603" # false positive: https://github.com/astral-sh/ruff/issues/4045
 ]
