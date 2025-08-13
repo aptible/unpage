@@ -1,17 +1,9 @@
 from datetime import datetime
 
-import msgspec
 from pydantic import AwareDatetime, BaseModel
 
 
-class LogAnomaly(BaseModel):
-    pattern: str
-    peak_increase: float
-    peak_time: AwareDatetime
-    counts_sparkline: str
-
-
-class LogLine(msgspec.Struct):
+class LogLine(BaseModel):
     time: datetime
     log: str
 

@@ -1,0 +1,33 @@
+name: Combine Dependabot PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_type_filter:
+        description: 'Filter PRs by dependency type labels (e.g., "python", "npm", "docker"). Leave empty to include all Dependabot PRs'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  combine-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Combine Dependabot PRs
+        uses: github/combine-prs@2909f404763c3177a456e052bdb7f2e85d3a7cb3 # v5.2.0
+        with:
+          ignore_label: "nocombine"
+          select_label: ${{ github.event.inputs.pr_type_filter }}
+          labels: "dependencies, combined-pr"
+          pr_title: "chore(deps): Combine Dependabot PRs"
