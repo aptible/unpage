@@ -1,3 +1,5 @@
+import sys
+
 import rich
 
 from unpage.cli.profile._app import profile_app
@@ -18,4 +20,4 @@ def create(profile_name: str) -> None:
         rich.print(f"[green]Profile '{profile_name}' created successfully![/green]")
     except FileExistsError:
         rich.print(f"[red]Profile '{profile_name}' already exists![/red]")
-        return
+        sys.exit(1)

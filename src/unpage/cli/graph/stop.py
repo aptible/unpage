@@ -1,5 +1,6 @@
 import os
 import signal
+import sys
 
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import cleanup_pid_file, get_pid_file, is_process_running
@@ -23,17 +24,20 @@ async def stop() -> None:
 
     if not pid_file.exists():
         print("No graph build running")
-        return
+        sys.exit(1)
 
     try:
         pid = int(pid_file.read_text().strip())
-        if is_process_running(pid):
-            print(f"Stopping graph build (PID: {pid})...")
-            os.kill(pid, signal.SIGTERM)
-            print("Graph build stopped successfully")
-        else:
-            print("Process not found, cleaning up stale PID file...")
+        if not is_process_running(pid):
+            cleanup_pid_file()
+            print("No graph build running")
+            sys.exit(1)
+
+        print(f"Stopping graph build (PID: {pid})...")
+        os.kill(pid, signal.SIGTERM)
+        print("Graph build stopped successfully")
         cleanup_pid_file()
     except (ValueError, ProcessLookupError):
         cleanup_pid_file()
-        print("No running process found, cleaned up stale PID file")
+        print("No graph build running")
+        sys.exit(1)

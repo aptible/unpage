@@ -32,12 +32,9 @@ def check_and_create_lock() -> bool:
         try:
             existing_pid = int(pid_file.read_text().strip())
             if is_process_running(existing_pid):
-                print(f"Graph build already running (PID: {existing_pid})")
-                print("Use 'unpage graph stop' to stop it if needed")
                 return False
             else:
                 # Stale PID file, remove it
-                print("Found stale PID file, cleaning up...")
                 pid_file.unlink()
         except (ValueError, FileNotFoundError):
             # Corrupted or missing file, remove it

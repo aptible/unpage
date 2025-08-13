@@ -1,3 +1,7 @@
+import sys
+
+import rich
+
 from unpage.agent.utils import delete_agent
 from unpage.cli.agent._app import agent_app
 from unpage.config import manager
@@ -21,4 +25,9 @@ async def delete(agent_name: str) -> None:
             **prepare_profile_for_telemetry(manager.get_active_profile()),
         }
     )
-    delete_agent(agent_name)
+    try:
+        delete_agent(agent_name)
+        rich.print(f"[green]Agent '{agent_name}' deleted successfully[/green]")
+    except FileNotFoundError:
+        rich.print(f"[red]Agent '{agent_name}' does not exist[/red]")
+        sys.exit(1)

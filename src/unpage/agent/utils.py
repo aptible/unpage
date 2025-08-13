@@ -41,10 +41,14 @@ def get_agent_template(agent_name: str) -> str:
 def get_agents() -> list[str]:
     """Get the names of the agents in the active profile's config directory."""
     agents_dir = manager.get_active_profile_directory() / "agents"
-    return [
+    agents = [
         str(agent_file.relative_to(agents_dir).with_suffix(""))
         for agent_file in agents_dir.glob("**/*.yaml")
     ]
+    # Always include default agent
+    if "default" not in agents:
+        agents.append("default")
+    return agents
 
 
 def load_agent(agent_name: str) -> Agent:
