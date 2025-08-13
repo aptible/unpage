@@ -57,7 +57,7 @@ jobs:
           git_committer_email: "actions@users.noreply.github.com"
 
       - name: Publish | Upload to GitHub Release Assets
-        uses: python-semantic-release/publish-action@b717f67f7e7e9f709357bce5a542846503ce46ec  # v10.2.0
+        uses: python-semantic-release/publish-action@f8a3b2efc2282bc5219b83ba78ac64b69d6e05b9  # v10.3.1
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.RELEASE_GH_TOKEN }}
