@@ -6,7 +6,7 @@ from rich import print
 from unpage.agent.utils import get_agent_template
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import edit_file, get_editor
@@ -40,7 +40,7 @@ async def edit(
         }
     )
     # Get the config directory for the profile
-    config_dir = get_config_dir(profile, create=False)
+    config_dir = manager.get_profile_directory(profile)
 
     # Build the agent file path
     agent_file = config_dir / "agents" / f"{agent_name}.yaml"

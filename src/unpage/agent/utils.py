@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic_yaml import parse_yaml_file_as
 
 from unpage.agent.analysis import Agent
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.warnings import filter_all_warnings
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -40,7 +40,7 @@ def get_agent_template(agent_name: str) -> str:
 
 def get_agents(profile: str) -> list[str]:
     """Get the names of the agents in the config directory."""
-    agents_dir = get_config_dir(profile, create=False) / "agents"
+    agents_dir = manager.get_profile_directory(profile) / "agents"
     return [
         str(agent_file.relative_to(agents_dir).with_suffix(""))
         for agent_file in agents_dir.glob("**/*.yaml")
@@ -49,7 +49,7 @@ def get_agents(profile: str) -> list[str]:
 
 def load_agent(agent_name: str, profile: str) -> Agent:
     """Load the agent with the given name from the profile."""
-    agent_file = get_config_dir(profile, create=False) / "agents" / f"{agent_name}.yaml"
+    agent_file = manager.get_profile_directory(profile) / "agents" / f"{agent_name}.yaml"
 
     # If they're trying to load the default agent and it doesn't exist, create it.
     if not agent_file.exists() and agent_name == "default":
@@ -62,5 +62,5 @@ def load_agent(agent_name: str, profile: str) -> Agent:
 
 def delete_agent(agent_name: str, profile: str) -> None:
     """Delete the agent with the given name from the profile."""
-    agent_file = get_config_dir(profile, create=False) / "agents" / f"{agent_name}.yaml"
+    agent_file = manager.get_profile_directory(profile) / "agents" / f"{agent_name}.yaml"
     agent_file.unlink()

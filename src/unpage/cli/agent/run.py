@@ -7,7 +7,7 @@ from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import load_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import load_config
+from unpage.config import manager
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
@@ -53,7 +53,7 @@ async def run(
             "has_pagerduty_incident": bool(pagerduty_incident),
         }
     )
-    plugin_manager = PluginManager(load_config(profile, create=False))
+    plugin_manager = PluginManager(manager.get_profile_config(profile))
     data = ""
     if pagerduty_incident:
         if payload is not None or not sys.stdin.isatty():

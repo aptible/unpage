@@ -10,7 +10,7 @@ import rich
 
 from unpage.cli._app import app
 from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import Config, PluginConfig, load_config, save_config
+from unpage.config import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
@@ -73,12 +73,12 @@ async def configure(
     await _configure_intro()
     cfg = _initial_config(profile)
     await _select_plugins_to_enable_disable(cfg)
-    save_config(cfg, profile, create=True)
+    cfg.save()
     await _send_event("config_saved", profile)
     rich.print("")
     await _configure_plugins(cfg, profile)
     await _send_event("plugins_configured", profile)
-    save_config(cfg, profile, create=True)
+    cfg.save()
     await _send_event("config_saved_2", profile)
     rich.print("")
     await _suggest_building_graph(profile, use_uv_run)
@@ -150,9 +150,9 @@ async def _configure_intro() -> None:
 
 
 def _initial_config(profile: str) -> Config:
-    default_config = PluginManager.default_config
+    default_config = manager.get_empty_config(profile)
     try:
-        existing_config = load_config(profile, create=False)
+        existing_config = manager.get_profile_config(profile)
     except Exception:
         existing_config = default_config
     plugin_settings: dict[str, PluginConfig] = {}
@@ -169,7 +169,10 @@ def _initial_config(profile: str) -> Config:
                 else existing_config.plugins[plugin_name].settings
             ),
         )
-    return Config(plugins=plugin_settings)
+
+    # Create config with file path for saving
+    config_file = manager.get_profile_directory(profile) / "config.yaml"
+    return Config(plugins=plugin_settings, profile=profile, file_path=config_file)
 
 
 async def _select_plugins_to_enable_disable(

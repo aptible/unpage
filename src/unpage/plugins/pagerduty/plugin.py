@@ -6,7 +6,7 @@ import questionary
 from pagerduty.rest_api_v2_client import RestApiV2Client
 from pydantic import AwareDatetime, BaseModel
 
-from unpage.config.utils import PluginSettings
+from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
 from unpage.plugins.pagerduty.models import PagerDutyIncident, PagerDutyIncidentPayload
