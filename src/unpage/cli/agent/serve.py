@@ -21,6 +21,7 @@ async def serve(
         str, Parameter(show_default=lambda v: v if not v else f"{v[:3]}<redacted>")
     ] = settings.NGROK_TOKEN,
     ngrok_domain: str = settings.NGROK_DOMAIN,
+    debug: bool = settings.UNPAGE_DEBUG,
 ) -> None:
     """Run the Unpage Agent server, which loads all agents and routes between them. This is intended to be a webhook receiver for PagerDuty.
 
@@ -67,4 +68,5 @@ async def serve(
         ngrok_token=ngrok_token,
         ngrok_domain=ngrok_domain,
         reload=reload,
+        debug=debug,
     )

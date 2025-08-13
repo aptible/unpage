@@ -4,7 +4,6 @@ from typing import cast
 from pydantic import AwareDatetime
 
 from unpage.knowledge import NODE_REGISTRY, HasMetrics
-from unpage.lib.anomalies import Anomaly, Point, detect_anomalies
 from unpage.models import Observation
 from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
@@ -81,17 +80,3 @@ class MetricsPlugin(Plugin, McpServerMixin):
         )
 
         return observations or "No metrics found. Try a longer time range."
-
-    @tool(
-        description=(
-            """Get anomalies for a list of metrics. Once you have the results
-            from metrics_get_metrics_for_resource, you can send a list of
-            Points (timestamp and value pairs) to this tool to identify
-            anomalies."""
-        )
-    )
-    async def get_anomalies_for_metrics(
-        self,
-        metrics: list[Point],
-    ) -> list[Anomaly]:
-        return detect_anomalies(metrics)
