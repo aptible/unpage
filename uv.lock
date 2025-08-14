@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 
 [[package]]
@@ -3199,7 +3199,7 @@ wheels = [
 
 [[package]]
 name = "unpage"
-version = "0.1.0a25"
+version = "0.1.0a26"
 source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },

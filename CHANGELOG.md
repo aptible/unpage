@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.26 (2025-08-14)
+
+### Bug Fixes
+
+- Dspy 3.0.0 GA release ✨ ([#84](https://github.com/aptible/unpage/pull/84),
+  [`78878bb`](https://github.com/aptible/unpage/commit/78878bb0b3bf2981204ae9a865a7727a13749ca0))
+
+### Documentation
+
+- All plugin docs have an mcp accordion at the top of the page [SC-34323]
+  ([#77](https://github.com/aptible/unpage/pull/77),
+  [`a629292`](https://github.com/aptible/unpage/commit/a629292d054bd01056f87f40663dc7a9609ca45b))
+
+
 ## v0.1.0-alpha.25 (2025-08-12)
 
 ### Features
