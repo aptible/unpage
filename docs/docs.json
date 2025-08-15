@@ -13,7 +13,7 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Join our Slack Community",
+          "anchor": "Slack Community",
           "icon": "headset",
           "href": "https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw"
         },
@@ -21,6 +21,11 @@
           "anchor": "Changelog",
           "icon": "sparkles",
           "href": "https://www.aptible.ai/changelog"
+        },
+        {
+          "anchor": "Github Repo",
+          "icon": "github",
+          "href": "https://github.com/aptible/unpage"
         }
       ]
     },
