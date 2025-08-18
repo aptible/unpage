@@ -6,16 +6,15 @@ title: Disk Space Errors
 [04:17:32 AM] CRITICAL - Disk space: / 96% used (23.4GB/24.5GB)
 ```
 
-You know
-exactly what comes next: stumbling to your laptop, SSH'ing into the server,
+You know exactly what comes next: stumbling to your laptop, SSH'ing into the server,
 running `df -h` to see which partition is full, then hunting through directories
 with `du` commands to find what's consuming all the space. Maybe it's log files
 that weren't rotated properly. Maybe a backup process went rogue. Maybe someone's
 script started dumping debug files everywhere.
 
-Every single disk space incident follows the same
-forensic pattern, yet here you are at 4am, manually typing the same commands
-while your production systems are grinding to a halt.
+Every single disk space incident follows the same forensic pattern, yet here you
+are at 4am, manually typing the same commands while your production systems are
+grinding to a halt.
 
 This is the kind of toil that keeps SREs up at night, literally.
 The investigation is completely systematic, the data sources are predictable,
