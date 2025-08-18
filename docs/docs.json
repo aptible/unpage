@@ -47,6 +47,13 @@
         ]
       },
       {
+        "group": "Example Agents",
+        "pages": [
+          "examples/ssl_connection_failure",
+          "examples/disk_space_alerts"
+        ]
+      },
+      {
         "group": "Plugins",
         "pages": [
           "plugins/aptible",
