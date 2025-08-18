@@ -116,7 +116,7 @@ plugins:
             host: The hostname or IP address of the host to check the disk space for
         - handle: check_large_files
           description: Check the large files in a host.
-          command: ssh -o StrictHostKeyChecking=no ec2-user@{host} 'find /var/log /tmp /var/lib/docker -type f -size +100M 2>/dev/null | xargs -I {} ls -lh {} | sort -k5 -hr | head -20'
+          command: ssh -o StrictHostKeyChecking=no ec2-user@{host} 'find /var/log /tmp /var/lib/docker -type f -size +100M 2>/dev/null | xargs -I {{}} ls -lh {{}} | sort -k5 -hr | head -20'
           args:
             host: The hostname or IP address of the host to check the large files for
 ```
