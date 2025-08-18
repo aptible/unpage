@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.27 (2025-08-18)
+
+### Bug Fixes
+
+- Only include the 'generated_at' and 'message' fields in the log output [SC-34360]
+  ([#104](https://github.com/aptible/unpage/pull/104),
+  [`2c60368`](https://github.com/aptible/unpage/commit/2c603687fe250e626389c23df623faec3ca62498))
+
+### Documentation
+
+- Add anchor for githup repo ([#89](https://github.com/aptible/unpage/pull/89),
+  [`5775b37`](https://github.com/aptible/unpage/commit/5775b37b127406f7142f47be394802d8bff40965))
+
+
 ## v0.1.0-alpha.26 (2025-08-14)
 
 ### Bug Fixes
