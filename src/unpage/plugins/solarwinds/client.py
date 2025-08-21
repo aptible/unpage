@@ -32,8 +32,8 @@ class SolarWindsLogEvent(BaseModel):
 class ResultPageInfo(BaseModel):
     """Pagination links"""
 
-    prevPage: str
-    nextPage: str
+    prevPage: str | None = None
+    nextPage: str | None = None
 
 
 class SearchResult(BaseModel):
@@ -92,7 +92,7 @@ class SolarWindsClient(httpx.AsyncClient):
         min_time: AwareDatetime,
         max_time: AwareDatetime,
         page_size: int = 1000,
-        continue_search: Callable[[AwareDatetime | None], bool] | None = None,
+        continue_search: Callable[[], bool] | None = None,
     ) -> AsyncGenerator[SolarWindsLogEvent, None]:
         """Search logs with pagination.
 
@@ -110,8 +110,8 @@ class SolarWindsClient(httpx.AsyncClient):
         while True:
             params: dict[str, Any] = {
                 "filter": query,
-                "startTime": int(min_time.timestamp()),
-                "endTime": int(max_time.timestamp()),
+                "startTime": min_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "endTime": max_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "pageSize": page_size,
                 "direction": "backward",
             }
@@ -135,5 +135,5 @@ class SolarWindsClient(httpx.AsyncClient):
                 skip_token = new_token
             else:
                 break
-            if not continue_search:
+            if continue_search is None or not continue_search():
                 break
