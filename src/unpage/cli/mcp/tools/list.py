@@ -1,4 +1,3 @@
-
 from unpage.cli.mcp.tools._app import tools_app
 from unpage.config import manager
 from unpage.knowledge import Graph
