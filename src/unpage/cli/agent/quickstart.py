@@ -26,6 +26,7 @@ from unpage.plugins.llm.plugin import LlmPlugin
 from unpage.plugins.pagerduty.models import PagerDutyIncident
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
 from unpage.plugins.papertrail.plugin import PapertrailPlugin
+from unpage.plugins.solarwinds.plugin import SolarWindsPlugin
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import confirm, edit_file, select
@@ -116,6 +117,14 @@ def _initial_plugin_settings(profile: str) -> dict[str, PluginConfig]:
                 else existing_config.plugins["papertrail"].settings
             ),
         ),
+        "solarwinds": PluginConfig(
+            enabled=False,
+            settings=(
+                SolarWindsPlugin.default_plugin_settings
+                if "solarwinds" not in existing_config.plugins
+                else existing_config.plugins["solarwinds"].settings
+            ),
+        ),
         "datadog": PluginConfig(
             enabled=False,
             settings=(
@@ -177,6 +186,7 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
         rich.print("")
     optional_plugins = [
         "papertrail",
+        "solarwinds",
         "datadog",
     ]
     for i, optional_plugin in enumerate(optional_plugins):

@@ -150,7 +150,7 @@ unpage mcp tools call [OPTIONS] TOOL_NAME [ARGS]
 ```shell
 # Call a tool with arguments
 unpage mcp tools call aws_list_ec2_instances --region us-west-2
-unpage mcp tools call papertrail_search_logs error "2025-07-25T00:00:00+00:00" "2025-07-27T00:00:00+00:00"
+unpage mcp tools call solarwinds_search_logs error "2025-07-25T00:00:00+00:00" "2025-07-27T00:00:00+00:00"
 
 # Call a tool and pipe output to jq for processing
 unpage mcp tools call datadog_get_metrics | jq .

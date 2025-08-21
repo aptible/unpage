@@ -61,3 +61,4 @@ tools:
   - "pagerduty_post_status_update"
   - "pagerduty_resolve_incident"
   - "papertrail_search_logs"
+  - "solarwinds_search_logs"
