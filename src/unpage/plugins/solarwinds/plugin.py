@@ -25,7 +25,7 @@ class SolarWindsSearchResult(BaseModel):
 
 
 class SolarWindsPlugin(Plugin, McpServerMixin):
-    _client: SolarWindsClient | None
+    _client: SolarWindsClient | None = None
 
     def __init__(
         self,
@@ -46,6 +46,10 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
 
     async def validate_plugin_config(self) -> None:
         await super().validate_plugin_config()
+        if self._client is None:
+            raise ValueError(
+                "SolarWinds client not initialized. Please check your token and datacenter configuration."
+            )
         await self._client.verify_connection()
 
     async def interactive_configure(self) -> PluginSettings:
@@ -96,6 +100,9 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
             def under_time_out(self) -> bool:
                 self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
                 return not self.timed_out
+
+        if self._client is None:
+            return "SolarWinds client not initialized. Please check your token and datacenter configuration."
 
         tt = timeoutTracker()
         async for log in self._client.search(

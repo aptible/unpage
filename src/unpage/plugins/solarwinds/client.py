@@ -117,8 +117,8 @@ class SolarWindsClient(httpx.AsyncClient):
                 yield log
 
             next_page = getattr(result.pageInfo, "nextPage", None)
-            new_token = self.extract_skip_token(next_page)
-            
+            new_token = self.extract_skip_token(next_page) if next_page else None
+
             # If there are no more new results, we can break early.
             if new_token in (None, skip_token):
                 break
