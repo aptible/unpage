@@ -1,3 +1,7 @@
+import sys
+
+from rich import print
+
 from unpage.cli.mcp.tools._app import tools_app
 from unpage.config import manager
 from unpage.knowledge import Graph
@@ -27,6 +31,11 @@ async def list_tools() -> None:
     mcp = await build_mcp_server(context)
 
     tools = await mcp.get_tools()
+    if not tools:
+        print("[red]No MCP tools available from enabled plugins.[/red]")
+        print("[bold]Enable plugins with 'unpage configure' to access more tools.[/bold]")
+        sys.exit(1)
+
     for key, tool in tools.items():
         cmd = [key]
         for arg, arg_data in tool.parameters["properties"].items():

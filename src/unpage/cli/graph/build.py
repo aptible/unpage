@@ -39,7 +39,9 @@ async def build(
     """
     # Check if already running
     if not check_and_create_lock():
-        return
+        print("Graph build already running")
+        print("Use 'unpage graph stop' to stop it if needed")
+        sys.exit(1)
 
     if background:
         # Build command args for subprocess
@@ -63,10 +65,6 @@ async def build(
         print("Graph building started in background")
         print("Check progress: unpage graph logs --follow")
         print("Stop with: unpage graph stop")
-        return
-
-    # For foreground execution, also check for conflicts
-    if not check_and_create_lock():
         return
 
     async def _build_graph() -> None:

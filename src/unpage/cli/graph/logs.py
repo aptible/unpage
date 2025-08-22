@@ -1,5 +1,6 @@
 import asyncio
 import shutil
+import sys
 
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import get_log_file
@@ -32,12 +33,12 @@ async def logs(
     tail_cmd = shutil.which("tail")
     if not tail_cmd:
         print("'tail' command not found. Please install it.")
-        return
+        sys.exit(1)
 
     if not log_file.exists():
         print("No log file found")
         print(f"Expected location: {log_file}")
-        return
+        sys.exit(1)
 
     if follow:
         print("Following logs (Ctrl+C to stop)")

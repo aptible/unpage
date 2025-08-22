@@ -1,3 +1,5 @@
+import sys
+
 import rich
 
 from unpage.cli.profile._app import profile_app
@@ -21,12 +23,12 @@ async def delete(profile_name: str, *, force: bool = False) -> None:
     if profile_name not in available_profiles:
         rich.print(f"[red]Profile '{profile_name}' does not exist[/red]")
         rich.print(f"Available profiles: {', '.join(available_profiles)}")
-        return
+        sys.exit(1)
 
     # Prevent deleting the default profile
     if profile_name == "default":
         rich.print("[red]Cannot delete the default profile[/red]")
-        return
+        sys.exit(1)
 
     # Check if the profile is the active profile
     active_profile = manager.get_active_profile()
@@ -34,7 +36,7 @@ async def delete(profile_name: str, *, force: bool = False) -> None:
         rich.print(
             f"[red]Cannot delete active profile '{profile_name}'. Use --force or switch to a different profile first.[/red]"
         )
-        return
+        sys.exit(1)
 
     # Confirm deletion unless forced
     if not force:

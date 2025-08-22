@@ -1,3 +1,5 @@
+import sys
+
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import (
     cleanup_pid_file,
@@ -25,7 +27,7 @@ async def status() -> None:
 
     if not pid_file.exists():
         print("No graph build running")
-        return
+        sys.exit(1)
 
     try:
         pid = int(pid_file.read_text().strip())
@@ -37,8 +39,10 @@ async def status() -> None:
             if log_file.exists():
                 print("View logs: unpage graph logs --follow")
         else:
-            print("Stale PID file found, cleaning up...")
             cleanup_pid_file()
+            print("No graph build running")
+            sys.exit(1)
     except ValueError:
-        print("Corrupted PID file found, cleaning up...")
         cleanup_pid_file()
+        print("No graph build running")
+        sys.exit(1)
