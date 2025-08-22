@@ -25,7 +25,7 @@ class SolarWindsSearchResult(BaseModel):
 
 
 class SolarWindsPlugin(Plugin, McpServerMixin):
-    _client: SolarWindsClient
+    _client: SolarWindsClient | None
 
     def __init__(
         self,
