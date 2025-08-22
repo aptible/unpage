@@ -4,7 +4,6 @@ import shlex
 import sys
 import time
 from collections import Counter
-from typing import Annotated
 
 import anyio
 
@@ -15,9 +14,7 @@ from unpage.cli.graph._background import (
     create_pid_file,
     get_log_file,
 )
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config import load_config
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins import KnowledgeGraphMixin
@@ -28,7 +25,6 @@ from unpage.telemetry import prepare_profile_for_telemetry
 @graph_app.command
 async def build(
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     interval: int | None = None,
     background: bool = False,
 ) -> None:
@@ -36,28 +32,28 @@ async def build(
 
     Parameters
     ----------
-    profile
-        The profile to use
     interval
         Rebuild the graph continuously, pausing for the specified seconds between builds
     background
         Run in background and return immediately
     """
     # Check if already running
-    if not check_and_create_lock(profile):
-        return
+    if not check_and_create_lock():
+        print("Graph build already running")
+        print("Use 'unpage graph stop' to stop it if needed")
+        sys.exit(1)
 
     if background:
         # Build command args for subprocess
         cmd = [a for a in sys.argv if a != "--background"]
 
         # Set up logging
-        log_file = get_log_file(profile)
+        log_file = get_log_file()
         log_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Start subprocess with logging
         with log_file.open("w") as f:
-            f.write(f"Starting graph build for profile '{profile}' in background\n")
+            f.write("Starting graph build in background\n")
             f.write(f"Command: {' '.join(cmd)}\n")
             f.write("=" * 50 + "\n\n")
             f.flush()
@@ -66,20 +62,16 @@ async def build(
                 shlex.join(cmd), stdout=f, stderr=asyncio.subprocess.STDOUT, start_new_session=True
             )
 
-        print(f"Graph building started in background for profile '{profile}'")
-        print(f"Check progress: unpage graph logs --profile {profile} --follow")
-        print(f"Stop with: unpage graph stop --profile {profile}")
-        return
-
-    # For foreground execution, also check for conflicts
-    if not check_and_create_lock(profile):
+        print("Graph building started in background")
+        print("Check progress: unpage graph logs --follow")
+        print("Stop with: unpage graph stop")
         return
 
     async def _build_graph() -> None:
         await telemetry.send_event(
             {
                 "command": "graph build - starting",
-                **prepare_profile_for_telemetry(profile),
+                **prepare_profile_for_telemetry(manager.get_active_profile()),
                 "interval": interval,
                 "background": background,
             }
@@ -89,8 +81,8 @@ async def build(
         start_time = time.perf_counter()
 
         graph = Graph()
-        config = load_config(profile, create=True)
-        output_path = (get_config_dir(profile) / "graph.json").resolve()
+        config = manager.get_active_profile_config()
+        output_path = (manager.get_active_profile_directory() / "graph.json").resolve()
         plugin_manager = PluginManager(config)
 
         async with anyio.create_task_group() as tg:
@@ -126,7 +118,7 @@ async def build(
         await telemetry.send_event(
             {
                 "command": "graph build - finished",
-                **prepare_profile_for_telemetry(profile),
+                **prepare_profile_for_telemetry(manager.get_active_profile()),
                 "duration_seconds": total_time,
                 "node_counts": node_counts,
                 "edge_counts": edge_counts,
@@ -134,7 +126,7 @@ async def build(
         )
 
     try:
-        create_pid_file(profile, os.getpid())
+        create_pid_file(os.getpid())
 
         if interval:
             while True:
@@ -144,4 +136,4 @@ async def build(
         else:
             await _build_graph()
     finally:
-        cleanup_pid_file(profile)
+        cleanup_pid_file()

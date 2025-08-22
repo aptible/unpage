@@ -10,7 +10,7 @@ from mcp import ServerResult, types
 from pydantic import BaseModel, ConfigDict
 from pydantic_core import to_jsonable_python
 
-from unpage.config import Config, get_config_dir, load_config
+from unpage.config import Config, manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins.mcp import McpServerMixin
@@ -73,7 +73,6 @@ async def build_mcp_server(context: Context) -> FastMCP:
 
 
 async def start(
-    profile: str,
     disable_stdio: bool = False,
     disable_http: bool = False,
     http_host: str = "127.0.0.1",
@@ -91,13 +90,13 @@ async def start(
     signal.signal(signal.SIGINT, lambda *args: os._exit(0))
     signal.signal(signal.SIGTERM, lambda *args: os._exit(0))
 
-    config = load_config(profile)
+    config = manager.get_active_profile_config()
     plugins = PluginManager(config=config)
     context = Context(
-        profile=profile,
+        profile=manager.get_active_profile(),
         config=config,
         plugins=plugins,
-        graph=Graph(get_config_dir(profile) / "graph.json"),
+        graph=Graph(manager.get_active_profile_directory() / "graph.json"),
     )
 
     mcp = await build_mcp_server(context)

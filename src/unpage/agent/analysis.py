@@ -7,7 +7,7 @@ from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
 
-from unpage.config.utils import get_config_dir, load_config
+from unpage.config import manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins.base import PluginManager
@@ -56,12 +56,12 @@ class Analyze(dspy.Signature):
 
 
 class AnalysisAgent(dspy.Module):
-    def __init__(self, profile: str) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
-        self.profile = profile
-        self.config_dir = get_config_dir(profile)
-        self.config = load_config(profile)
+        self.profile = manager.get_active_profile()
+        self.config_dir = manager.get_active_profile_directory()
+        self.config = manager.get_active_profile_config()
         self.llm_settings = self.config.plugins["llm"].settings
 
         self.available_agents: dict[str, Agent] = {}

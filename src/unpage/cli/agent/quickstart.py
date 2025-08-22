@@ -3,7 +3,7 @@ import os
 import sys
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
-from typing import Annotated, Any, cast
+from typing import Any, cast
 
 import human_readable
 import questionary
@@ -18,8 +18,7 @@ from unpage.agent.utils import load_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import Config, PluginConfig, load_config, save_config
+from unpage.config import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.plugins.datadog.plugin import DatadogPlugin
 from unpage.plugins.llm.plugin import LlmPlugin
@@ -32,39 +31,37 @@ from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import confirm, edit_file, select
 
 
-async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | None = None) -> None:
+async def _send_event(step: str, extra_params: dict[Any, Any] | None = None) -> None:
     await telemetry.send_event(
         {
             "command": "agent quickstart",
             "step": step,
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             **(extra_params if extra_params else {}),
         }
     )
 
 
 @agent_app.command
-async def quickstart(
-    *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
-) -> None:
+async def quickstart() -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
-    await _send_event("start", profile)
+    await _send_event("start")
     welcome_to_unpage()
     _quickstart_intro()
-    cfg, next_step_count = await _create_config(
-        Config(plugins=_initial_plugin_settings(profile)), profile
+    config = manager.get_empty_config(
+        manager.get_active_profile(), plugins=_initial_plugin_settings()
     )
+    cfg, next_step_count = await _create_config(config)
     plugin_manager = PluginManager(cfg)
-    save_config(cfg, profile, create=True)
-    await _send_event("config_saved", profile)
-    agent_name = await _create_and_edit_agent(profile, next_step_count)
-    await _send_event("agent_created", profile)
-    await _demo_an_incident(profile, agent_name, next_step_count + 1, plugin_manager)
-    await _send_event("incident_demoed", profile)
+    cfg.save()
+    await _send_event("config_saved")
+    agent_name = await _create_and_edit_agent(next_step_count)
+    await _send_event("agent_created")
+    await _demo_an_incident(agent_name, next_step_count + 1, plugin_manager)
+    await _send_event("incident_demoed")
     await _show_agent_commands(next_step_count + 2)
-    await _send_event("shown_agent_commands", profile)
-    await _optionally_launch_configure(next_step_count + 3, profile)
+    await _send_event("shown_agent_commands")
+    await _optionally_launch_configure(next_step_count + 3)
 
 
 def _quickstart_intro() -> None:
@@ -85,11 +82,12 @@ Here's what the quickstart will entail:
 """)
 
 
-def _initial_plugin_settings(profile: str) -> dict[str, PluginConfig]:
+def _initial_plugin_settings() -> dict[str, PluginConfig]:
     try:
-        existing_config = load_config(profile, create=False)
-    except Exception:
-        existing_config = Config(plugins={})
+        existing_config = manager.get_active_profile_config()
+    except FileNotFoundError:
+        existing_config = manager.get_empty_config(manager.get_active_profile())
+
     return {
         "core": PluginConfig(enabled=True),
         "networking": PluginConfig(enabled=True),
@@ -136,7 +134,7 @@ def _initial_plugin_settings(profile: str) -> dict[str, PluginConfig]:
     }
 
 
-async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
+async def _create_config(cfg: Config) -> tuple[Config, int]:
     plugin_manager = PluginManager(cfg)
     required_plugins = [
         "llm",
@@ -165,7 +163,6 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
             if await _plugin_valid(plugin_manager, plugin):
                 await _send_event(
                     f"plugin_valid_{plugin}",
-                    profile,
                     extra_params={
                         "attempts": attempts,
                     },
@@ -175,7 +172,6 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
             if not await confirm("Retry?"):
                 await _send_event(
                     f"plugin_invalid_{plugin}",
-                    profile,
                     extra_params={
                         "attempts": attempts,
                     },
@@ -211,7 +207,6 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
                 if await _plugin_valid(plugin_manager, optional_plugin):
                     await _send_event(
                         f"plugin_valid_{optional_plugin}",
-                        profile,
                         extra_params={
                             "attempts": attempts,
                         },
@@ -221,7 +216,6 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
                 if not await confirm("Retry?"):
                     await _send_event(
                         f"plugin_invalid_{optional_plugin}",
-                        profile,
                         extra_params={
                             "attempts": attempts,
                         },
@@ -229,7 +223,7 @@ async def _create_config(cfg: Config, profile: str) -> tuple[Config, int]:
                     break
                 attempts += 1
         else:
-            await _send_event(f"plugin_disabled_{optional_plugin}", profile)
+            await _send_event(f"plugin_disabled_{optional_plugin}")
         rich.print("")
     next_step_count = len(required_plugins) + len(optional_plugins) + 1
     return (cfg, next_step_count)
@@ -246,16 +240,15 @@ async def _plugin_valid(plugin_manager: PluginManager, plugin: str) -> bool:
     return True
 
 
-async def _create_and_edit_agent(profile: str, next_step_count: int) -> str:
+async def _create_and_edit_agent(next_step_count: int) -> str:
     console = Console()
     console.print(Panel(f"[bold]{next_step_count}. Create and edit demo agent[/bold]", width=80))
     agent_name = "demo-quickstart"
     template = "demo_quickstart"
-    agent_file = await create_agent(agent_name, profile, True, template)
+    agent_file = await create_agent(agent_name, True, template)
     await _send_event(
         "created_agent",
-        profile,
-        {
+        extra_params={
             "agent_name_sha256": hash_value(agent_name),
             "template": template,
         },
@@ -320,7 +313,7 @@ async def _random_incident_from_recent(pd: PagerDutyPlugin) -> PagerDutyIncident
         return incident.incident
 
 
-async def _select_pagerduty_incident(pd: PagerDutyPlugin, profile: str) -> PagerDutyIncident | None:
+async def _select_pagerduty_incident(pd: PagerDutyPlugin) -> PagerDutyIncident | None:
     class incidentChooser(BaseModel):
         title: str
         func: Callable[[PagerDutyPlugin], Awaitable[PagerDutyIncident | None]]
@@ -348,8 +341,7 @@ async def _select_pagerduty_incident(pd: PagerDutyPlugin, profile: str) -> Pager
         if incident:
             await _send_event(
                 "selected_pagerduty_incident",
-                profile,
-                {"selection_method": opts[int(choice)].title},
+                extra_params={"selection_method": opts[int(choice)].title},
             )
             return incident
         rich.print("Oops, did not get an incident id to test with")
@@ -358,7 +350,7 @@ async def _select_pagerduty_incident(pd: PagerDutyPlugin, profile: str) -> Pager
 
 
 async def _demo_an_incident(
-    profile: str, agent_name: str, next_step_count: int, plugin_manager: PluginManager
+    agent_name: str, next_step_count: int, plugin_manager: PluginManager
 ) -> None:
     console = Console()
     console.print(Panel(f"[bold]{next_step_count}. Demo time![/bold]", width=80))
@@ -366,13 +358,13 @@ async def _demo_an_incident(
     rich.print("Now we can test the agent output with one of your existing PagerDuty incidents!")
     rich.print("")
     pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
-    incident = await _select_pagerduty_incident(pd, profile)
+    incident = await _select_pagerduty_incident(pd)
     if not incident:
         rich.print("Did not get an incident, skipping the demo.")
         return
     try:
-        agent = load_agent(agent_name, profile)
-        analysis_agent = AnalysisAgent(profile)
+        agent = load_agent(agent_name)
+        analysis_agent = AnalysisAgent()
         rich.print("")
         rich.print("Details of the incident we're going to demo:")
         rich.print(f"> Title: {incident.title}")
@@ -423,7 +415,7 @@ async def _demo_an_incident(
         rich.print("You can re-run this demo at any point with:")
         rich.print("")
         rich.print(
-            f"  [bold deep_sky_blue1]uvx unpage{f' --profile {profile}' if profile != DEFAULT_PROFILE else ''} agent run --pagerduty-incident {incident.id} demo-quickstart[/bold deep_sky_blue1]"
+            f"  [bold deep_sky_blue1]uvx unpage agent run --pagerduty-incident {incident.id} demo-quickstart[/bold deep_sky_blue1]"
         )
         rich.print("")
     except Exception as ex:
@@ -461,7 +453,7 @@ async def _show_agent_commands(next_step_count: int) -> None:
     rich.print("")
 
 
-async def _optionally_launch_configure(next_step_count: int, profile: str) -> None:
+async def _optionally_launch_configure(next_step_count: int) -> None:
     console = Console()
     console.print(
         Panel(f"[bold]{next_step_count}. Infrastructure Knowledge Graph[/bold]", width=80)
@@ -485,10 +477,10 @@ async def _optionally_launch_configure(next_step_count: int, profile: str) -> No
     )
     rich.print(">")
     if not await confirm("Would you like to run uvx unpage configure now?"):
-        await _send_event("done_no_configure", profile)
+        await _send_event("done_no_configure")
         return
     rich.print(">")
-    await _send_event("starting_configure", profile)
+    await _send_event("starting_configure")
     _replace_current_proc_with_unpage_configure()
 
 

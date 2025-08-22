@@ -1,14 +1,13 @@
 import sys
-from typing import Annotated
 
 from rich import print
 
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.actions import create_agent
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
-from unpage.utils import edit_file, get_editor
+from unpage.utils import edit_file
 
 
 @agent_app.command
@@ -16,10 +15,9 @@ async def create(
     agent_name: str,
     /,
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     overwrite: bool = False,
     template: str = "default",
-    editor: str | None = get_editor(),
+    editor: str | None = None,
     no_edit: bool = False,
 ) -> None:
     """Create a new agent configuration file and open it in your editor.
@@ -28,8 +26,6 @@ async def create(
     ----------
     agent_name
         The name of the agent to create
-    profile
-        The profile to use
     overwrite
         Overwrite the agent file if it already exists
     template
@@ -43,7 +39,7 @@ async def create(
         {
             "command": "agent create",
             "agent_name_sha256": hash_value(agent_name),
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "overwrite": overwrite,
             "template": template,
             "editor": editor,
@@ -52,17 +48,20 @@ async def create(
     )
     agent_file = await create_agent(
         agent_name=agent_name,
-        profile=profile,
         overwrite=overwrite,
         template=template,
     )
+
+    # Skip file editing if specified.
+    if no_edit:
+        return
+
     # Open the file in the user's editor
-    if editor and not no_edit:
-        try:
-            await edit_file(agent_file, editor)
-        except ValueError:
-            print(
-                "[red]No editor specified. Set the $EDITOR environment variable or use --editor option.[/red]"
-            )
-            print(f"[blue]Please manually open {str(agent_file)!r} in your editor.[/blue]")
-            sys.exit(1)
+    try:
+        await edit_file(agent_file, editor)
+    except ValueError:
+        print(
+            "[red]No editor specified. Set the $EDITOR environment variable or pass the --editor option. Please manually open the file in your editor.[/red]",
+            file=sys.stderr,
+        )
+        sys.exit(1)

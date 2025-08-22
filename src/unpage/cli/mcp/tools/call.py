@@ -1,14 +1,11 @@
 import json
 import sys
-from typing import Annotated
 
 from fastmcp import Client
 from mcp.types import TextContent
 
 from unpage.cli.mcp.tools._app import tools_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config import load_config
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
@@ -24,7 +21,6 @@ async def call(
     count_results: bool = False,
     count_level: int = 0,
     arguments: list[str] | None = None,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
 ) -> None:
     """Call an MCP tool from the command line.
 
@@ -39,26 +35,24 @@ async def call(
         Count level for nested structures (0 or 1)
     arguments
         Arguments to pass to the tool
-    profile
-        The profile to use
     """
     await telemetry.send_event(
         {
             "command": "mcp tools call",
             "tool": tool,
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "count_results": count_results,
             "count_level": count_level,
             "has_arguments": arguments is not None,
         }
     )
-    config = load_config(profile)
+    config = manager.get_active_profile_config()
     plugins = PluginManager(config=config)
     context = Context(
-        profile=profile,
+        profile=manager.get_active_profile(),
         config=config,
         plugins=plugins,
-        graph=Graph(get_config_dir(profile) / "graph.json"),
+        graph=Graph(manager.get_active_profile_directory() / "graph.json"),
     )
     mcp = await build_mcp_server(context)
 

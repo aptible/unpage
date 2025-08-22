@@ -1,15 +1,13 @@
 import sys
-from typing import Annotated
 
 from rich import print
 
 from unpage.agent.utils import get_agent_template
 from unpage.cli.agent._app import agent_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
-from unpage.utils import edit_file, get_editor
+from unpage.utils import edit_file
 
 
 @agent_app.command
@@ -17,8 +15,7 @@ async def edit(
     agent_name: str,
     /,
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
-    editor: str | None = get_editor(),
+    editor: str | None = None,
 ) -> None:
     """Edit an existing agent configuration file.
 
@@ -26,8 +23,6 @@ async def edit(
     ----------
     agent_name
         The name of the agent to edit
-    profile
-        The profile to use
     editor
         The editor to use to open the agent file; DAYDREAM_EDITOR and EDITOR environment variables also work
     """
@@ -35,12 +30,12 @@ async def edit(
         {
             "command": "agent edit",
             "agent_name_sha256": hash_value(agent_name),
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "editor": editor,
         }
     )
     # Get the config directory for the profile
-    config_dir = get_config_dir(profile, create=False)
+    config_dir = manager.get_active_profile_directory()
 
     # Build the agent file path
     agent_file = config_dir / "agents" / f"{agent_name}.yaml"

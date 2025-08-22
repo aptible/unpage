@@ -1,12 +1,10 @@
 import asyncio
 import shlex
-from typing import Annotated
 
 from rich import print
 
 from unpage.cli.mlflow._app import mlflow_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 from unpage.utils import confirm
@@ -15,27 +13,24 @@ from unpage.utils import confirm
 @mlflow_app.command
 async def serve(
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     port: int = 5566,
 ) -> None:
     """Start MLflow tracking server
 
     Parameters
     ----------
-    profile
-        The profile to use
     port
         Port for MLflow server to listen on
     """
     await telemetry.send_event(
         {
             "command": "mlflow serve",
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "port": port,
         }
     )
     host = "127.0.0.1"
-    config_dir = get_config_dir(profile, create=True)
+    config_dir = manager.get_active_profile_directory()
     mlflow_db = config_dir / "mlflow" / "debug.db"
     mlflow_db.parent.mkdir(parents=True, exist_ok=True)
     mlflow_db.unlink(missing_ok=True)

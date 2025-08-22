@@ -2,22 +2,23 @@ import sys
 from pathlib import Path
 
 from unpage.agent.utils import get_agent_template
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.utils import confirm
 
 
-async def create_agent(agent_name: str, profile: str, overwrite: bool, template: str) -> Path:
+async def create_agent(agent_name: str, overwrite: bool, template: str) -> Path:
     # Create the default YAML content
     try:
         agent_template = get_agent_template(template)
     except FileNotFoundError:
         print(
-            f"Template '{template}' not found at {Path(__file__).parent / 'templates' / f'{template}.yaml'}"
+            f"Template '{template}' not found at {Path(__file__).parent / 'templates' / f'{template}.yaml'}",
+            file=sys.stderr,
         )
         sys.exit(1)
 
-    # Get the config directory for the profile
-    config_dir = get_config_dir(profile, create=True)
+    # Get the config directory for the active profile
+    config_dir = manager.get_active_profile_directory()
 
     # Create the agents directory if it doesn't exist
     agents_dir = config_dir / "agents"

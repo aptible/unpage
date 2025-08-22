@@ -1,13 +1,12 @@
 import sys
-from typing import TYPE_CHECKING, Annotated, cast
+from typing import TYPE_CHECKING, cast
 
 from rich import print
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import load_agent
 from unpage.cli.agent._app import agent_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import load_config
+from unpage.config import manager
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
@@ -23,7 +22,6 @@ async def run(
     /,
     *,
     pagerduty_incident: str | None = None,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     debug: bool = False,
 ) -> None:
     """Run an agent with the provided payload and print the analysis.
@@ -38,22 +36,20 @@ async def run(
         The alert payload to analyze. Alternatively, you can pipe the payload to stdin.
     pagerduty_incident
         PagerDuty incident ID or URL to use instead of payload or stdin
-    profile
-        The profile to use
     debug
         Enable debug mode to print the history of the agent
     """
     await telemetry.send_event(
         {
             "command": "agent run",
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "agent_name_sha256": hash_value(agent_name),
             "debug": debug,
             "has_payload": payload is not None,
             "has_pagerduty_incident": bool(pagerduty_incident),
         }
     )
-    plugin_manager = PluginManager(load_config(profile, create=False))
+    plugin_manager = PluginManager(manager.get_active_profile_config())
     data = ""
     if pagerduty_incident:
         if payload is not None or not sys.stdin.isatty():
@@ -85,14 +81,14 @@ async def run(
 
     # Get the config directory and load the specific agent
     try:
-        agent = load_agent(agent_name, profile)
+        agent = load_agent(agent_name)
     except FileNotFoundError as ex:
         print(f"[red]Agent {agent_name!r} not found at {str(ex.filename)!r}[/red]")
         print(f"[bold]Use 'unpage agent create {agent_name!r}' to create a new agent.[/bold]")
         sys.exit(1)
 
     # Run the analysis with the specific agent
-    analysis_agent = AnalysisAgent(profile)
+    analysis_agent = AnalysisAgent()
     try:
         result = await analysis_agent.acall(payload=data, agent=agent)
         print(result)

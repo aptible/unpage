@@ -5,7 +5,7 @@ from typing import Any
 import questionary
 from pydantic import AwareDatetime, BaseModel
 
-from unpage.config.utils import PluginSettings
+from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
 from unpage.plugins.papertrail.client import PapertrailClient, PapertrailLogEvent

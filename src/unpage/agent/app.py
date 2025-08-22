@@ -13,7 +13,7 @@ from uvicorn.supervisors import ChangeReload, Multiprocess
 
 from unpage.agent.analysis import AnalysisAgent
 from unpage.agent.utils import get_agents
-from unpage.config.utils import get_config_dir
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 
 
@@ -24,7 +24,6 @@ class Settings(BaseSettings):
 
     UNPAGE_TUNNEL: bool = False
     UNPAGE_RELOAD: bool = False
-    UNPAGE_PROFILE: str = "default"
     UNPAGE_HOST: str = "127.0.0.1"
     UNPAGE_PORT: int = 8000
     UNPAGE_WORKERS: int = 1
@@ -64,8 +63,8 @@ app = FastAPI(lifespan=lifespan)
 app.state.analysis_tasks = set()
 
 
-async def analyze(payload: dict[str, Any], profile: str, debug: bool) -> None:
-    analysis_agent = AnalysisAgent(profile)
+async def analyze(payload: dict[str, Any], debug: bool) -> None:
+    analysis_agent = AnalysisAgent()
     analysis = await analysis_agent.acall(payload=payload)
     if debug:
         print("\n\n===== DEBUG OUTPUT =====\n")
@@ -82,7 +81,7 @@ async def webhook(request: Request) -> dict[str, Any]:
     payload = await request.json()
 
     # Start a background task to analyze the payload.
-    task = asyncio.create_task(analyze(payload, settings.UNPAGE_PROFILE, settings.UNPAGE_DEBUG))
+    task = asyncio.create_task(analyze(payload, settings.UNPAGE_DEBUG))
 
     # Add task to the set to create a strong reference.
     analysis_tasks.add(task)
@@ -97,7 +96,6 @@ async def listen(
     host: str = "127.0.0.1",
     port: int = 8000,
     workers: int = 1,
-    profile: str = "default",
     reload: bool = False,
     tunnel: bool = False,
     ngrok_token: str = "",
@@ -105,7 +103,6 @@ async def listen(
     debug: bool = False,
 ) -> None:
     # Set environment variables to make them accessible to FastAPI's lifespan.
-    settings.UNPAGE_PROFILE = profile
     settings.UNPAGE_TUNNEL = tunnel
     settings.NGROK_TOKEN = ngrok_token
     settings.NGROK_DOMAIN = ngrok_domain
@@ -116,7 +113,7 @@ async def listen(
     await telemetry.send_event(
         {
             "command": "agent_listen",
-            "num_agents": len(get_agents(profile)),
+            "num_agents": len(get_agents()),
         }
     )
 
@@ -131,7 +128,7 @@ async def listen(
                 raise FileNotFoundError("Could not find the project root")
         reload_config = {
             "reload": True,
-            "reload_dirs": [str(project_root), str(get_config_dir(profile))],
+            "reload_dirs": [str(project_root), str(manager.get_active_profile_directory())],
             "reload_includes": ["**/*.py", "**/*.yaml"],
         }
 

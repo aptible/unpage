@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
-from unpage.config.utils import Config, PluginConfig, PluginSettings
+from unpage.config import Config, PluginConfig, PluginSettings
 from unpage.utils import classproperty
 
 if TYPE_CHECKING:
@@ -106,10 +106,3 @@ class PluginManager:
     def __iter__(self) -> Iterator[Plugin]:
         """Iterate over all enabled plugins."""
         return iter(self.get_enabled_plugins())
-
-    @classproperty
-    def default_config(cls) -> Config:
-        cfg = Config()
-        for p, plugin_cls in REGISTRY.items():
-            cfg.plugins[p] = PluginConfig(enabled=True, settings=plugin_cls.default_plugin_settings)
-        return cfg

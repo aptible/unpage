@@ -3,14 +3,13 @@ import os
 import shlex
 import sys
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Any
 
 import questionary
 import rich
 
 from unpage.cli._app import app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
-from unpage.config.utils import Config, PluginConfig, load_config, save_config
+from unpage.config import Config, PluginConfig, manager
 from unpage.plugins.base import PluginManager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
@@ -36,12 +35,12 @@ def _resolve_default_use_uv_run() -> bool:
 _default_use_uv_run = _resolve_default_use_uv_run()
 
 
-async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | None = None) -> None:
+async def _send_event(step: str, extra_params: dict[Any, Any] | None = None) -> None:
     await telemetry.send_event(
         {
             "command": "configure",
             "step": step,
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             **(extra_params if extra_params else {}),
         }
     )
@@ -50,38 +49,34 @@ async def _send_event(step: str, profile: str, extra_params: dict[Any, Any] | No
 @app.command
 async def configure(
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     use_uv_run: bool = _default_use_uv_run,
 ) -> None:
     """Setup unpage including all plugins!
 
     Parameters
     ----------
-    profile
-        The profile to use
     use_uv_run
         Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage)
     """
     await _send_event(
         "start",
-        profile,
         extra_params={
             "use_uv_run": use_uv_run,
         },
     )
     welcome_to_unpage()
     await _configure_intro()
-    cfg = _initial_config(profile)
+    cfg = _initial_config()
     await _select_plugins_to_enable_disable(cfg)
-    save_config(cfg, profile, create=True)
-    await _send_event("config_saved", profile)
+    cfg.save()
+    await _send_event("config_saved")
     rich.print("")
-    await _configure_plugins(cfg, profile)
-    await _send_event("plugins_configured", profile)
-    save_config(cfg, profile, create=True)
-    await _send_event("config_saved_2", profile)
+    await _configure_plugins(cfg)
+    await _send_event("plugins_configured")
+    cfg.save()
+    await _send_event("config_saved_2")
     rich.print("")
-    await _suggest_building_graph(profile, use_uv_run)
+    await _suggest_building_graph(use_uv_run)
 
 
 def welcome_to_unpage() -> None:
@@ -149,10 +144,10 @@ async def _configure_intro() -> None:
     await questionary.press_any_key_to_continue().unsafe_ask_async()
 
 
-def _initial_config(profile: str) -> Config:
-    default_config = PluginManager.default_config
+def _initial_config() -> Config:
+    default_config = manager.get_empty_config(manager.get_active_profile())
     try:
-        existing_config = load_config(profile, create=False)
+        existing_config = manager.get_active_profile_config()
     except Exception:
         existing_config = default_config
     plugin_settings: dict[str, PluginConfig] = {}
@@ -169,7 +164,11 @@ def _initial_config(profile: str) -> Config:
                 else existing_config.plugins[plugin_name].settings
             ),
         )
-    return Config(plugins=plugin_settings)
+
+    # Create config with file path for saving
+    active_profile = manager.get_active_profile()
+    config_file = manager.get_active_profile_directory() / "config.yaml"
+    return Config(plugins=plugin_settings, profile=active_profile, file_path=config_file)
 
 
 async def _select_plugins_to_enable_disable(
@@ -211,7 +210,7 @@ async def _enable_disable_plugins(cfg: Config) -> None:
     rich.print("")
 
 
-async def _configure_plugins(cfg: Config, profile: str) -> None:
+async def _configure_plugins(cfg: Config) -> None:
     rich.print("> 2. Configure plugins")
     rich.print("")
     rich.print("> Now we will go through each plugin and configure it.")
@@ -229,7 +228,7 @@ async def _configure_plugins(cfg: Config, profile: str) -> None:
     plugin_manager = PluginManager(cfg)
     for plugin_name in cfg.plugins:
         if not cfg.plugins[plugin_name].enabled:
-            await _send_event(f"plugin_disabled_{plugin_name}", profile)
+            await _send_event(f"plugin_disabled_{plugin_name}")
             continue
         attempts = 1
         while True:
@@ -241,13 +240,13 @@ async def _configure_plugins(cfg: Config, profile: str) -> None:
             plugin_manager = PluginManager(cfg)
             if await _plugin_valid(plugin_manager, plugin_name):
                 await _send_event(
-                    f"plugin_valid_{plugin_name}", profile, extra_params={"attempts": attempts}
+                    f"plugin_valid_{plugin_name}", extra_params={"attempts": attempts}
                 )
                 break
             rich.print(f"> Validation failed for {plugin_name}")
             if not await confirm("Retry?"):
                 await _send_event(
-                    f"plugin_invalid_{plugin_name}", profile, extra_params={"attempts": attempts}
+                    f"plugin_invalid_{plugin_name}", extra_params={"attempts": attempts}
                 )
                 break
             attempts += 1
@@ -272,7 +271,7 @@ async def _plugin_valid(plugin_manager: PluginManager, plugin_name: str) -> bool
     return True
 
 
-async def _suggest_building_graph(profile: str, use_uv_run: bool) -> None:
+async def _suggest_building_graph(use_uv_run: bool) -> None:
     rich.print("> 3. Next steps")
     rich.print("")
     rich.print("> Now you're all set to build the infrastructure knowledge graph.")
@@ -290,9 +289,7 @@ async def _suggest_building_graph(profile: str, use_uv_run: bool) -> None:
     rich.print("")
     rich.print("> Create the graph by running:")
     rich.print(">")
-    rich.print(
-        f">   {'uvx' if not use_uv_run else 'uv run'} unpage graph build{f' --profile {profile}' if profile != DEFAULT_PROFILE else ''}"
-    )
+    rich.print(f">   {'uvx' if not use_uv_run else 'uv run'} unpage graph build")
     rich.print(">")
     rich.print("> This is full usage for `unpage graph build`:")
     rich.print("")
@@ -305,10 +302,10 @@ async def _suggest_building_graph(profile: str, use_uv_run: bool) -> None:
     if not await confirm(
         "Would you like to launch `unpage graph build` now? (this can take 5min or up to an hour, or even more, depending on how large your infra is)"
     ):
-        await _send_event("done_no_graph_build", profile)
+        await _send_event("done_no_graph_build")
         return
     rich.print(">")
-    await _send_event("starting_graph_build", profile)
+    await _send_event("starting_graph_build")
     _replace_current_proc_with_unpage_graph_build(graph_build_cmd)
 
 
