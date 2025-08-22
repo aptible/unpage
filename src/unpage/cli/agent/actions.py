@@ -6,7 +6,7 @@ from unpage.config import manager
 from unpage.utils import confirm
 
 
-async def create_agent(agent_name: str, profile: str, overwrite: bool, template: str) -> Path:
+async def create_agent(agent_name: str, overwrite: bool, template: str) -> Path:
     # Create the default YAML content
     try:
         agent_template = get_agent_template(template)
@@ -16,8 +16,8 @@ async def create_agent(agent_name: str, profile: str, overwrite: bool, template:
         )
         sys.exit(1)
 
-    # Get the config directory for the profile
-    config_dir = manager.get_profile_directory(profile)
+    # Get the config directory for the active profile
+    config_dir = manager.get_active_profile_directory()
 
     # Create the agents directory if it doesn't exist
     agents_dir = config_dir / "agents"

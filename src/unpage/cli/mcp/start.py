@@ -1,12 +1,11 @@
 import sys
 import warnings
-from typing import Annotated
 
 from fastmcp import settings as fastmcp_settings
 
 from unpage import mcp
 from unpage.cli.mcp._app import mcp_app
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
@@ -14,7 +13,6 @@ from unpage.telemetry import prepare_profile_for_telemetry
 @mcp_app.command
 async def start(
     *,
-    profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE,
     disable_sse: bool = False,
     disable_stdio: bool = False,
     disable_http: bool = False,
@@ -25,8 +23,6 @@ async def start(
 
     Parameters
     ----------
-    profile
-        The profile to use
     disable_sse
         Disable the HTTP transport for the MCP Server (deprecated, use --disable-http instead)
     disable_stdio
@@ -50,7 +46,7 @@ async def start(
     await telemetry.send_event(
         {
             "command": "mcp start",
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "disable_sse": disable_sse,
             "disable_stdio": disable_stdio,
             "disable_http": disable_http,
@@ -59,7 +55,6 @@ async def start(
         }
     )
     await mcp.start(
-        profile=profile,
         disable_stdio=disable_stdio,
         disable_http=disable_http,
         http_host=http_host,

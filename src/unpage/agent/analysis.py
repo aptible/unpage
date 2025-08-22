@@ -56,12 +56,12 @@ class Analyze(dspy.Signature):
 
 
 class AnalysisAgent(dspy.Module):
-    def __init__(self, profile: str) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
-        self.profile = profile
-        self.config_dir = manager.get_profile_directory(profile)
-        self.config = manager.get_profile_config(profile)
+        self.profile = manager.get_active_profile()
+        self.config_dir = manager.get_active_profile_directory()
+        self.config = manager.get_active_profile_config()
         self.llm_settings = self.config.plugins["llm"].settings
 
         self.available_agents: dict[str, Agent] = {}

@@ -1,5 +1,3 @@
-from typing import Annotated
-
 from unpage.cli.graph._app import graph_app
 from unpage.cli.graph._background import (
     cleanup_pid_file,
@@ -7,45 +5,40 @@ from unpage.cli.graph._background import (
     get_pid_file,
     is_process_running,
 )
-from unpage.cli.options import DEFAULT_PROFILE, ProfileParameter
+from unpage.config import manager
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @graph_app.command
-async def status(*, profile: Annotated[str, ProfileParameter] = DEFAULT_PROFILE) -> None:
-    """Check if graph build is running
-
-    Parameters
-    ----------
-    profile
-        The profile to use
-    """
+async def status() -> None:
+    """Check if graph build is running"""
+    active_profile = manager.get_active_profile()
     await telemetry.send_event(
         {
             "command": "graph status",
-            **prepare_profile_for_telemetry(profile),
+            **prepare_profile_for_telemetry(active_profile),
         }
     )
 
-    pid_file = get_pid_file(profile)
+    pid_file = get_pid_file()
 
     if not pid_file.exists():
-        print(f"No graph build running for profile '{profile}'")
+        print("No graph build running")
         return
 
     try:
         pid = int(pid_file.read_text().strip())
         if is_process_running(pid):
-            print(f"Graph build running for profile '{profile}' (PID: {pid})")
+            print(f"Graph build running (PID: {pid})")
 
             # Show log file info if it exists
-            log_file = get_log_file(profile)
+            log_file = get_log_file()
             if log_file.exists():
-                print(f"View logs: unpage graph logs --profile {profile} --follow")
+                print("View logs: unpage graph logs --follow")
         else:
-            print(f"Stale PID file found for profile '{profile}', cleaning up...")
-            cleanup_pid_file(profile)
+            print("Stale PID file found, cleaning up...")
+            cleanup_pid_file()
     except ValueError:
-        print(f"Corrupted PID file found for profile '{profile}', cleaning up...")
-        cleanup_pid_file(profile)
+        print("Corrupted PID file found, cleaning up...")
+        cleanup_pid_file()
