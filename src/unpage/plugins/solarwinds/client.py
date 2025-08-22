@@ -3,14 +3,10 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 import httpx
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel
 
 
 class SolarWindsLogEvent(BaseModel):
-    model_config = ConfigDict(
-        extra="ignore",  # ignore fields in API results we don't need
-    )
-
     time: AwareDatetime
     """time that SolarWinds received the log event (ISO 8601 timestamp)"""
 

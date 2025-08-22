@@ -2,14 +2,10 @@ from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 import httpx
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel
 
 
 class PapertrailLogEvent(BaseModel):
-    model_config = ConfigDict(
-        extra="ignore",  # ignore fields in API results we don't need
-    )
-
     generated_at: AwareDatetime
     """time that Papertrail received the log event (ISO 8601 timestamp)
 
