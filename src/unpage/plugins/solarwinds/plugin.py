@@ -104,12 +104,11 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
             max_time=max_time,
             continue_search=tt.under_time_out,
         ):
-            message = log.model_dump_json(indent=6, include={"time", "message"})
-            content_length += len(message) + 8
+            content_length += len(log.model_dump_json())
             if content_length >= RESULT_LIMIT:
                 truncated = True
                 break
-            logs.append(message)
+            logs.append(log)
         return SolarWindsSearchResult(
             results=logs,
             truncated=truncated,

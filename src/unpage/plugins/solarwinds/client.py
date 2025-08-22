@@ -3,30 +3,19 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 import httpx
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 
 class SolarWindsLogEvent(BaseModel):
-    """unique SolarWinds event ID"""
+    model_config = ConfigDict(
+        extra="ignore",  # ignore fields in API results we don't need
+    )
 
-    id: str
-
-    """time that SolarWinds received the log event (ISO 8601 timestamp)
-    # TODO check if the time zone is that of the API token owner?
-    """
+    """time that SolarWinds received the log event (ISO 8601 timestamp)"""
     time: AwareDatetime
 
     """log event message"""
     message: str
-
-    """Server hostname"""
-    hostname: str
-
-    """syslog severity"""
-    severity: str
-
-    """syslog “tag” field, more commonly called program"""
-    program: str
 
 
 class ResultPageInfo(BaseModel):
