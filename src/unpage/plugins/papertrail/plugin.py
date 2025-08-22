@@ -16,12 +16,12 @@ RESULT_LIMIT = 75 * 1024
 class PapertrailSearchResult(BaseModel):
     """Result of a Papertrail log search."""
 
-    """True when the search results were truncated due to the response size limit or single search time limit"""
     truncated: bool = False
-    """True when the search timed out due to the overall time limit"""
+    """True when the search results were truncated due to the response size limit or single search time limit"""
     timed_out: bool = False
-    """The log events that were found"""
+    """True when the search timed out due to the overall time limit"""
     results: list[PapertrailLogEvent]
+    """The log events that were found"""
 
 
 class PapertrailPlugin(Plugin, McpServerMixin):

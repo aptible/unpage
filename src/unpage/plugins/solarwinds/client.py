@@ -11,11 +11,11 @@ class SolarWindsLogEvent(BaseModel):
         extra="ignore",  # ignore fields in API results we don't need
     )
 
-    """time that SolarWinds received the log event (ISO 8601 timestamp)"""
     time: AwareDatetime
+    """time that SolarWinds received the log event (ISO 8601 timestamp)"""
 
-    """log event message"""
     message: str
+    """log event message"""
 
 
 class ResultPageInfo(BaseModel):
@@ -28,8 +28,8 @@ class ResultPageInfo(BaseModel):
 class SearchResult(BaseModel):
     """Search result from SolarWinds API"""
 
-    """An array of hashes of log events (one hash per event)"""
     logs: list[SolarWindsLogEvent]
+    """An array of hashes of log events (one hash per event)"""
 
     pageInfo: ResultPageInfo
 

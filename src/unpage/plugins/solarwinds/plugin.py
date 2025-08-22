@@ -16,12 +16,14 @@ RESULT_LIMIT = 75 * 1024
 class SolarWindsSearchResult(BaseModel):
     """Result of a SolarWinds log search."""
 
-    """True when the search results were truncated due to the response size limit or single search time limit"""
     truncated: bool = False
-    """True when the search timed out due to the overall time limit"""
+    """True when the search results were truncated due to the response size limit or single search time limit"""
+
     timed_out: bool = False
-    """The log events that were found"""
+    """True when the search timed out due to the overall time limit"""
+
     results: list[SolarWindsLogEvent]
+    """The log events that were found"""
 
 
 class SolarWindsPlugin(Plugin, McpServerMixin):
