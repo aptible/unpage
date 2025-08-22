@@ -110,7 +110,7 @@ class SolarWindsClient(httpx.AsyncClient):
 
             response = await self.get("/v1/logs", params=params)
             response.raise_for_status()
-            result = SearchResult.model_validate(response.json())
+            result = SearchResult(**response.json())
 
             # Yield all logs in the current page
             for log in result.logs:
