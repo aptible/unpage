@@ -1,6 +1,8 @@
 from cyclopts import Parameter
 
-DEFAULT_PROFILE = "default"
+from unpage.config import manager
+
+DEFAULT_PROFILE = manager.get_active_profile()
 
 ProfileParameter = Parameter(
     name="--profile",

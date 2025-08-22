@@ -6,7 +6,7 @@ import questionary
 import rich
 from litellm import acompletion
 
-from unpage.config.utils import PluginSettings
+from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
 from unpage.utils import Choice, classproperty, select
 

@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 import pytest_asyncio
 from fastmcp import Client, FastMCP
 
-from unpage.config.utils import Config
+from unpage.config import Config, manager
 from unpage.knowledge import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins import PluginManager
@@ -11,7 +11,7 @@ from unpage.plugins import PluginManager
 
 @pytest_asyncio.fixture
 async def default_config() -> Config:
-    return PluginManager.default_config
+    return manager.get_empty_config(profile="test")
 
 
 @pytest_asyncio.fixture
