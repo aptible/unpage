@@ -93,7 +93,7 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
             start_time: AwareDatetime = datetime.now(UTC)
             time_out: timedelta = timedelta(seconds=timeout_seconds)
 
-            def under_time_out(self, _: AwareDatetime | None) -> bool:
+            def under_time_out(self) -> bool:
                 self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
                 return not self.timed_out
 
