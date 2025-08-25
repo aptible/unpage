@@ -286,7 +286,7 @@ class Graph:
             node["fontcolor"] = font_color
             del node["data"]
 
-        return nx.nx_pydot.to_pydot(graph)
+        return nx.nx_pydot.to_pydot(graph).to_string()
 
     async def save(self, path: Path | str) -> None:
         """Save the graph to a file."""
