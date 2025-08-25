@@ -648,7 +648,7 @@ wheels = [
 
 [[package]]
 name = "dspy"
-version = "3.0.1"
+version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -674,9 +674,9 @@ dependencies = [
     { name = "ujson" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/70/cb/4bfb5345e230e33b0fa4f18c16fe646395a081a48c6feb314e6993a86bb1/dspy-3.0.1.tar.gz", hash = "sha256:92220584eb7c3587746cac76209f7f167dbf6f38f5f05a7019d610ededc1eede", size = 213285, upload-time = "2025-08-14T17:39:32.415Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/b3/f1f530bccc3dd439d3a1c3e6a1e0ea3727c3147086a2b1aaadf7b7067089/dspy-3.0.2.tar.gz", hash = "sha256:14101d7b24e5353570b28d5d32cc42a606b50439a74f5db9b19346865b2fb28e", size = 213893, upload-time = "2025-08-22T11:16:57.02Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c1/b4/ef2706be57daf78562b8aa811cdfe184616becb6659522ace85919202b21/dspy-3.0.1-py3-none-any.whl", hash = "sha256:a9afb6eedaab063e9ca6d46840fad85b97ab45e79b4bf9371e6bf3a5666ef5c6", size = 259011, upload-time = "2025-08-14T17:39:30.901Z" },
+    { url = "https://files.pythonhosted.org/packages/89/e2/e697cb6bc60b297e90e0b313ce4c6e75c025948c96973ea0aa7903a6e442/dspy-3.0.2-py3-none-any.whl", hash = "sha256:22533af14700cc88af466201b2d83f7a8566a150ea98c8772a167124c983c4c3", size = 260058, upload-time = "2025-08-22T11:16:55.061Z" },
 ]
 
 [[package]]
