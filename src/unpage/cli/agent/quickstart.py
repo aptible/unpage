@@ -24,7 +24,7 @@ from unpage.plugins.datadog.plugin import DatadogPlugin
 from unpage.plugins.llm.plugin import LlmPlugin
 from unpage.plugins.pagerduty.models import PagerDutyIncident
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
-from unpage.plugins.papertrail.plugin import PapertrailPlugin
+from unpage.plugins.solarwinds.plugin import SolarWindsPlugin
 from unpage.telemetry import client as telemetry
 from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 from unpage.utils import confirm, edit_file, select
@@ -72,7 +72,7 @@ Here's what the quickstart will entail:
 
 1. Configure LLM (Amazon Bedrock, OpenAI, Anthropic Claude, and many more!)
 2. Configure Pagerduty plugin
-3. Optionally configure Papertrail
+3. Optionally configure SolarWinds
 4. Optionally configure Datadog
 5. Create and edit a demo agent
 6. Test the demo agent against a PagerDuty incident
@@ -106,12 +106,12 @@ def _initial_plugin_settings() -> dict[str, PluginConfig]:
                 else existing_config.plugins["pagerduty"].settings
             ),
         ),
-        "papertrail": PluginConfig(
+        "solarwinds": PluginConfig(
             enabled=False,
             settings=(
-                PapertrailPlugin.default_plugin_settings
-                if "papertrail" not in existing_config.plugins
-                else existing_config.plugins["papertrail"].settings
+                SolarWindsPlugin.default_plugin_settings
+                if "solarwinds" not in existing_config.plugins
+                else existing_config.plugins["solarwinds"].settings
             ),
         ),
         "datadog": PluginConfig(
@@ -172,7 +172,7 @@ async def _create_config(cfg: Config) -> tuple[Config, int]:
             rich.print("")
         rich.print("")
     optional_plugins = [
-        "papertrail",
+        "solarwinds",
         "datadog",
     ]
     for i, optional_plugin in enumerate(optional_plugins):

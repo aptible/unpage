@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.28 (2025-08-25)
+
+### Documentation
+
+- Add GA4 to docs pages ([#106](https://github.com/aptible/unpage/pull/106),
+  [`54cb25f`](https://github.com/aptible/unpage/commit/54cb25fbb2833acdfb50ba263ddcb8ca1c2a7bb7))
+
+- Add LLM config link to getting started guide ([#107](https://github.com/aptible/unpage/pull/107),
+  [`e440083`](https://github.com/aptible/unpage/commit/e4400833044dd38f1c1b95181619bedef4e550bd))
+
+- SSL and disk space example agents ([#105](https://github.com/aptible/unpage/pull/105),
+  [`a8f67f7`](https://github.com/aptible/unpage/commit/a8f67f7a6b989d591723abcafd9698436e1fbc9f))
+
+### Features
+
+- Solarwinds log search plugin ([#108](https://github.com/aptible/unpage/pull/108),
+  [`656f85b`](https://github.com/aptible/unpage/commit/656f85bc6fcea812298374af4e64d07806ee9b17))
+
+
 ## v0.1.0-alpha.27 (2025-08-18)
 
 ### Bug Fixes

@@ -1,0 +1,79 @@
+---
+title: SolarWinds
+---
+
+Our SolarWinds integration allows [Agents](/concepts/agents) to search and analyze
+log data from your SolarWinds Observability account.
+
+<AccordionGroup>
+  <Accordion title="MCP Tools" icon="wrench">
+    - **search_logs**: Search SolarWinds logs within a specified time range
+  </Accordion>
+</AccordionGroup>
+
+## Prerequisites
+<Steps>
+  <Step title="Open your SolarWinds profile">
+    [Log in to your SolarWnds account](https://swo.cloud.solarwinds.com/login), with Admin permsionns, and then go to ["Settings" > "Profile"](https://my.na-01.cloud.solarwinds.com/settings/profile).
+  </Step>
+  <Step title="Create an API Access Token">
+    ![SolarWinds API Token](/images/solarwinds/token.png)
+  </Step>
+</Steps>
+
+
+## Configuration
+Configure the SolarWinds plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  solarwinds:
+    enabled: true
+    settings:
+      token: <your SolarWinds api token> # required
+      solarwinds_datacenter: <your SolarWinds datacenter> # Default: 'na-01'
+```
+
+Alternatively, you can set these settings as environment variables:
+
+```bash
+export SOLARWINDS_TOKEN="your-solarwinds-api-token"
+export SOLARWINDS_DATACENTER="na-01"
+```
+
+
+## Tools
+The SolarWinds plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="search_logs">
+  Search SolarWinds for logs within a given time range.
+
+  **Arguments**
+  <ParamField path="query" type="string" required>
+    The search query. Use SolarWinds's search syntax to filter logs by hostname,
+    program, message content, or other criteria. For example: "error", "hostname:web01",
+    or "program:nginx AND status:500".
+  </ParamField>
+  <ParamField path="min_time" type="datetime" required>
+    The starting time for the search range (ISO 8601 timestamp). Logs generated
+    at or after this time will be included in the results.
+  </ParamField>
+  <ParamField path="max_time" type="datetime" required>
+    The ending time for the search range (ISO 8601 timestamp). Logs generated
+    at or before this time will be included in the results.
+  </ParamField>
+  <ParamField path="timeout_seconds" type="integer" default="10">
+    The maximum number of seconds to wait for the search to complete. Defaults to 10 seconds.
+    Increase this value for more comprehensive results in large log volumes, or decrease it
+    for faster response times.
+  </ParamField>
+
+  **Returns** `SolarWindsSearchResult`: An object containing:
+  - `results`: Log events with details including timestamp and message.
+  - `truncated`: Boolean indicating if results were truncated due to response size limits.
+  - `timed_out`: Boolean indicating if the search timed out based on the specified timeout.
+
+  **Note**: Results are automatically truncated if they exceed response size limits to ensure optimal performance. Choose your search term and time narrowly, and iterate with additional searches if necessary, rather than trying to return the entire log context.
+</Card>

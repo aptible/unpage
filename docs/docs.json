@@ -67,6 +67,7 @@
           "plugins/networking",
           "plugins/pagerduty",
           "plugins/papertrail",
+          "plugins/solarwinds",
           "plugins/shell"
         ]
       },
