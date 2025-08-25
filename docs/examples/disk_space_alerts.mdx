@@ -51,7 +51,7 @@ prompt: >
   - Extract the host from the PagerDuty alert
   - Use shell command: `shell_check_disk_space` to get disk usage and identify largest directories
   - Use shell command: `shell_check_large_files` to find large files in common problem directories
-  - Search Papertrail for recent disk space warnings or errors from this host
+  - Search SolarWinds for recent disk space warnings or errors from this host
   - Create a status update with:
     - Which partition is full
     - Top directories consuming space
@@ -61,7 +61,7 @@ prompt: >
 tools:
   - "shell_check_disk_space"
   - "shell_check_large_files"
-  - "papertrail_search_logs"
+  - "solarwinds_search_logs"
   - "pagerduty_post_status_update"
 ```
 
@@ -159,7 +159,7 @@ Your Agent will update the PagerDuty alert with:
 - Current disk usage percentages for all partitions
 - Top 20 directories consuming the most space
 - Largest files in common problem directories (/var/log, /tmp, /var/lib/docker)
-- Recent log entries from Papertrail indicating disk space warnings
+- Recent log entries from SolarWinds indicating disk space warnings
 - Actionable recommendations for immediate space cleanup
 
 ![PagerDuty Disk Space Alert Status Update](/images/examples/disk/status.png)

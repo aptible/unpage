@@ -8,53 +8,64 @@ from pydantic import AwareDatetime, BaseModel
 from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
 from unpage.plugins.mixins import McpServerMixin, tool
-from unpage.plugins.papertrail.client import PapertrailClient, PapertrailLogEvent
+from unpage.plugins.solarwinds.client import SolarWindsClient, SolarWindsLogEvent
 
 RESULT_LIMIT = 75 * 1024
 
 
-class PapertrailSearchResult(BaseModel):
-    """Result of a Papertrail log search."""
+class SolarWindsSearchResult(BaseModel):
+    """Result of a SolarWinds log search."""
 
     truncated: bool = False
     """True when the search results were truncated due to the response size limit or single search time limit"""
+
     timed_out: bool = False
     """True when the search timed out due to the overall time limit"""
-    results: list[PapertrailLogEvent]
+
+    results: list[SolarWindsLogEvent]
     """The log events that were found"""
 
 
-class PapertrailPlugin(Plugin, McpServerMixin):
-    _client: PapertrailClient
+class SolarWindsPlugin(Plugin, McpServerMixin):
+    _client: SolarWindsClient | None = None
 
     def __init__(
         self,
         *args: Any,
         token: str | None = None,
+        datacenter: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.token = (
             token
-            or os.environ.get("PAPERTRAIL_API_TOKEN", "")
-            or os.environ.get("PAPERTRAIL_TOKEN", "")
+            or os.environ.get("SOLARWINDS_API_TOKEN", "")
+            or os.environ.get("SOLARWINDS_TOKEN", "")
         )
+        self.datacenter = datacenter or os.environ.get("SOLARWINDS_DATACENTER", "") or "na-01"
         if self.token:
-            self._client = PapertrailClient(token=self.token)
+            self._client = SolarWindsClient(token=self.token, datacenter=self.datacenter)
 
     async def validate_plugin_config(self) -> None:
         await super().validate_plugin_config()
+        if self._client is None:
+            raise ValueError(
+                "SolarWinds client not initialized. Please check your token and datacenter configuration."
+            )
         await self._client.verify_connection()
 
     async def interactive_configure(self) -> PluginSettings:
         """Interactive wizard for configuring the settings of this plugin."""
         return {
             "token": await questionary.password(
-                "Enter your Papertrail API token",
-                default=self.token
-                or os.environ.get("PAPERTRAIL_API_TOKEN", "")
-                or os.environ.get("PAPERTRAIL_TOKEN", ""),
-                instruction="Generate a token with https://docs.aptible.ai/plugins/papertrail#prerequisites",
+                "Enter your SolarWinds API token",
+                default=self.token,
+                instruction="Generate API Access Token https://documentation.solarwinds.com/en/success_center/observability/content/settings/api-tokens.htm",
+            ).unsafe_ask_async(),
+            "datacenter": await questionary.text(
+                "Enter your datacenter (na-01, na-02, eu-01, ap-01, etc.)",
+                default="na-01",
+                instruction="Your SolarWinds datacenter code https://documentation.solarwinds.com/en/success_center/observability/content/system_requirements/endpoints.htm#Find",
             ).unsafe_ask_async(),
         }
 
@@ -65,8 +76,8 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         min_time: AwareDatetime,
         max_time: AwareDatetime,
         timeout_seconds: int = 10,
-    ) -> PapertrailSearchResult | str:
-        """Search Papertrail for logs within a given time range
+    ) -> SolarWindsSearchResult | str:
+        """Search SolarWinds for logs within a given time range
 
         Args:
             query (str): The search query.
@@ -75,7 +86,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             timeout_seconds (int): The maximum seconds to wait for the search to complete. Defaults to 10 seconds.
 
         Returns:
-            PapertrailSearchResult: logs that matched the query and fit within response limit
+            SolarWindsSearchResult: logs that matched the query and fit within response limit
         """
         if min_time >= max_time:
             return f"min_time must come before max_time {min_time=} {max_time=}"
@@ -88,9 +99,12 @@ class PapertrailPlugin(Plugin, McpServerMixin):
             start_time: AwareDatetime = datetime.now(UTC)
             time_out: timedelta = timedelta(seconds=timeout_seconds)
 
-            def under_time_out(self, _: AwareDatetime | None) -> bool:
+            def under_time_out(self) -> bool:
                 self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
                 return not self.timed_out
+
+        if self._client is None:
+            return "SolarWinds client not initialized. Please check your token and datacenter configuration."
 
         tt = timeoutTracker()
         async for log in self._client.search(
@@ -104,7 +118,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
                 truncated = True
                 break
             logs.append(log)
-        return PapertrailSearchResult(
+        return SolarWindsSearchResult(
             results=logs,
             truncated=truncated,
             timed_out=tt.timed_out,

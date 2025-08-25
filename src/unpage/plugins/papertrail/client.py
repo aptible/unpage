@@ -6,38 +6,13 @@ from pydantic import AwareDatetime, BaseModel
 
 
 class PapertrailLogEvent(BaseModel):
-    """unique Papertrail event ID (64-bit integer as JSON string)
-
-    The id values for a series of events indicate relative event order and will only increase, but id values are not sequential.
-    """
-
-    id: str
-    """time that the log event was generated (ISO 8601 timestamp)"""
     generated_at: AwareDatetime
     """time that Papertrail received the log event (ISO 8601 timestamp)
 
     received_at and display_received_at are in the time zone of the API token owner (set in the profile).
     """
     received_at: AwareDatetime
-    """time that Papertrail received the log event (formatted date-time string)
 
-    received_at and display_received_at are in the time zone of the API token owner (set in the profile).
-    """
-    display_received_at: str
-    """sender name in Papertrail (string)"""
-    source_name: str
-    """hostname of the message (string)"""
-    hostname: str
-    """unique Papertrail sender ID (32-bit integer)"""
-    source_id: int
-    """IP address that originated this log event (string)"""
-    source_ip: str
-    """syslog facility (string)"""
-    facility: str
-    """syslog severity (string)"""
-    severity: str
-    """syslog “tag” field, more commonly called program (string)"""
-    program: str
     """log event message (string)"""
     message: str
 
