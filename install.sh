@@ -91,11 +91,14 @@ telemetry_event() {
         shift  # Remove first argument, rest are key=value pairs
 
         # Use session user ID and generate event ID
-        local event_id=$(generate_uuid)
+        local event_id
+        event_id=$(generate_uuid)
 
         # Get system information
-        local sysname=$(uname -s 2>/dev/null || echo "unknown")
-        local sysmachine=$(uname -m 2>/dev/null || echo "unknown")
+        local sysname
+        sysname=$(uname -s 2>/dev/null || echo "unknown")
+        local sysmachine
+        sysmachine=$(uname -m 2>/dev/null || echo "unknown")
 
         # Start building the JSON payload
         local additional_fields=""
@@ -110,7 +113,8 @@ telemetry_event() {
         done
 
         # Build the telemetry payload
-        local telemetry_payload=$(cat <<EOF
+        local telemetry_payload
+        telemetry_payload=$(cat <<EOF
 {
     "version": "installer",
     "sysname": "$sysname",
@@ -142,9 +146,12 @@ EOF
                  --data-urlencode "url=https://github.com/aptible/unpage" \
                  --data-urlencode "value=$telemetry_payload" >/dev/null 2>&1 || true
         elif [ "$download_cmd" = "wget" ]; then
-            local encoded_payload=$(printf '%s' "$telemetry_payload" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
-            local encoded_event_id=$(printf '%s' "$event_id" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
-            local encoded_user_id=$(printf '%s' "$INSTALLATION_ID" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
+            local encoded_payload
+            encoded_payload=$(printf '%s' "$telemetry_payload" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
+            local encoded_event_id
+            encoded_event_id=$(printf '%s' "$event_id" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
+            local encoded_user_id
+            encoded_user_id=$(printf '%s' "$INSTALLATION_ID" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
             wget -q -O /dev/null "$tuna_url?id=$encoded_event_id&user_id=$encoded_user_id&type=unpage_telemetry&url=https://github.com/aptible/unpage&value=$encoded_payload" >/dev/null 2>&1 || true
         fi
     } 2>/dev/null || true
@@ -175,7 +182,7 @@ confirm() {
     fi
 
     while true; do
-        read -p "$prompt $prompt_suffix: " yn < /dev/tty
+        read -r -p "$prompt $prompt_suffix: " yn < /dev/tty
         case $yn in
             [Yy]* ) return 0;;
             [Nn]* ) return 1;;
