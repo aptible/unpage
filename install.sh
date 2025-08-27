@@ -175,7 +175,7 @@ confirm() {
     fi
 
     while true; do
-        read -p "$prompt $prompt_suffix: " yn
+        read -p "$prompt $prompt_suffix: " yn < /dev/tty
         case $yn in
             [Yy]* ) return 0;;
             [Nn]* ) return 1;;
