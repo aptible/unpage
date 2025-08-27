@@ -31,6 +31,53 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Function to generate a UUID
+generate_uuid() {
+    if command_exists python && python -c "import uuid" 2>/dev/null; then
+        python -c "import uuid; print(str(uuid.uuid4()).lower())"
+    elif command_exists uuidgen; then
+        uuidgen | tr '[:upper:]' '[:lower:]'
+    else
+        # Fallback to null UUID
+        echo "00000000-0000-0000-0000-000000000000"
+    fi
+}
+
+# Function to get existing user ID or return empty
+get_installation_id() {
+    local identity_file="$HOME/.unpage/.identity"
+
+    if [ -f "$identity_file" ]; then
+        cat "$identity_file"
+    else
+        printf "%s" "$(generate_uuid)"
+    fi
+}
+
+# Global installation ID
+INSTALLATION_ID=""
+
+# Function to persist installation ID on successful installation
+persist_installation_id() {
+    if [[ "${UNPAGE_TELEMETRY_DISABLED:-0}" == "1" ]]; then
+        return 0
+    fi
+
+    local installation_id="$1"
+    local identity_file="$HOME/.unpage/.identity"
+
+    # Don't persist nil UUID (fallback UUID)
+    if [ "$installation_id" = "00000000-0000-0000-0000-000000000000" ]; then
+        return 0
+    fi
+
+    # Create directory if it doesn't exist
+    mkdir -p "$(dirname "$identity_file")"
+
+    # Save installation ID
+    printf "%s" "$installation_id" > "$identity_file"
+}
+
 # Function to send telemetry event
 telemetry_event() {
     # Check if telemetry is disabled
@@ -42,6 +89,9 @@ telemetry_event() {
     {
         local event_name="$1"
         shift  # Remove first argument, rest are key=value pairs
+
+        # Use session user ID and generate event ID
+        local event_id=$(generate_uuid)
 
         # Get system information
         local sysname=$(uname -s 2>/dev/null || echo "unknown")
@@ -86,12 +136,16 @@ EOF
 
         if [ "$download_cmd" = "curl" ]; then
             curl -s -G "$tuna_url" \
+                 --data-urlencode "id=$event_id" \
+                 --data-urlencode "user_id=$INSTALLATION_ID" \
                  --data-urlencode "type=unpage_telemetry" \
                  --data-urlencode "url=https://github.com/aptible/unpage" \
                  --data-urlencode "value=$telemetry_payload" >/dev/null 2>&1 || true
         elif [ "$download_cmd" = "wget" ]; then
             local encoded_payload=$(printf '%s' "$telemetry_payload" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
-            wget -q -O /dev/null "$tuna_url?type=unpage_telemetry&url=https://github.com/aptible/unpage&value=$encoded_payload" >/dev/null 2>&1 || true
+            local encoded_event_id=$(printf '%s' "$event_id" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
+            local encoded_user_id=$(printf '%s' "$INSTALLATION_ID" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
+            wget -q -O /dev/null "$tuna_url?id=$encoded_event_id&user_id=$encoded_user_id&type=unpage_telemetry&url=https://github.com/aptible/unpage&value=$encoded_payload" >/dev/null 2>&1 || true
         fi
     } 2>/dev/null || true
 }
@@ -220,6 +274,9 @@ install_unpage() {
 
 # Main installation logic
 main() {
+    # Set up session user ID (use existing or generate new)
+    INSTALLATION_ID=$(get_installation_id)
+
     # Send telemetry event for install start
     telemetry_event 'install_started'
 
@@ -289,6 +346,10 @@ main() {
 
     echo
     print_success "Installation complete!"
+
+    # Persist installation ID on successful installation
+    persist_installation_id "$INSTALLATION_ID"
+
     telemetry_event 'install_completed'
     print_info "Next steps:"
     echo "  1. Run 'unpage agent quickstart' to build an agent"
