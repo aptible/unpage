@@ -30,7 +30,7 @@ tools: >
 	...
 ```
 
-**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident.
+**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident. Learn more about **Unpage's router here**.
 
 **Prompt:** The selected agent will follow the investigation steps listed in the prompt. This will often resemble a runbook for the type of alert.
 
@@ -39,7 +39,9 @@ tools: >
 #with what the agent prompt looks like
 ```
 
-**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and connect to your alerting tool. 
+**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and connect to your alerting tool. You can limit the tools that the agent has access to by specifying them here. 
+
+Learn more about connecting **plugins and tools** here. 
 
 **Response:** In this case, the CPU alert agent will leave a comment on the incident like this:
 
@@ -49,22 +51,21 @@ tools: >
 
 You can customize your agents to automatically respond to different types of alerts and take different actions to address them. See more **examples here**. 
 
-This quickstart flow will show you how easily you can build your own custom agents for automation.  Here’s what it will entail:   \
-Create your first agent. Choose from our pre-defined templates, or build your own from scratch\!\
-Configure the agent. Give it access to the tools & context it needs\
-Run the agent with a test payload to assess the output
+To create your first agent, **install Unpage** and run Quickstart:
 
-Unpage is an agent builder and knowledge graph builder that makes infrastructure context available via MCP server, enabling you to build LLM-powered applications that query and execute on your infrastructure safely and intelligently. Here's how it works, at a high level:
+```shellscript
+#Install Unpage
+curl -fsSL https://unpage.ai/install.sh | bash
+```
 
-<Frame>
-  ![How It Works](/images/illustrations/how-it-works.png)
-</Frame>
+```shellscript
+#Quickstart
+uvx unpage agent quickstart
+```
 
-And here's a demo of how it works in detail:
+If you need help, you can find us in the **Unpage Slack community** or follow along with this demo:
 
 <iframe className="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/z17sHig2xMk?si=k_-tIa8YqGfX9sI3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen />
-
-At the end of this guide, you will have Unpage set up to run locally with built-in integrations and tools, a knowledge graph, and your first infrastructure-aware agent.
 
 ## Installation
 
@@ -89,58 +90,58 @@ For other platforms, follow the [official uv installation guide](https://github.
 Unpage is designed to be run using `uvx`, which comes with `uv`:
 
 ```shell
-uvx unpage -h
+curl -fsSL https://unpage.ai/install.sh | bash
 ```
 
-## Quickstart
+## ~~Quickstart~~
 
-To get started, run:
+~~To get started, run:~~
 
 ```shell
 uvx unpage agent quickstart
 ```
 
-This will get you up and running with your first agent, which will automatically investigate and add context to alerts from [PagerDuty](/plugins/pagerduty) (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
+~~This will get you up and running with your first agent, which will automatically investigate and add context to alerts from ~~[~~PagerDuty~~](/plugins/pagerduty)~~ (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.~~
 
-The quickstart flow will walk you through:
+~~The quickstart flow will walk you through:~~
 
-- Configuring [your LLM](/plugins/llm), [PagerDuty plugin](/plugins/pagerduty), and logs and metrics plugins
-- Creating your first [agent](/concepts/agents) and prompt
-- Testing your agent with an existing incident ticket
-- Building your [knowledge graph](/concepts/knowledge-graph)
+- ~~Configuring ~~[~~your LLM~~](/plugins/llm)~~, ~~[~~PagerDuty plugin~~](/plugins/pagerduty)~~, and logs and metrics plugins~~
+- ~~Creating your first ~~[~~agent~~](/concepts/agents)~~ and prompt~~
+- ~~Testing your agent with an existing incident ticket~~
+- ~~Building your ~~[~~knowledge graph~~](/concepts/knowledge-graph)
 
-## Running the Agent
+## ~~Running the Agent~~
 
-Once you're happy with the results of your agent, you can automate the agent's actions for new incidents by running `unpage agent serve` and configuring [PagerDuty to send webhooks](/plugins/pagerduty#webhooks) to the Unpage server:
+~~Once you're happy with the results of your agent, you can automate the agent's actions for new incidents by running ~~`unpage agent serve`~~and configuring ~~ [~~PagerDuty to send webhooks~~](/plugins/pagerduty#webhooks)~~ to the Unpage server:~~
 
 ```shell
 uvx unpage agent serve -h
 ```
 
-The `agent serve` command supports running the server over an ngrok tunnel, so that you can test your agents end-to-end locally, without deploying. For more information on `agent serve` options, see [its documentation](/commands/agent#subcommand%3A-serve).
+~~The ~~`agent serve`~~command supports running the server over an ngrok tunnel, so that you can test your agents end-to-end locally, without deploying. For more information on ~~ `agent serve`~~options, see ~~ [~~its documentation~~](/commands/agent#subcommand%3A-serve)~~.~~
 
-## Maintenance
+## ~~Maintenance~~
 
-### Update Configuration
+### ~~Update Configuration~~
 
-If you need to add or update plugins or API keys, you can update your configuration with:
+~~If you need to add or update plugins or API keys, you can update your configuration with:~~
 
 ```shell
 uvx unpage configure
 ```
 
-### Update the Knowledge Graph
+### ~~Update the Knowledge Graph~~
 
-To refresh your knowledge graph to give your agent up-to-date information, run:
+~~To refresh your knowledge graph to give your agent up-to-date information, run:~~
 
 ```shell
 uvx unpage graph build -h
 ```
 
-### Add More Context
+### ~~Add More Context~~
 
-Your agent's responses will improve with more context about your infrastructure, which can be provided via the knowledge graph or custom scripts. To provide your agents with more context in addition to the knowledge graph, see [Shell Commands](/plugins/shell).
+~~Your agent's responses will improve with more context about your infrastructure, which can be provided via the knowledge graph or custom scripts. To provide your agents with more context in addition to the knowledge graph, see ~~[~~Shell Commands~~](/plugins/shell)~~.~~
 
-### Create Agents
+### ~~Create Agents~~
 
-See [Agents](/concepts/agents) to learn more about how to create and edit your agents and prompts.
+~~See ~~[~~Agents~~](/concepts/agents)~~ to learn more about how to create and edit your agents and prompts.~~
