@@ -71,7 +71,7 @@ This project uses [semantic-release](https://python-semantic-release.readthedocs
 #### Release-Triggering Prefixes
 
 - **`feat:`** - New features (triggers **minor** version bump: `0.1.0` → `0.2.0`)
-- **`fix:`** - Bug fixes (triggers **patch** version bump: `0.1.0` → `0.1.1`)  
+- **`fix:`** - Bug fixes (triggers **patch** version bump: `0.1.0` → `0.1.1`)
 - **`perf:`** - Performance improvements (triggers **patch** version bump: `0.1.0` → `0.1.1`)
 
 #### Non-Release Prefixes

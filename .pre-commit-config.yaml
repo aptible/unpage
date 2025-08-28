@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       # Prevent committing to the main branch.
       - id: no-commit-to-branch
@@ -20,18 +20,18 @@ repos:
       # Ensure that executable files have shebangs
       - id: check-executables-have-shebangs
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
         name: shellcheck
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     # Zizmor version.
-    rev: v1.7.0
+    rev: v1.12.1
     hooks:
       # Run the linter.
       - id: zizmor
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10
+    rev: v0.12.11
     hooks:
       # Run the linter and fix linting errors.
       - id: ruff-check
@@ -39,8 +39,11 @@ repos:
       # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.400
+    rev: v1.1.404
     hooks:
       # Check for type errors.
       - id: pyright
         entry: uv run --active pyright
+        exclude: |
+            (?x)^
+            pinned_hatchling_backend.py$
