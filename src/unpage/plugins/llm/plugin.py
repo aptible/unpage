@@ -101,7 +101,7 @@ class LlmPlugin(Plugin):
         rich.print(
             "To configure a model not referenced in this quickstart, you can directly edit Unpage's config.yaml."
         )
-        rich.print("More information here: https://docs.aptible.ai/plugins/llm")
+        rich.print("More information here: https://docs.unpage.ai/plugins/llm")
         rich.print("")
         provider = await select(
             "Which LLM provider would you like to use?",

@@ -54,7 +54,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
                 default=self.token
                 or os.environ.get("PAPERTRAIL_API_TOKEN", "")
                 or os.environ.get("PAPERTRAIL_TOKEN", ""),
-                instruction="Generate a token with https://docs.aptible.ai/plugins/papertrail#prerequisites",
+                instruction="Generate a token with https://docs.unpage.ai/plugins/papertrail#prerequisites",
             ).unsafe_ask_async(),
         }
 
