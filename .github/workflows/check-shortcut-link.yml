@@ -14,18 +14,19 @@ jobs:
     steps:
       - name: Check for Shortcut ticket reference
         env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           echo "Checking PR description for Shortcut ticket reference..."
-          echo "PR Body:"
+          echo "PR info:"
+          echo "$PR_TITLE"
           echo "$PR_BODY"
           echo "----------------------------------------"
 
           # Check if PR body contains [SC-NNNNN] pattern (case insensitive)
-          if echo "$PR_BODY" | grep -iE '\[sc-[0-9]{5}\]' > /dev/null; then
+          TICKET=$(echo "$PR_BODY\n$PR_TITLE" | grep -ioE '\[sc-[0-9]{5}\]' | head -1)
+          if [[ -n "${TICKET}" ]] ; then
             echo "✅ Found Shortcut ticket reference in PR description"
-            # Extract and display the ticket reference
-            TICKET=$(echo "$PR_BODY" | grep -ioE '\[sc-[0-9]{5}\]' | head -1)
             echo "📋 Ticket: $TICKET"
           else
             echo "❌ No Shortcut ticket reference found in PR description"
