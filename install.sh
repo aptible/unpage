@@ -359,14 +359,11 @@ main() {
 
     telemetry_event 'install_completed'
     print_info "Next steps:"
-    echo "  1. Run 'unpage agent quickstart' to build an agent"
-    echo "  2. Run 'unpage configure' to walk through the configuration wizard"
-    echo "  3. Run 'unpage --help' to see all available commands"
+    echo "  1. Start a new shell session, or run 'source $HOME/.local/bin/env' to load unpage"
+    echo "  2. Run 'unpage agent quickstart' to build an agent"
+    echo "  3. Run 'unpage configure' to walk through the configuration wizard"
+    echo "  4. Run 'unpage --help' to see all available commands"
     echo
-
-    # Always start a new shell session to ensure unpage is available
-    print_info "Starting a new shell session with unpage available..."
-    exec "$SHELL"
 }
 
 # Run the main function
