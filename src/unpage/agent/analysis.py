@@ -6,11 +6,12 @@ import dspy
 from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
+import rich
 
-from unpage.config import manager
+from unpage.config import Config, manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
-from unpage.plugins.base import PluginManager
+from unpage.plugins.base import REGISTRY, PluginManager
 from unpage.utils import wildcard_or_regex_match_any
 
 
@@ -19,6 +20,14 @@ class Agent(BaseModel):
     description: str = Field(description="A description of the agent and when it should be used")
     prompt: str = Field(description="The prompt to use for the agent")
     tools: list[str] = Field(description="The tools the agent has access to")
+
+    def required_plugins_from_tools(self) -> list[str]:
+        allowed_tool_patterns = self.tools or ["*"]
+        return [
+            plugin_name
+            for plugin_name in REGISTRY
+            if wildcard_or_regex_match_any(allowed_tool_patterns, f"{plugin_name}_")
+        ]
 
 
 class SelectAgent(dspy.Signature):

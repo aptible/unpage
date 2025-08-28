@@ -43,6 +43,11 @@ prompt: >
 tools:
   # This disabled the pagerduty_post_status_update tool, just in case you don't want
   # during the demo.
-  - "/^(?!pagerduty_post_status_update$).*/"
+  - "core_*"
+  - "networking_*"
+  - "/^pagerduty_(?!post_status_update$).*/"
+  # - "aws_*"
+  # - "datadog_*"
+  # - "papertrail_*"
   # This rule, which is currently commented, allows all tools.
   # - "*"

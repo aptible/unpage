@@ -5,6 +5,7 @@ from typing import Any, cast
 import questionary
 from pagerduty.rest_api_v2_client import RestApiV2Client
 from pydantic import AwareDatetime, BaseModel
+import rich
 
 from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
@@ -41,6 +42,8 @@ class PagerDutyPlugin(Plugin, McpServerMixin):
 
     async def interactive_configure(self) -> PluginSettings:
         defaults = self.default_plugin_settings
+        rich.print("[bold]If you don't user PagerDuty:[/bold] No worries! You can test this agent with any alert payload (Details here: https://docs.unpage.ai/examples/creating_new_agents#step-1%3A-identify-your-input-source). The main difference is that the agent can only post updates to PagerDuty, as that's what our current tools support. ")
+        rich.print("")
         return PagerDutyPluginSettings(
             api_key=await questionary.password(
                 "API Key",

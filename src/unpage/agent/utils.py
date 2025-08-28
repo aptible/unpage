@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from pydantic_yaml import parse_yaml_file_as
+from pydantic_yaml import parse_yaml_file_as, parse_yaml_raw_as
 
 from unpage.agent.analysis import Agent
 from unpage.config import manager
@@ -38,6 +38,12 @@ def get_agent_template(agent_name: str) -> str:
     return (Path(__file__).parent / "templates" / f"{agent_name}.yaml").read_text()
 
 
+def get_agent_template_description(agent_name: str) -> str:
+    text = get_agent_template(agent_name)
+    yml = parse_yaml_raw_as(Agent, text)
+    return yml.description
+
+
 def get_agents() -> list[str]:
     """Get the names of the agents in the active profile's config directory."""
     agents_dir = manager.get_active_profile_directory() / "agents"
@@ -61,7 +67,10 @@ def load_agent(agent_name: str) -> Agent:
         agent_file.touch()
         agent_file.write_text(get_agent_template(agent_name))
 
-    return parse_yaml_file_as(Agent, agent_file)
+    agent = parse_yaml_file_as(Agent, agent_file)
+    if not agent.name:
+        agent.name = agent_file.stem
+    return agent
 
 
 def delete_agent(agent_name: str) -> None:

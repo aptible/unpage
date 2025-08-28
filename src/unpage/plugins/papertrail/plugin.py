@@ -4,6 +4,7 @@ from typing import Any
 
 import questionary
 from pydantic import AwareDatetime, BaseModel
+import rich
 
 from unpage.config import PluginSettings
 from unpage.plugins.base import Plugin
