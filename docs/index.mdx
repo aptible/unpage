@@ -8,6 +8,52 @@ title: "Getting Started"
 
 ## Intro
 
+Unpage is the open source framework for building SRE agents with infrastructure context and secure access to any dev tool. With Unpage, you can reduce alert noise, automate incident investigation, and build custom agents to handle specific tasks that would otherwise require an SRE.
+
+## Unpage Agents
+
+Unpage Agents are defined in natural language in YAML files. This is an example agent that investigates CPU alerts and provides a summary on the incident:
+
+```yaml expandable
+#cpu-alert-agent.yaml
+
+#description: used by the router to determine which agent to use for the alert
+description: >
+	Use this agent...
+
+#prompt: instructions for the agent to follow when acting on the alert
+prompt: >
+	...
+
+#tools:
+tools: >
+	...
+```
+
+**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident.
+
+**Prompt:** The selected agent will follow the investigation steps listed in the prompt. This will often resemble a runbook for the type of alert.
+
+```yaml
+#it would be cool to show a runbook side-by-side 
+#with what the agent prompt looks like
+```
+
+**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and connect to your alerting tool. 
+
+**Response:** In this case, the CPU alert agent will leave a comment on the incident like this:
+
+```yaml
+#agent response here
+```
+
+You can customize your agents to automatically respond to different types of alerts and take different actions to address them. See more **examples here**. 
+
+This quickstart flow will show you how easily you can build your own custom agents for automation.  Here’s what it will entail:   \
+Create your first agent. Choose from our pre-defined templates, or build your own from scratch\!\
+Configure the agent. Give it access to the tools & context it needs\
+Run the agent with a test payload to assess the output
+
 Unpage is an agent builder and knowledge graph builder that makes infrastructure context available via MCP server, enabling you to build LLM-powered applications that query and execute on your infrastructure safely and intelligently. Here's how it works, at a high level:
 
 <Frame>
