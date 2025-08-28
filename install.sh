@@ -32,6 +32,7 @@ command_exists() {
 }
 
 # Function to generate a UUID
+FALLBACK_UUID="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 generate_uuid() {
     if command_exists python && python -c "import uuid" 2>/dev/null; then
         python -c "import uuid; print(str(uuid.uuid4()).lower())"
@@ -39,7 +40,7 @@ generate_uuid() {
         uuidgen | tr '[:upper:]' '[:lower:]'
     else
         # Fallback to null UUID
-        echo "00000000-0000-0000-0000-000000000000"
+        echo "$FALLBACK_UUID"
     fi
 }
 
@@ -67,7 +68,7 @@ persist_installation_id() {
     local identity_file="$HOME/.unpage/.identity"
 
     # Don't persist nil UUID (fallback UUID)
-    if [ "$installation_id" = "00000000-0000-0000-0000-000000000000" ]; then
+    if [ "$installation_id" = "$FALLBACK_UUID" ]; then
         return 0
     fi
 
