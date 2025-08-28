@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from pydantic_yaml import parse_yaml_file_as
+from pydantic_yaml import parse_yaml_file_as, parse_yaml_raw_as
 
 from unpage.agent.analysis import Agent
 from unpage.config import manager
@@ -36,6 +36,12 @@ def get_agent_templates() -> list[str]:
 def get_agent_template(agent_name: str) -> str:
     """Get the contents of the agent template for the given agent name."""
     return (Path(__file__).parent / "templates" / f"{agent_name}.yaml").read_text()
+
+
+def get_agent_template_description(agent_name: str) -> str:
+    text = get_agent_template(agent_name)
+    yml = parse_yaml_raw_as(Agent, text)
+    return yml.description
 
 
 def get_agents() -> list[str]:

@@ -13,8 +13,8 @@ from questionary import Choice
 from rich.console import Console
 from rich.panel import Panel
 
-from unpage.agent.analysis import AnalysisAgent
-from unpage.agent.utils import load_agent
+from unpage.agent.analysis import Agent, AnalysisAgent
+from unpage.agent.utils import get_agent_template_description, get_agent_templates, load_agent
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
@@ -46,39 +46,70 @@ async def quickstart() -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
     await _send_event("start")
     welcome_to_unpage()
-    _quickstart_intro()
-    config = manager.get_empty_config(
-        manager.get_active_profile(), plugins=_initial_plugin_settings()
-    )
-    cfg, next_step_count = await _create_config(config)
-    plugin_manager = PluginManager(cfg)
-    cfg.save()
-    await _send_event("config_saved")
-    agent_name = await _create_and_edit_agent(next_step_count)
-    await _send_event("agent_created")
-    await _demo_an_incident(agent_name, next_step_count + 1, plugin_manager)
-    await _send_event("incident_demoed")
-    await _show_agent_commands(next_step_count + 2)
-    await _send_event("shown_agent_commands")
-    await _optionally_launch_configure(next_step_count + 3)
+    if not await _quickstart_intro():
+        return
+    rich.print("")
+    agent = await _select_and_edit_agent()
+    # cfg = await _config_for_agent()
+    # _test_agent(agent_name, cfg)
+    # _show_whats_next()
 
 
-def _quickstart_intro() -> None:
-    rich.print("""This interactive tool will walk through the configuration of your system.
-We'll setup basic plugins so your LLM can use the Unpage MCP server.
+async def _quickstart_intro() -> bool:
+    rich.print("""
+Unpage is the open source framework for building SRE agents with infrastructure context and secure access to any dev tool.
 
+This quickstart flow will show you how easily you can build your own custom agents for automation. Here's what it will entail:
 
-Here's what the quickstart will entail:
-
-1. Configure LLM (Amazon Bedrock, OpenAI, Anthropic Claude, and many more!)
-2. Configure Pagerduty plugin
-3. Optionally configure SolarWinds
-4. Optionally configure Datadog
-5. Create and edit a demo agent
-6. Test the demo agent against a PagerDuty incident
-7. See how to create, test and refine your own agents
-8. Configure and build an infrastructure knowledge graph
+• Create your first agent. Choose from our pre-defined templates, or build your own from scratch!
+• Configure the agent. Give it access to the tools & context it needs
+• Run the agent with a test payload to assess the output
 """)
+    return await confirm("That's it! Ready to get started?")
+
+
+async def _select_and_edit_agent() -> Agent:
+    rich.print(
+        "First, which agent would you like to try? Choose a template, or make one from scratch. If it's your first time, we recommend starting with a template."
+    )
+    rich.print("")
+    rich.print("----------")
+    rich.print("")
+    demo_template_names = [t for t in get_agent_templates() if "demo" in t]
+    choices = [
+        Choice(
+            title=t,
+            value=t,
+            description=get_agent_template_description(t),
+        )
+        for t in demo_template_names
+    ]
+    choices.append(
+        Choice(
+            title="Build my own from scratch",
+            value="blank",
+            description="Build your own agent from scratch",
+        )
+    )
+    template_selected = await select(
+        "Select a demo agent:",
+        choices=choices,
+    )
+    agent_name = f"demo_quickstart__{template_selected}"
+    agent_file = await create_agent(
+        agent_name=agent_name,
+        overwrite=True,
+        template=template_selected,
+    )
+    rich.print("")
+    rich.print(
+        f"Great! You selected {template_selected if template_selected != 'blank' else 'to build your own template'}. When you're ready, we'll open the agent's configuration file in your default editor so you can (optionally) make changes. Make note of the tools that the agent has access to, as this will determine the plugins we'll need to setup before we can test the agent."
+    )
+    rich.print("")
+    await questionary.press_any_key_to_continue("Hit [enter] to open the editor").unsafe_ask_async()
+    await edit_file(agent_file)
+    rich.print()
+    return agent_name
 
 
 def _initial_plugin_settings() -> dict[str, PluginConfig]:
