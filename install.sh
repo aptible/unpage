@@ -32,7 +32,7 @@ command_exists() {
 }
 
 # Function to generate a UUID
-FALLBACK_UUID="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+FALLBACK_UUID="00000000-0000-1000-8000-000000000000"
 generate_uuid() {
     if command_exists python && python -c "import uuid" 2>/dev/null; then
         python -c "import uuid; print(str(uuid.uuid4()).lower())"
