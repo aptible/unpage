@@ -48,7 +48,7 @@ generate_uuid() {
 get_installation_id() {
     local identity_file="$HOME/.unpage/.identity"
 
-    if [ -f "$identity_file" ]; then
+    if [[ -f "$identity_file" ]]; then
         cat "$identity_file"
     else
         printf "%s" "$(generate_uuid)"
@@ -68,7 +68,7 @@ persist_installation_id() {
     local identity_file="$HOME/.unpage/.identity"
 
     # Don't persist nil UUID (fallback UUID)
-    if [ "$installation_id" = "$FALLBACK_UUID" ]; then
+    if [[ "$installation_id" == "$FALLBACK_UUID" ]]; then
         return 0
     fi
 
@@ -139,14 +139,14 @@ EOF
         # Send the telemetry event (don't let failures break the installer)
         local tuna_url="https://tuna.aptible.com/www/e"
 
-        if [ "$download_cmd" = "curl" ]; then
+        if [[ "$download_cmd" == "curl" ]]; then
             curl -s -G "$tuna_url" \
                  --data-urlencode "id=$event_id" \
                  --data-urlencode "user_id=$INSTALLATION_ID" \
                  --data-urlencode "type=unpage_telemetry" \
                  --data-urlencode "url=https://github.com/aptible/unpage" \
                  --data-urlencode "value=$telemetry_payload" >/dev/null 2>&1 || true
-        elif [ "$download_cmd" = "wget" ]; then
+        elif [[ "$download_cmd" == "wget" ]]; then
             local encoded_payload
             encoded_payload=$(printf '%s' "$telemetry_payload" | sed 's/ /%20/g; s/"/%22/g; s/{/%7B/g; s/}/%7D/g; s/:/%3A/g; s/,/%2C/g' 2>/dev/null || echo "")
             local encoded_event_id
@@ -205,19 +205,20 @@ source_uv_env() {
 
     for base_path in "${possible_base_paths[@]}"; do
         # Skip empty paths
-        if [ -z "$base_path" ]; then
+        if [[ -z "$base_path" ]]; then
             continue
         fi
 
         # Look for env script in the base directory
-        if [ -f "$base_path/env" ]; then
+        if [[ -f "$base_path/env" ]]; then
             print_info "Found uv environment script at: $base_path/env"
+            # shellcheck disable=SC1091
             source "$base_path/env"
             return 0
         fi
 
         # Also check bin subdirectory for uv binary as fallback
-        if [ -f "$base_path/bin/uv" ] && [ -x "$base_path/bin/uv" ]; then
+        if [[ -f "$base_path/bin/uv" ]] && [[ -x "$base_path/bin/uv" ]]; then
             print_info "Found uv binary at: $base_path/bin/uv (adding to PATH)"
             export PATH="$base_path/bin:$PATH"
             return 0
