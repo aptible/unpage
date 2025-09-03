@@ -1,0 +1,382 @@
+---
+title: "Tutorial: Creating New Agents"
+---
+
+Every team has unique infrastructure, monitoring systems, and incident response
+processes. The example agents in our library serve as references and starting
+points, but the real power of Unpage comes from understanding the agent-building
+process itself.
+
+This tutorial walks you through the steps needed to design and implement your
+own agents from scratch.
+
+
+## Overview: The Agent Creation Process
+
+Creating a new agent involves six key steps:
+
+1. **Identify your input source** - What webhook/alert will trigger the agent?
+2. **Write the agent description** - How will the router know when to use this agent?
+3. **Design the runbook instructions** - What should the agent do step-by-step?
+4. **Define required tools** - What built-in and custom tools does the agent need?
+5. **Create custom shell tools** - Extend Unpage with your specific commands/scripts
+6. **Test and deploy** - Validate locally and set up production webhook handling
+
+Let's walk through each step with a practical example.
+
+## Example Scenario: Redis Memory Usage Alerts
+
+For this tutorial, we'll create an agent that handles Redis memory usage alerts
+from DataDog. When Redis memory usage exceeds 85%, our agent will:
+
+- Check current Redis memory statistics
+- Identify the largest keys consuming memory
+- Analyze recent memory growth patterns
+- Check for memory-intensive operations in Redis logs
+- Post actionable recommendations to the incident
+
+
+## Step 1: Identify Your Input Source
+
+The first step is understanding what triggers your agent. This could be:
+
+- **PagerDuty incidents** from various monitoring systems
+- **Direct webhooks** from DataDog, New Relic, CloudWatch, etc.
+- **GitHub Actions failures** or other CI/CD events
+- **Custom application alerts** from your own services
+
+For our Redis example, we'll assume we get alerts that look like:
+
+```json
+{
+  "incident": {
+    "title": "Redis Memory Usage Critical",
+    "description": "redis-prod-cluster memory usage: 87.2% (6.1GB/7.0GB)",
+    "service": "redis-prod-cluster",
+    "status": "triggered"
+  }
+}
+```
+
+
+## Step 2: Write the Agent Description
+
+The agent description is used by Unpage's [Router](/concepts/router) to
+automatically select which agent should handle each incoming alert. Write
+descriptions that are:
+
+- **Specific** about the alert types this agent handles
+- **Distinguishing** to differentiate from other agents
+- **Comprehensive** to cover edge cases and variations
+
+Create the agent configuration:
+
+```bash
+$ unpage agent create redis_memory_alerts
+```
+
+Start with the description in the YAML file that opens:
+
+```yaml
+description: >
+  Handle Redis memory usage alerts and high memory consumption issues.
+  Use this agent when:
+    - The alert mentions Redis, redis-server, or Redis cluster names
+    - Memory usage, memory consumption, or OOM (out of memory) is mentioned
+    - Redis-specific metrics like used_memory, maxmemory, or evicted_keys are referenced
+    - The alert comes from DataDog, CloudWatch, or other monitoring systems monitoring Redis instances
+```
+
+## Step 3: Design the Runbook Instructions
+
+The `prompt` section contains step-by-step instructions for what the agent should do.
+Think of this as a detailed runbook that a human SRE would follow, but written for an LLM.
+
+Structure your instructions clearly:
+
+- Use numbered or bulleted steps
+- Be specific about what information to gather
+- Include error handling and edge cases
+- Specify what actions to take based on findings
+- Include formatting requirements for status updates
+
+```yaml
+prompt: >
+  You are a Redis memory analysis specialist. When investigating Redis memory alerts:
+
+  1. Extract the Redis instance/cluster name from the PagerDuty alert
+  2. Use `shell_redis_memory_info` to get current memory statistics and configuration
+  3. Use `shell_redis_top_keys` to identify the largest keys consuming memory
+  4. Use `shell_redis_memory_usage_history` to analyze memory growth patterns over the last 4 hours
+  5. Use `search_datadog_logs` to find Redis logs from the last 30 minutes, looking for:
+     - Memory-related warnings or errors
+     - Large key operations (HSET, SADD with many members)
+     - Client connection spikes that might indicate memory leaks
+  6. Use `get_resource_with_neighbors` to identify applications connected to this Redis instance
+  7. For each connected application, search logs for Redis-related errors or unusual patterns
+
+  Analysis and Response:
+  - If memory usage is above 90%: Mark as CRITICAL and recommend immediate action
+  - If memory usage is 85-90%: Mark as HIGH and suggest proactive measures
+  - If large keys (>100MB) exist: Identify the key patterns and suggest optimization
+  - If memory growth is rapid (>10% in 1 hour): Flag as potential memory leak
+
+  Create a comprehensive status update including:
+  - Current memory usage percentage and absolute values
+  - Top 10 memory-consuming key patterns with sizes
+  - Memory growth rate over the last 4 hours
+  - Any concerning log patterns or errors
+  - Connected applications that might be causing issues
+  - Specific recommended actions (key cleanup, configuration changes, scaling)
+
+  Post findings using `pagerduty_post_status_update` with priority based on severity analysis.
+```
+
+## Step 4: Define Required Tools
+
+List all the tools your agent needs in the `tools` section. These include:
+
+- **Built-in tools** from Unpage plugins (DataDog, PagerDuty, AWS, etc.)
+- **Custom shell commands** you'll create for specific operations
+- **Wildcards** for groups of related tools
+
+```yaml
+tools:
+  - "shell_redis_memory_info"
+  - "shell_redis_top_keys"
+  - "shell_redis_memory_usage_history"
+  - "search_datadog_logs"
+  - "get_resource_with_neighbors"
+  - "pagerduty_post_status_update"
+```
+
+To see all available built-in tools:
+
+```bash
+$ unpage mcp tools list
+```
+
+Your Agent will **only** have access to the tools you explicitly give it
+permission to call.
+
+
+## Step 5: Create Custom Shell Tools
+
+You can always extend Unpage with custom [shell commands](/plugins/shell) to
+interact with your specific infrastructure. These commands can:
+
+- Execute Redis CLI commands against your instances
+- Run custom scripts or database queries
+- Call internal APIs or tools
+- Parse and format data for the agent
+
+Edit your Unpage configuration (`~/.unpage/profiles/default/config.yaml`) to add the custom commands:
+
+```yaml
+plugins:
+  # ... existing plugins
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: redis_memory_info
+          description: Get comprehensive Redis memory statistics and configuration
+          command: |
+            redis-cli -h {redis_host} -p {redis_port} --raw INFO memory &&
+            echo "---CONFIG---" &&
+            redis-cli -h {redis_host} -p {redis_port} CONFIG GET maxmemory* &&
+            redis-cli -h {redis_host} -p {redis_port} CONFIG GET save
+          args:
+            redis_host: The Redis server hostname or IP address
+            redis_port: The Redis server port (default 6379)
+
+        - handle: redis_top_keys
+          description: Identify the largest keys in Redis by memory usage
+          command: |
+            redis-cli -h {redis_host} -p {redis_port} --latency-history -i 1 > /dev/null 2>&1 &
+            LATENCY_PID=$!
+            redis-cli -h {redis_host} -p {redis_port} --bigkeys --i 0.01
+            kill $LATENCY_PID 2>/dev/null || true
+          args:
+            redis_host: The Redis server hostname or IP address
+            redis_port: The Redis server port (default 6379)
+
+        - handle: redis_memory_usage_history
+          description: Get Redis memory usage metrics from the last 4 hours via DataDog API
+          command: |
+            curl -X GET "https://api.datadoghq.com/api/v1/query" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+              -H "DD-APPLICATION-KEY: ${DATADOG_APP_KEY}" \
+              -G \
+              --data-urlencode "query=avg:redis.info.memory.used_memory{host:{redis_host}}" \
+              --data-urlencode "from=$(date -d '4 hours ago' +%s)" \
+              --data-urlencode "to=$(date +%s)"
+          args:
+            redis_host: The Redis server hostname to query metrics for
+```
+
+### Shell Command Best Practices
+
+When creating shell commands:
+
+- **Include error handling** with `2>/dev/null || echo "Command failed"`
+- **Use environment variables** for API keys and credentials
+- **Chain commands** with `&&` for sequential execution
+- **Parse output** to provide clean, structured data
+- **Add timeouts** for potentially long-running operations
+- **Document required permissions** and dependencies
+
+## Step 6: Test and Deploy
+
+### Local Testing
+
+Test your agent with sample data before deploying:
+
+```bash
+# Test with a sample alert payload
+$ echo '{"incident": {"title": "Redis Memory Usage Critical", "description": "redis-prod-cluster memory usage: 87.2%"}}' | unpage agent run redis_memory_alerts
+
+# Test with a PagerDuty incident ID
+$ unpage agent run redis_memory_alerts --pagerduty-incident PXXXXX
+```
+
+### Test Routing
+
+Verify the router selects your agent correctly:
+
+```bash
+# Test routing decision
+$ unpage agent route '{"incident": {"title": "Redis Memory Critical"}}'
+
+# Debug routing with detailed explanation
+$ unpage agent route --debug '{"incident": {"title": "Redis Memory Critical"}}'
+```
+
+### Production Deployment
+
+Set up webhook handling for production alerts:
+
+```bash
+# Local webhook server for testing
+$ unpage agent serve
+
+# Public webhook with ngrok tunnel
+$ unpage agent serve --tunnel --ngrok-token YOUR_NGROK_TOKEN
+
+# Production deployment (typically with reverse proxy)
+$ unpage agent serve --host 0.0.0.0 --port 8000
+```
+
+Configure your monitoring system (PagerDuty, DataDog, etc.) to send webhooks to:
+- Local testing: `http://localhost:8000/webhook`
+- Ngrok tunnel: `https://your-tunnel.ngrok.io/webhook`
+- Production: `https://your-domain.com/webhook`
+
+## Advanced Agent Patterns
+
+### Multi-Step Analysis Agents
+
+For complex scenarios, break analysis into phases:
+
+```yaml
+prompt: >
+  Phase 1 - Data Collection:
+  - Gather all relevant metrics and logs
+  - Verify the scope of the issue
+
+  Phase 2 - Root Cause Analysis:
+  - Correlate data to identify potential causes
+  - Rule out common false positives
+
+  Phase 3 - Impact Assessment:
+  - Determine affected services and users
+  - Estimate business impact
+
+  Phase 4 - Response and Communication:
+  - Post detailed findings with evidence
+  - Recommend specific remediation steps
+  - Set appropriate incident priority
+```
+
+### Conditional Logic Agents
+
+Use conditional prompts for different scenarios:
+
+```yaml
+prompt: >
+  Analyze the alert and determine the scenario:
+
+  If memory usage > 95%:
+    - Execute emergency memory cleanup procedures
+    - Post CRITICAL update with immediate actions
+
+  If memory growth rate > 20% per hour:
+    - Focus on identifying memory leaks
+    - Examine recent deployments and configuration changes
+
+  If evicted_keys metric is increasing:
+    - Analyze key eviction patterns
+    - Recommend maxmemory policy adjustments
+
+  Otherwise:
+    - Perform standard memory analysis
+    - Post standard monitoring recommendations
+```
+
+### Integration with External Systems
+
+Agents can interact with any system your shell commands can reach:
+
+```yaml
+tools:
+  - "shell_slack_notify_team"
+  - "shell_create_jira_ticket"
+  - "shell_trigger_runbook_automation"
+  - "shell_update_status_page"
+```
+
+## Debugging and Iteration
+
+### Monitoring Agent Performance
+
+Use Unpage's built-in tracing to monitor agent execution:
+
+```bash
+# Start MLflow tracking server
+$ unpage mlflow serve
+
+# Run agent with tracing enabled
+$ env MLFLOW_TRACKING_URI=http://127.0.0.1:5566 unpage agent run redis_memory_alerts @test_alert.json
+```
+
+View execution traces at `http://127.0.0.1:5566` to see:
+- Tool usage patterns
+- Execution timing
+- Error rates and types
+- Agent decision flows
+
+## Best Practices Summary
+
+1. **Start simple** - Begin with basic analysis, then add complexity
+2. **Test thoroughly** - Use various input scenarios and edge cases
+3. **Handle errors gracefully** - Include fallbacks for failed commands
+4. **Be specific in descriptions** - Help the router make correct decisions
+5. **Document dependencies** - Note required tools, permissions, and environment setup
+6. **Iterate based on results** - Refine prompts based on real incident responses
+7. **Monitor and improve** - Use tracing data to optimize agent performance
+
+## Conclusion
+
+Creating effective Unpage agents transforms reactive incident response into
+proactive, automated analysis. By following this systematic approach you can
+build agents that not only save time during incidents but also provide deeper
+insights into your infrastructure than manual investigation alone.
+
+The key is starting with one well-defined use case, perfecting it through testing
+and iteration, then expanding to cover additional scenarios as you gain experience
+with the platform.
+
+Remember: the best agents are those that encode your team's operational
+knowledge and decision-making processes, making your entire team more effective
+at infrastructure management.
