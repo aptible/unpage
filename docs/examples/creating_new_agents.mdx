@@ -350,7 +350,7 @@ $ unpage mlflow serve
 $ env MLFLOW_TRACKING_URI=http://127.0.0.1:5566 unpage agent run redis_memory_alerts @test_alert.json
 ```
 
-View execution traces at `http://127.0.0.1:5566` to see:
+View execution traces at `http://127.0.0.1:5566/#/experiments/1?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D&compareRunsMode=TRACES` to see:
 - Tool usage patterns
 - Execution timing
 - Error rates and types
