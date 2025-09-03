@@ -50,7 +50,11 @@
         "group": "Example Agents",
         "pages": [
           "examples/ssl_connection_failure",
-          "examples/disk_space_alerts"
+          "examples/disk_space_alerts",
+          "examples/db_connection_pool",
+          "examples/k8s_crash_loop_backoff",
+          "examples/failing_gha_build",
+          "examples/creating_new_agents"
         ]
       },
       {

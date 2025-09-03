@@ -1,0 +1,244 @@
+---
+title: Kubernetes Crash Loop Backoff
+---
+
+Kubernetes pods stuck in crash loops are among the most urgent production issues
+you'll face as an SRE. When a pod continuously fails to start, restarting every
+few seconds or minutes, it can take down critical services and leave users unable
+to access your application. The crash loop might be caused by application bugs,
+missing dependencies, resource constraints, configuration errors, or connectivity
+issues to external services.
+
+Every crash loop investigation follows the same tedious pattern: checking pod
+status and events, reviewing container logs from current and previous restarts,
+examining resource usage to identify OOM kills, verifying configuration and
+secrets, and testing connectivity to dependencies. You're frantically switching
+between `kubectl` commands while production is down and users are impacted.
+
+## Example Alert
+
+Here is an example Kubernetes crash loop alert our Agent will investigate:
+
+```
+[01:23:45 AM] CRITICAL - Pod CrashLoopBackOff
+Namespace: production
+Pod: api-server-deployment-7d8f6b9c4-x7k2m
+Restarts: 15
+Last State: Terminated (exit code 1)
+```
+
+## Creating A Kubernetes Crash Loop Investigation Agent
+
+Let's create an Agent that runs every time we get a pod crash loop alert. Our
+Agent will extract the pod and namespace from the alert,
+analyze the pod's status and events, examine container logs from current and
+previous restarts, check resource usage for OOM kills, verify configuration
+dependencies, and test connectivity to external services.
+
+After [installing Unpage](/), create the agent by running:
+
+```bash
+$ unpage agent create k8s_crash_loop_backoff
+```
+
+A yaml file will open in your `$EDITOR`. Paste the following Agent definition
+into the file:
+
+```yaml
+description: Investigate Kubernetes pods stuck in crash loops
+
+prompt: >
+  - Extract pod name and namespace from the PagerDuty alert
+  - Use `shell_kubectl_get_pod` to get current pod status, restart count, and container states
+  - Use `shell_kubectl_describe_pod` to get detailed pod information and recent events
+  - Use `shell_kubectl_logs_current` to get current container logs
+  - Use `shell_kubectl_logs_previous` to get logs from the previous failed container
+  - Use `shell_kubectl_get_events` to get cluster events related to the pod and namespace
+  - Use `shell_kubectl_top_pod` to check current resource usage and identify potential OOM issues
+  - Use `shell_kubectl_get_configmaps` to verify referenced ConfigMaps exist
+  - Use `shell_kubectl_get_secrets` to verify referenced Secrets exist
+  - Use search_datadog_logs to search for application errors and stack traces from the pod
+  - If the pod depends on external services, use get_resource_with_neighbors to identify them
+  - For each external dependency, use ping or appropriate connectivity tools to verify reachability
+  - Analyze all collected data to determine the root cause:
+    - Application crashes (check exit codes and error logs)
+    - Resource constraints (OOM kills, CPU throttling)
+    - Configuration issues (missing ConfigMaps/Secrets, bad environment variables)
+    - Connectivity problems (external service failures, DNS issues)
+    - Image pull failures (registry authentication, missing tags)
+  - Create a comprehensive status update including:
+    - Pod restart count and crash frequency pattern
+    - Exit codes and termination reasons
+    - Critical error messages from logs
+    - Resource usage patterns and OOM evidence
+    - Missing or invalid configurations
+    - External dependency status
+    - Root cause analysis and recommended immediate actions
+  - Post findings to PagerDuty with pagerduty_post_status_update for immediate remediation
+
+tools:
+  - "shell_kubectl_get_pod"
+  - "shell_kubectl_describe_pod"
+  - "shell_kubectl_logs_current"
+  - "shell_kubectl_logs_previous"
+  - "shell_kubectl_get_events"
+  - "shell_kubectl_top_pod"
+  - "shell_kubectl_get_configmaps"
+  - "shell_kubectl_get_secrets"
+  - "search_datadog_logs"
+  - "get_resource_with_neighbors"
+  - "ping"
+  - "pagerduty_post_status_update"
+```
+
+Let's dig in to what each section of the yaml file does:
+
+### Description: When the agent should run
+
+The `description` of an Agent is used by the [Router](/concepts/router) to
+decide which Agent to run for a given input. In this example we want the Agent
+to run only when the alert is about Kubernetes pod crash loops or CrashLoopBackOff.
+
+### Prompt: What the agent should do
+
+The `prompt` is where you give the Agent instructions, written in a runbook
+format. Make sure any instructions you give are achievable using the tools
+you have allowed the Agent to use (see below).
+
+### Tools: What the agent is allowed to use
+
+The `tools` section explicitly grants permission to use specific tools. You can
+list individual tools, or use wildcards and regex patterns to limit what the
+Agent can use.
+
+To see all of the available tools your Unpage installation has access to, run:
+
+```bash
+$ unpage mcp tools list
+```
+
+In our example we added several custom kubectl commands for Kubernetes diagnostics:
+
+* `shell_kubectl_get_pod`
+* `shell_kubectl_describe_pod`
+* `shell_kubectl_logs_current`
+* `shell_kubectl_logs_previous`
+* `shell_kubectl_get_events`
+* `shell_kubectl_top_pod`
+* `shell_kubectl_get_configmaps`
+* `shell_kubectl_get_secrets`
+
+These are custom [shell commands](/plugins/shell) that use kubectl to diagnose
+pod crash loops. Custom shell commands allow you to extend the functionality of
+Unpage without having to write a new plugin.
+
+## Defining Custom Tools
+
+To add our custom Kubernetes analysis tools, edit `~/.unpage/profiles/default/config.yaml`
+and add the following:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: kubectl_get_pod
+          description: Get detailed pod status including restarts and container states.
+          command: kubectl get pod {pod_name} -n {namespace} -o wide
+          args:
+            pod_name: The name of the pod to inspect
+            namespace: The Kubernetes namespace containing the pod
+        - handle: kubectl_describe_pod
+          description: Get detailed pod description including events and container status.
+          command: kubectl describe pod {pod_name} -n {namespace}
+          args:
+            pod_name: The name of the pod to inspect
+            namespace: The Kubernetes namespace containing the pod
+        - handle: kubectl_logs_current
+          description: Get current container logs from the pod.
+          command: kubectl logs {pod_name} -n {namespace} --tail=100 --timestamps
+          args:
+            pod_name: The name of the pod to get logs from
+            namespace: The Kubernetes namespace containing the pod
+        - handle: kubectl_logs_previous
+          description: Get logs from the previous failed container instance.
+          command: kubectl logs {pod_name} -n {namespace} --previous --tail=100 --timestamps || echo "No previous container logs available"
+          args:
+            pod_name: The name of the pod to get previous logs from
+            namespace: The Kubernetes namespace containing the pod
+        - handle: kubectl_get_events
+          description: Get Kubernetes events related to the pod and namespace.
+          command: kubectl get events -n {namespace} --field-selector involvedObject.name={pod_name} --sort-by='.lastTimestamp'
+          args:
+            pod_name: The name of the pod to get events for
+            namespace: The Kubernetes namespace to search for events
+        - handle: kubectl_top_pod
+          description: Get current resource usage for the pod to identify OOM or resource constraints.
+          command: kubectl top pod {pod_name} -n {namespace} --containers || echo "Metrics server not available or pod not running"
+          args:
+            pod_name: The name of the pod to check resource usage
+            namespace: The Kubernetes namespace containing the pod
+        - handle: kubectl_get_configmaps
+          description: List ConfigMaps in the namespace to verify pod dependencies.
+          command: kubectl get configmaps -n {namespace}
+          args:
+            pod_name: The name of the pod to check ConfigMap references
+            namespace: The Kubernetes namespace to search
+        - handle: kubectl_get_secrets
+          description: List Secrets in the namespace to verify pod dependencies.
+          command: kubectl get secrets -n {namespace}
+          args:
+            pod_name: The name of the pod to check Secret references
+            namespace: The Kubernetes namespace to search
+```
+
+Shell commands have full access to your environment and can run kubectl commands
+against your Kubernetes clusters. Make sure your kubectl context is configured
+correctly and you have appropriate RBAC permissions. See [shell commands](/plugins/shell)
+for more details.
+
+## Running Your Agent
+
+With your Agent configured and the custom Kubernetes analysis tools added,
+we are ready to test it on a real PagerDuty alert.
+
+### Testing on an existing alert
+
+To test your Agent locally on a specific PagerDuty alert, run:
+
+```bash
+# You can pass in a PagerDuty incident ID or URL
+$ unpage agent run k8s_crash_loop_backoff --pagerduty-incident Q1K8SLOOP42X9Z
+```
+
+### Listening for webhooks
+
+To have your Agent listen for new PagerDuty alerts as they happen, run
+`unpage agent serve` and add the webhook URL to your PagerDuty account:
+
+```bash
+# Webhook listener on localhost:8000/webhook
+$ unpage agent serve
+
+# Webhook listener on your_ngrok_domain/webhook
+$ unpage agent serve --tunnel --ngrok-token your_ngrok_token
+```
+
+## Example Output
+
+Your Agent will update the alert with:
+- Current pod status, restart count, and crash frequency analysis
+- Container exit codes and termination reasons from recent restarts
+- Critical error messages and stack traces from current and previous logs
+- Kubernetes events showing scheduling, pulling, or startup failures
+- Resource usage patterns indicating OOM kills or CPU throttling
+- Verification of ConfigMaps, Secrets, and other configuration dependencies
+- External service connectivity test results
+- Root cause analysis with specific remediation recommendations
+
+The Agent transforms a frantic crash loop investigation into a structured analysis,
+providing the exact information needed to quickly identify whether the issue is
+application code, resource constraints, configuration problems, or infrastructure,
+enabling faster resolution and reduced downtime.

@@ -1,0 +1,187 @@
+---
+title: Database Connection Pool Exhaustion
+---
+
+PostgreSQL databases have a hard limit on concurrent connections. When reached,
+your application stops accepting new requests. This happens more often than you'd
+think: a deployment introduces a connection leak, a background job goes haywire,
+or legitimate traffic simply exceeds your capacity.
+
+The frustrating part is that connection pool issues require manual detective work.
+You need to identify which queries are stuck, which services are hogging
+connections, and whether it's safe to kill certain processes. Every minute
+spent investigating is another minute of downtime.
+
+This investigation follows the same pattern every time: check connection counts,
+find long-running queries, analyze service logs, identify the culprit. It's
+repetitive work that's perfect for automation.
+
+
+## Example Alert
+
+Here is an example database connection pool alert our Agent will investigate:
+
+```
+Database: prod-postgres.us-east-1
+Status: Connection limit reached (200/200)
+Impact: order-service (42 connections), user-api (38 connections), analytics (31 connections)
+Duration: 12 minutes
+Error: "FATAL: remaining connection slots are reserved"
+```
+
+## Creating A Database Connection Pool Investigation Agent
+
+Let's create an Agent that runs every time we get a database connection pool
+exhaustion alert. Our Agent will extract the database host from
+the alert, analyze current connections and pool statistics, identify long-running
+queries and locks, and correlate logs across connected services to pinpoint
+which service is causing the issue.
+
+After [installing Unpage](/), create the agent by running:
+
+```bash
+$ unpage agent create db_connection_pool
+```
+
+A yaml file will open in your `$EDITOR`. Paste the following Agent definition
+into the file:
+
+```yaml
+description: Handle database connection pool exhaustion alerts
+
+prompt: >
+  - Extract the database host from the PagerDuty alert
+  - Use `shell_check_db_connections` to get current connection counts and limits
+  - Use `shell_check_db_pool_stats` to analyze connection pool statistics by database and user
+  - Use `shell_check_long_queries` to identify queries running longer than 5 minutes
+  - Use `shell_check_db_locks` to find blocking locks that might prevent connection cleanup
+  - Use search_datadog_logs to find connection errors in the last 30 minutes for the database host
+  - Use get_resource_with_neighbors to identify all services connected to the database
+  - For each connected service, search Datadog logs for connection-related errors and patterns
+  - Correlate the timeline of errors across services to identify which service started having issues first
+  - Create a detailed status update showing:
+    - Current vs maximum connections
+    - Top databases/users consuming connections
+    - Long-running queries with their duration and blocking status
+    - Services with the most connection errors and their error patterns
+    - Timeline of when issues started per service
+  - Post findings to PagerDuty with pagerduty_post_status_update for immediate action
+
+tools:
+  - "shell_check_db_connections"
+  - "shell_check_db_pool_stats"
+  - "shell_check_long_queries"
+  - "shell_check_db_locks"
+  - "search_datadog_logs"
+  - "get_resource_with_neighbors"
+  - "pagerduty_post_status_update"
+```
+
+Let's dig in to what each section of the yaml file does:
+
+### Description: When the agent should run
+
+The `description` of an Agent is used by the [Router](/concepts/router) to
+decide which Agent to run for a given input. In this example we want the Agent
+to run only when the alert is about database connection pool exhaustion.
+
+### Prompt: What the agent should do
+
+The `prompt` is where you give the Agent instructions, written in a runbook
+format. Make sure any instructions you give are achievable using the tools
+you have allowed the Agent to use (see below).
+
+### Tools: What the agent is allowed to use
+
+The `tools` section explicitly grants permission to use specific tools. You can
+list individual tools, or use wildcards and regex patterns to limit what the
+Agent can use.
+
+To see all of the available tools your Unpage installation has access to, run:
+
+```bash
+$ unpage mcp tools list
+```
+
+In our example we added several custom shell commands for database diagnostics:
+
+* `shell_check_db_connections`
+* `shell_check_db_pool_stats`
+* `shell_check_long_queries`
+* `shell_check_db_locks`.
+
+These are custom [shell commands](/plugins/shell) that query the internal tables
+of a PostgreSQL database to help diagnose connection pool errors. Custom shell
+commands allow you to extend the functionality of Unpage without having to write
+a new plugin.
+
+## Defining Custom Tools
+
+To add our custom database analysis tools, edit `~/.unpage/profiles/default/config.yaml`
+and add the following:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: check_db_connections
+          description: Check current database connections and limits.
+          command: psql -c "SELECT count(*) as active_connections, setting as max_connections FROM pg_stat_activity, pg_settings WHERE name = '\''max_connections'\'';" -c "SELECT datname, count(*) as connections FROM pg_stat_activity GROUP BY datname ORDER BY connections DESC;"
+        - handle: check_db_pool_stats
+          description: Analyze connection pool statistics by database, user, and state.
+          command: psql -c "SELECT datname, usename, state, count(*) FROM pg_stat_activity GROUP BY datname, usename, state ORDER BY count DESC;" -c "SELECT application_name, count(*) FROM pg_stat_activity WHERE state = '\''active'\'' GROUP BY application_name ORDER BY count DESC LIMIT 10;"
+        - handle: check_long_queries
+          description: Find long-running queries that might be holding connections.
+          command: psql -c "SELECT pid, now() - pg_stat_activity.query_start AS duration, query, state, wait_event FROM pg_stat_activity WHERE (now() - pg_stat_activity.query_start) > interval '\''5 minutes'\'' ORDER BY duration DESC;"
+        - handle: check_db_locks
+          description: Check for database locks that might prevent connection cleanup.
+          command: psql -c "SELECT blocked_locks.pid AS blocked_pid, blocked_activity.usename AS blocked_user, blocking_locks.pid AS blocking_pid, blocking_activity.usename AS blocking_user, blocked_activity.query AS blocked_statement, blocking_activity.query AS current_statement_in_blocking_process FROM pg_catalog.pg_locks blocked_locks JOIN pg_catalog.pg_stat_activity blocked_activity ON blocked_activity.pid = blocked_locks.pid JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.locktype = blocked_locks.locktype AND blocking_locks.DATABASE IS NOT DISTINCT FROM blocked_locks.DATABASE AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid AND blocking_locks.pid != blocked_locks.pid JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid WHERE NOT blocked_locks.GRANTED;"
+```
+
+Shell commands have full access to your environment and can run custom scripts
+or call internal tools. See [shell commands](/plugins/shell) for more details.
+
+## Running Your Agent
+
+With your Agent configured and the custom database analysis tools added,
+we are ready to test it on a real PagerDuty alert.
+
+### Testing on an existing alert
+
+To test your Agent locally on a specific PagerDuty alert, run:
+
+```bash
+# You can pass in a PagerDuty incident ID or URL
+$ unpage agent run db_connection_pool --pagerduty-incident Q3DBPOOL5T89X2
+```
+
+### Listening for webhooks
+
+To have your Agent listen for new PagerDuty alerts as they happen, run
+`unpage agent serve` and add the webhook URL to your PagerDuty account:
+
+```bash
+# Webhook listener on localhost:8000/webhook
+$ unpage agent serve
+
+# Webhook listener on your_ngrok_domain/webhook
+$ unpage agent serve --tunnel --ngrok-token your_ngrok_token
+```
+
+## Example Output
+
+Your Agent will update the PagerDuty alert with:
+- Current active connections vs maximum connection limit
+- Breakdown of connections by database and user
+- Long-running queries with their duration and wait events
+- Database locks that are blocking connection cleanup
+- Connected services with connection error patterns from logs
+- Timeline correlation showing which service started having issues first
+- Actionable recommendations for immediate connection pool recovery
+
+The Agent transforms a frantic 3am investigation into a structured analysis,
+giving you the exact information needed to quickly identify and resolve the
+connection pool exhaustion.

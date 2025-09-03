@@ -1,0 +1,196 @@
+---
+title: GitHub Actions Build Failures
+---
+
+You can use Unpage to automatically diagnose and fix many common build and
+deployment issues, from dependency conflicts to test failures to configuration
+errors.
+
+Instead of manually digging through logs and debugging, your agent analyzes the
+failure, applies a fix using [Claude Code Headless Mode](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-headless),
+and opens a pull request for your review.
+
+This keeps humans in control of what gets merged while eliminating the tedious
+parts of build failure investigation. Your team stays unblocked, deployments
+resume faster, and engineers can focus on reviewing solutions rather than hunting
+for problems.
+
+
+## Example Build Failure
+
+<img
+  src="/images/examples/gha/failure.png"
+  alt="GitHub Actions Failure"
+  noZoom
+  width="300"
+/>
+
+## Creating A GitHub Actions Build Failure Agent
+
+Let's create an Agent that runs every time we get a GitHub Actions build failure
+alert. Our Agent will extract the workflow and job details from the
+alert, fetch the failing job logs, analyze the specific error, use Claude Code
+to automatically fix the issue, and create a pull request with the fix.
+
+After [installing Unpage](/), create the agent by running:
+
+```bash
+$ unpage agent create failing_gha_build
+```
+
+A yaml file will open in your `$EDITOR`. Paste the following Agent definition
+into the file:
+
+```yaml
+description: Investigate a failed GitHub Actions workflow (on a main branch or a release; not relevant to pull request failures)
+
+prompt: >
+  - Extract the repository name from the PagerDuty alert
+  - Use `shell_get_last_failing_run` to get the most recent failing GitHub Actions run ID for the repository
+  - Use `shell_fetch_run_logs` to fetch the complete logs from the failing run
+  - Use `shell_noninteractive_claude_code_run` to provide the error logs to Claude Code and ask it to fix the error
+  - If Claude Code successfully made a change, use `shell_commit_and_open_pull_request` to commit that change and open a pull request with Claude Code's explanation of the fix in the description for human review
+  - If Claude Code did not successfully make a change, log the output and stop - no automated action will be taken and human intervention is required
+
+tools:
+  - "shell_get_last_failing_run"
+  - "shell_fetch_run_logs"
+  - "shell_noninteractive_claude_code_run"
+  - "shell_commit_and_open_pull_request"
+```
+
+Let's dig in to what each section of the yaml file does:
+
+### Description: When the agent should run
+
+The `description` of an Agent is used by the [Router](/concepts/router) to
+decide which Agent to run for a given input. In this example we want the Agent
+to run only when the alert is about GitHub Actions workflow failures on main
+branches or releases, not pull request failures.
+
+### Prompt: What the agent should do
+
+The `prompt` is where you give the Agent instructions, written in a runbook
+format. Make sure any instructions you give are achievable using the tools
+you have allowed the Agent to use (see below).
+
+### Tools: What the agent is allowed to use
+
+The `tools` section explicitly grants permission to use specific tools. You can
+list individual tools, or use wildcards and regex patterns to limit what the
+Agent can use.
+
+To see all of the available tools your Unpage installation has access to, run:
+
+```bash
+$ unpage mcp tools list
+```
+
+In our example we added several custom shell commands for GitHub Actions diagnostics:
+
+* `shell_get_last_failing_run`
+* `shell_fetch_run_logs`
+* `shell_noninteractive_claude_code_run`
+* `shell_commit_and_open_pull_request`
+
+These are custom [shell commands](/plugins/shell) that use the [GitHub CLI](https://cli.github.com/) (`gh`),
+Claude Code in [Headless Mode](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-headless),
+and standard git commands to interact with GitHub Actions and automate fixes.
+
+Custom shell commands allow you to extend the functionality of Unpage without
+having to write a new plugin.
+
+## Defining Custom Tools
+
+To add our custom GitHub Actions analysis and automation tools, edit `~/.unpage/profiles/default/config.yaml`
+and add the following:
+
+```yaml
+plugins:
+  # ...
+  shell:
+    enabled: true
+    settings:
+      commands:
+        - handle: get_last_failing_run
+          description: Get the most recent failing GitHub Actions run ID for a repository.
+          command: gh run list --repo {github_repo} --status failure --limit 1 --json databaseId --jq '.[0].databaseId'
+          args:
+            github_repo: The GitHub repository in owner/repo format
+        - handle: fetch_run_logs
+          description: Fetch complete logs from a specific GitHub Actions run.
+          command: gh run view {run_id} --repo {github_repo} --log
+          args:
+            run_id: The GitHub Actions run ID
+            github_repo: The GitHub repository in owner/repo format
+        - handle: noninteractive_claude_code_run
+          description: Run Claude Code in non-interactive mode to analyze and fix GitHub Actions build errors.
+          command: |
+            cd {repo_path} && echo "{log_content}" | claude -p --append-system-prompt "The GitHub Actions build failed. Here are the relevant error logs from the failing run. Please analyze the error and fix the problem in the codebase."
+          args:
+            repo_path: The local path to the git repository
+            log_content: The relevant error logs from the failing GitHub Actions run
+        - handle: commit_and_open_pull_request
+          description: Commit changes and open a pull request with the fix.
+          command: |
+            cd {repo_path} &&
+            git checkout -b {head_branch_name} &&
+            git add -A &&
+            git commit -m "{commit_message}" &&
+            git push -u origin {head_branch_name} &&
+            gh pr create --title "🤖 Automated fix for failing GitHub Actions build" --body "{pr_description}" --base {base_branch_name} --head {head_branch_name} --repo {github_repo}
+          args:
+            repo_path: The local path to the git repository
+            github_repo: The GitHub repo on which to open the pull request
+            head_branch_name: The name of a branch to which the commit should be pushed
+            base_branch_name: The name of the target branch for the pull request
+            commit_message: A commit message to use for the single commit
+            pr_description: A description for the pull request
+```
+
+Shell commands have full access to your environment and can run the GitHub CLI
+(`gh`) and git commands. Make sure you have the GitHub CLI installed and
+authenticated (`gh auth login`) and that the repository is cloned locally.
+See [shell commands](/plugins/shell) for more details.
+
+## Running Your Agent
+
+With your Agent configured and the custom GitHub Actions automation tools added,
+we are ready to test it on a real PagerDuty alert.
+
+### Testing on an existing alert
+
+To test your Agent locally on a specific PagerDuty alert, run:
+
+```bash
+# You can pass in a PagerDuty incident ID or URL
+$ unpage agent run failing_gha_build --pagerduty-incident Q1GHA7X8Y2Z9A3
+```
+
+### Listening for webhooks
+
+To have your Agent listen for new PagerDuty alerts as they happen, run
+`unpage agent serve` and add the webhook URL to your PagerDuty account:
+
+```bash
+# Webhook listener on localhost:8000/webhook
+$ unpage agent serve
+
+# Webhook listener on your_ngrok_domain/webhook
+$ unpage agent serve --tunnel --ngrok-token your_ngrok_token
+```
+
+## Example Output
+
+Your Agent will:
+- Extract the repository name from the alert
+- Query GitHub Actions for the most recent failing run ID using `gh run list`
+- Fetch complete logs from the failing run using `gh run view --log`
+- Use Claude Code to analyze the root cause and attempt an automated fix
+- Create a pull request with the automated fix (if successful) for human review
+- Provide detailed explanation of what was changed and why in the PR description
+- Stop and wait for human intervention if no automated fix could be applied
+
+The Agent transforms a disruptive build failure into an automated investigation
+and fix attempt, creating a pull request for human review rather than automatically
+merging changes, ensuring code quality while dramatically reducing time to resolution.
