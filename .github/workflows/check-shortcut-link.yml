@@ -1,0 +1,42 @@
+name: check-shortcut-link
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, labeled, unlabeled]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-shortcut-link:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.labels == null || !contains(github.event.pull_request.labels.*.name, 'no-ticket')
+    steps:
+      - name: Check for Shortcut ticket reference
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "Checking PR description for Shortcut ticket reference..."
+          echo "PR info:"
+          echo "$PR_TITLE"
+          echo "$PR_BODY"
+          echo "----------------------------------------"
+
+          # Check if PR body contains [SC-NNNNN] pattern (case insensitive)
+          TICKET=$(echo "$PR_BODY\n$PR_TITLE" | grep -ioE '\[sc-[0-9]{5}\]' | head -1)
+          if [[ -n "${TICKET}" ]] ; then
+            echo "✅ Found Shortcut ticket reference in PR description"
+            echo "📋 Ticket: $TICKET"
+          else
+            echo "❌ No Shortcut ticket reference found in PR description"
+            echo ""
+            echo "Please include a Shortcut ticket reference in your PR description."
+            echo "Format: [SC-12345] (where 12345 is your ticket number)"
+            echo ""
+            echo "Example:"
+            echo "This PR fixes the login bug described in [SC-12345]"
+            echo ""
+            echo "⏭️ To skip this check, add the 'no-ticket' label to your PR"
+            exit 1
+          fi

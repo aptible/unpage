@@ -29,5 +29,5 @@ jobs:
         with:
           ignore_label: "nocombine"
           select_label: ${{ github.event.inputs.pr_type_filter }}
-          labels: "dependencies, combined-pr"
+          labels: "dependencies, combined-pr, no-ticket"
           pr_title: "chore(deps): Combine Dependabot PRs"
