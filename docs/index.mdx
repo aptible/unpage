@@ -46,11 +46,9 @@ Learn more about Unpage's router [here](/concepts/router).
 
 Learn more about connecting plugins and tools [here](/concepts/plugins).
 
-**Response:** In this case, the CPU alert agent will leave a comment on the incident like this:
+**Response:** In this case, the CPU alert agent will leave a comment on the incident:
 
-```yaml
-#TODO agent response here
-```
+> ROOT CAUSE IDENTIFIED: SSL certificate for domain ‘[expired-rsa-dv.ssl.com](http://expired-rsa-dv.ssl.com)’ is EXPIRED. Certificate expired on August 2, 2016 GMT (over 8 years ago). This explains the SSL connection failures. IMMEDIATE ACTION REQUIRED: Certificate renewal needed for affected domain to restore SSL connectivity.
 
 You can customize your agents to automatically respond to different types of alerts and take different actions to address them. See more examples [here](/examples/ssl_connection_failure).
 
@@ -84,7 +82,7 @@ On macOS:
 curl -fsSL https://unpage.ai/install.sh | bash
 ```
 
-For other platforms, first install `uv` using the [official uv installation guide](https://github.com/astral-sh/uv), then run the command.
+For other platforms, first install `uv` using the [official uv installation guide](https://github.com/astral-sh/uv), then run the command above.
 
 ## Quickstart
 
