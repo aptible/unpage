@@ -2,99 +2,108 @@
 title: "Getting Started"
 ---
 
-<Info>
-  **ALPHA SOFTWARE**: Unpage is experimental, under heavy development, and may be unstable. Use at your own risk\!
-</Info>
-
 ## Intro
 
-Unpage is an agent builder and knowledge graph builder that makes infrastructure context available via MCP server, enabling you to build LLM-powered applications that query and execute on your infrastructure safely and intelligently. Here's how it works, at a high level:
+Unpage is the open source framework for building SRE agents with infrastructure context and secure access to any dev tool.
 
-<Frame>
-  ![How It Works](/images/illustrations/how-it-works.png)
-</Frame>
+Modern infrastructure is messy. Clusters, services, and databases all interact in ways that are hard to map and harder to document. To respond to alerts, automate ops, or build custom automations, agents need both **context** and **secure access** to your dev tools.
 
-And here's a demo of how it works in detail:
+With Unpage, you can build production-ready SRE agents in minutes:
+
+- **Define agents in YAML:** Configure how they respond to events.
+- **Route intelligently:** Match alerts and requests to the right agent.
+- **Give agents context:** Map your infrastructure with plugins and a knowledge graph.
+- **Integrate securely:** Connect agents to logs, metrics, traces, infrastructure providers, and external tools via MCP or scoped shell access.
+
+With these, you can build agents that act with real context and clear boundaries across incident response, ops automation, cost optimization, or developer self-service.
+
+<Info>
+  Unpage is **young.** It’s already useful today and growing quickly with community feedback.
+</Info>
+
+## Unpage Agents
+
+Unpage agents are defined in natural language in YAML files. This is an example agent that investigates SSL/TLS connection failures and provides a summary on the incident:
+
+```yaml expandable
+# SSL-connection-failure-agent.yaml
+
+# Description: Used by the router to determine which agent to use for the alert
+description: Investigate SSL/TLS connection failures
+
+# Prompt: Instructions for the agent to follow when acting on the alert
+prompt: >
+  - Extract the domain/hostname from the alert about connection failures.
+  - Use shell command `shell_check_cert_expiration_date` to check the certificate expiration dates
+  - Parse the certificate dates to determine if the cert is expired or expiring soon
+  - If certificate is expired or expiring within 24 hours:
+    - Post high-priority status update to the incident explaining the root cause
+    - Include the exact expiration date and affected resources
+
+# Tools: Allows the agent to use the specified tools during its investigation
+tools: >
+  - "shell_check_cert_expiration_date"
+  - "pagerduty_post_status_update"
+```
+
+**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident.
+
+Learn more about Unpage's router [here](/concepts/router).
+
+**Prompt:** The selected agent will follow the investigation steps listed in the prompt. This will often resemble a runbook for the type of alert.
+
+**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and retrieve more details about the alert, as needed. You can limit the tools that the agent has access to by specifying them in this section.
+
+> Note: You can list all available tools by running `unpage mcp tools list`
+
+Learn more about connecting plugins and tools [here](/concepts/plugins).
+
+**Response:** In this case, the CPU alert agent will leave a comment on the incident:
+
+> ROOT CAUSE IDENTIFIED: SSL certificate for domain ‘[expired-rsa-dv.ssl.com](http://expired-rsa-dv.ssl.com)’ is EXPIRED. Certificate expired on August 2, 2016 GMT (over 8 years ago). This explains the SSL connection failures. IMMEDIATE ACTION REQUIRED: Certificate renewal needed for affected domain to restore SSL connectivity.
+
+You can customize your agents to automatically respond to different types of alerts and take different actions to address them. See more examples [here](/examples/ssl_connection_failure).
+
+To create your first agent, install Unpage and run Quickstart. You'll have a handful of example agents to start from, or you can create your own\!
+
+```shellscript
+# Install Unpage
+curl -fsSL https://install.unpage.ai | bash
+```
+
+```shellscript
+# Quickstart
+unpage agent quickstart
+```
+
+If you need help, you can find us in the [Unpage Slack community](https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw) or follow along with this demo:
 
 <iframe className="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/z17sHig2xMk?si=k_-tIa8YqGfX9sI3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen />
 
-At the end of this guide, you will have Unpage set up to run locally with built-in integrations and tools, a knowledge graph, and your first infrastructure-aware agent.
-
 ## Installation
-
-### Prerequisites
-
-- Python 3.12 or higher
-- `uv` package manager
-- API keys for [your LLM](/plugins/llm) and alerting, infrastructure, and observability tools. Learn more in [Plugins](/concepts/plugins).
-
-### Install uv
 
 On macOS:
 
 ```shell
-brew install uv
+curl -fsSL https://unpage.ai/install.sh | bash
 ```
 
-For other platforms, follow the [official uv installation guide](https://github.com/astral-sh/uv).
-
-### Install Unpage
-
-Unpage is designed to be run using `uvx`, which comes with `uv`:
-
-```shell
-uvx unpage -h
-```
+For other platforms, first install `uv` using the [official uv installation guide](https://github.com/astral-sh/uv), then run the command above.
 
 ## Quickstart
 
 To get started, run:
 
 ```shell
-uvx unpage agent quickstart
+unpage agent quickstart
 ```
 
-This will get you up and running with your first agent, which will automatically investigate and add context to alerts from [PagerDuty](/plugins/pagerduty) (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
+This will get you up and running with your first agent, which will automatically investigate and add context to alerts from PagerDuty (or your preferred alerting provider). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
 
-The quickstart flow will walk you through:
+## Learn More
 
-- Configuring [your LLM](/plugins/llm), [PagerDuty plugin](/plugins/pagerduty), and logs and metrics plugins
-- Creating your first [agent](/concepts/agents) and prompt
-- Testing your agent with an existing incident ticket
-- Building your [knowledge graph](/concepts/knowledge-graph)
+- [Test and run your agents](/commands/agent)
+- [Set up your knowledge graph](/commands/graph)
+- [Expand your agent's knowledge with custom scripts](/plugins/shell)
 
-## Running the Agent
-
-Once you're happy with the results of your agent, you can automate the agent's actions for new incidents by running `unpage agent serve` and configuring [PagerDuty to send webhooks](/plugins/pagerduty#webhooks) to the Unpage server:
-
-```shell
-uvx unpage agent serve -h
-```
-
-The `agent serve` command supports running the server over an ngrok tunnel, so that you can test your agents end-to-end locally, without deploying. For more information on `agent serve` options, see [its documentation](/commands/agent#subcommand%3A-serve).
-
-## Maintenance
-
-### Update Configuration
-
-If you need to add or update plugins or API keys, you can update your configuration with:
-
-```shell
-uvx unpage configure
-```
-
-### Update the Knowledge Graph
-
-To refresh your knowledge graph to give your agent up-to-date information, run:
-
-```shell
-uvx unpage graph build -h
-```
-
-### Add More Context
-
-Your agent's responses will improve with more context about your infrastructure, which can be provided via the knowledge graph or custom scripts. To provide your agents with more context in addition to the knowledge graph, see [Shell Commands](/plugins/shell).
-
-### Create Agents
-
-See [Agents](/concepts/agents) to learn more about how to create and edit your agents and prompts.
+Have a request for the Unpage team? Let us know on [Slack](https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw) or [GitHub](https://github.com/aptible/unpage/issues).
