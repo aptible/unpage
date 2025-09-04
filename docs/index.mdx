@@ -26,22 +26,21 @@ With these, you can build agents that act with real context and clear boundaries
 Unpage agents are defined in natural language in YAML files. This is an example agent that investigates SSL/TLS connection failures and provides a summary on the incident:
 
 ```yaml expandable
-#SSL-connection-failure-agent.yaml
+# SSL-connection-failure-agent.yaml
 
-#Description: Used by the router to determine which agent to use for the alert
-description: >
-Investigate SSL/TLS connection failures
+# Description: Used by the router to determine which agent to use for the alert
+description: Investigate SSL/TLS connection failures
 
-#Prompt: Instructions for the agent to follow when acting on the alert
+# Prompt: Instructions for the agent to follow when acting on the alert
 prompt: >
   - Extract the domain/hostname from the alert about connection failures.
-  - Use shell command \`shell_check_cert_expiration_date\` to check the certificate expiration dates
+  - Use shell command `shell_check_cert_expiration_date` to check the certificate expiration dates
   - Parse the certificate dates to determine if the cert is expired or expiring soon
   - If certificate is expired or expiring within 24 hours:
     - Post high-priority status update to the incident explaining the root cause
     - Include the exact expiration date and affected resources
 
-#Tools: Allows the agent to use the specified tools during its investigation
+# Tools: Allows the agent to use the specified tools during its investigation
 tools: >
   - "shell_check_cert_expiration_date"
   - "pagerduty_post_status_update"
@@ -53,7 +52,9 @@ Learn more about Unpage's router [here](/concepts/router).
 
 **Prompt:** The selected agent will follow the investigation steps listed in the prompt. This will often resemble a runbook for the type of alert.
 
-**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and connect to your alerting tool. You can limit the tools that the agent has access to by specifying them in this section.
+**Tools**: In order to do its investigation, the agent uses tools to understand your infrastructure and retrieve more details about the alert, as needed. You can limit the tools that the agent has access to by specifying them in this section.
+
+> Note: You can list all available tools by running `unpage mcp tools list`
 
 Learn more about connecting plugins and tools [here](/concepts/plugins).
 
@@ -66,12 +67,12 @@ You can customize your agents to automatically respond to different types of ale
 To create your first agent, install Unpage and run Quickstart. You'll have a handful of example agents to start from, or you can create your own\!
 
 ```shellscript
-#Install Unpage
+# Install Unpage
 curl -fsSL https://install.unpage.ai | bash
 ```
 
 ```shellscript
-#Quickstart
+# Quickstart
 unpage agent quickstart
 ```
 
