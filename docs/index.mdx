@@ -2,13 +2,24 @@
 title: "Getting Started"
 ---
 
-<Info>
-  **ALPHA SOFTWARE**: Unpage is experimental, under heavy development, and may be unstable. Use at your own risk\!
-</Info>
-
 ## Intro
 
-Unpage is the open source framework for building SRE agents with infrastructure context and secure access to any dev tool. With Unpage, you can reduce alert noise, automate incident investigation, and build custom agents to handle specific tasks that would otherwise require an SRE.
+Unpage is the open source framework for building SRE agents with infrastructure context and secure access to any dev tool.
+
+Modern infrastructure is messy. Clusters, services, and databases all interact in ways that are hard to map and harder to document. To respond to alerts, automate ops, or build custom automations, agents need both **context** and **secure access** to your dev tools.
+
+With Unpage, you can build production-ready SRE agents in minutes:
+
+- **Define agents in YAML:** Configure how they respond to events.
+- **Route intelligently:** Match alerts and requests to the right agent.
+- **Give agents context:** Map your infrastructure with plugins and a knowledge graph.
+- **Integrate securely:** Connect agents to logs, metrics, traces, infrastructure providers, and external tools via MCP or scoped shell access.
+
+With these, you can build agents that act with real context and clear boundaries across incident response, ops automation, cost optimization, or developer self-service.
+
+<Info>
+  Unpage is **young.** It’s already useful today and growing quickly with community feedback.
+</Info>
 
 ## Unpage Agents
 
@@ -36,7 +47,7 @@ tools: >
   - "pagerduty_post_status_update"
 ```
 
-**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident. 
+**Description**: When Unpage is running and receives an incident payload from your alerting tool, the router uses the agent description to determine which agent should act on the incident.
 
 Learn more about Unpage's router [here](/concepts/router).
 
