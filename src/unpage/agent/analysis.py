@@ -6,9 +6,8 @@ import dspy
 from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
-import rich
 
-from unpage.config import Config, manager
+from unpage.config import manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins.base import REGISTRY, PluginManager
