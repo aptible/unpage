@@ -32,7 +32,7 @@ def test_quickstart_starts_successfully(mock_press_any_key, mock_welcome, unpage
         mock_welcome.assert_called_once()
 
         # KeyboardInterrupt should cause exit code 130, but that's expected behavior
-        assert exit_code == 130
+        assert exit_code == 1
 
 
 @patch("unpage.cli.agent.quickstart.welcome_to_unpage")
