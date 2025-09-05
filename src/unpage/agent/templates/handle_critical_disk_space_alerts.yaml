@@ -1,0 +1,19 @@
+# https://docs.unpage.ai/examples/disk_space_alerts
+description: Handle critical disk space alerts
+
+prompt: >
+  - Extract the host from the PagerDuty alert
+  - Use shell command: `shell_check_disk_space` to get disk usage and identify largest directories
+  - Use shell command: `shell_check_large_files` to find large files in common problem directories
+  - Search SolarWinds for recent disk space warnings or errors from this host
+  - Create a status update with:
+    - Which partition is full
+    - Top directories consuming space
+    - Largest files in /var/log, /tmp, and docker directories
+  - Post findings to PagerDuty with add_pagerduty_status_update for manual review and action
+
+tools:
+  - "shell_check_disk_space"
+  - "shell_check_large_files"
+  - "solarwinds_search_logs"
+  - "pagerduty_post_status_update"

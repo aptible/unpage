@@ -1,0 +1,29 @@
+# https://docs.unpage.ai/examples/db_connection_pool
+description: Handle database connection pool exhaustion alerts
+
+prompt: >
+  - Extract the database host from the PagerDuty alert
+  - Use `shell_check_db_connections` to get current connection counts and limits
+  - Use `shell_check_db_pool_stats` to analyze connection pool statistics by database and user
+  - Use `shell_check_long_queries` to identify queries running longer than 5 minutes
+  - Use `shell_check_db_locks` to find blocking locks that might prevent connection cleanup
+  - Use search_datadog_logs to find connection errors in the last 30 minutes for the database host
+  - Use get_resource_with_neighbors to identify all services connected to the database
+  - For each connected service, search Datadog logs for connection-related errors and patterns
+  - Correlate the timeline of errors across services to identify which service started having issues first
+  - Create a detailed status update showing:
+    - Current vs maximum connections
+    - Top databases/users consuming connections
+    - Long-running queries with their duration and blocking status
+    - Services with the most connection errors and their error patterns
+    - Timeline of when issues started per service
+  - Post findings to PagerDuty with pagerduty_post_status_update for immediate action
+
+tools:
+  - "shell_check_db_connections"
+  - "shell_check_db_pool_stats"
+  - "shell_check_long_queries"
+  - "shell_check_db_locks"
+  - "search_datadog_logs"
+  - "get_resource_with_neighbors"
+  - "pagerduty_post_status_update"
