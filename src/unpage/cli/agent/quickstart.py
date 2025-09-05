@@ -115,7 +115,7 @@ async def _select_and_edit_agent() -> Agent:
     return load_agent(agent_name)
 
 
-async def _config_plugin(plugin_name: str, step_number: int) -> PluginSettings:
+async def _interactive_plugin_config(plugin_name: str, step_number: int) -> PluginSettings:
     console = Console()
     console.print(
         Panel(
@@ -126,6 +126,19 @@ async def _config_plugin(plugin_name: str, step_number: int) -> PluginSettings:
     plugin_cls = REGISTRY[plugin_name]
     plugin = plugin_cls(**plugin_cls.default_plugin_settings)
     return await plugin.interactive_configure()
+
+
+async def _plugin_settings_valid(plugin_name: str, plugin_settings: PluginSettings) -> bool:
+    plugin_cls = REGISTRY[plugin_name]
+    plugin = plugin_cls(**plugin_settings)
+    rich.print(f"Validating {plugin.name}...")
+    try:
+        await plugin.validate_plugin_config()
+    except Exception as ex:
+        rich.print(f"Error validating {plugin.name}:\n{ex}")
+        return False
+    rich.print(f"[green]{plugin.name} configuration is valid![/green]")
+    return True
 
 
 async def _config_for_agent(agent: Agent) -> Config:
@@ -155,17 +168,24 @@ async def _config_for_agent(agent: Agent) -> Config:
         "When you're ready to configure these plugins, hit [enter]"
     ).unsafe_ask_async()
     rich.print("")
+    plugins = {}
+    for i, plugin_name in enumerate(required_tools_that_need_config):
+        while True:
+            plugin_settings = await _interactive_plugin_config(
+                plugin_name=plugin_name, step_number=i + 1
+            )
+            if await _plugin_settings_valid(plugin_name, plugin_settings):
+                plugins[plugin_name] = PluginConfig(enabled=True, settings=plugin_settings)
+                break
+            rich.print(f"Validation failed for {plugin_name}")
+            if not await confirm("Retry?"):
+                sys.exit(1)
+            rich.print("")
     cfg = manager.get_empty_config(
         profile=manager.get_active_profile(),
         telemetry_enabled=not UNPAGE_TELEMETRY_DISABLED,
         plugins={
-            **{
-                plugin_name: PluginConfig(
-                    enabled=True,
-                    settings=await _config_plugin(plugin_name=plugin_name, step_number=i + 1),
-                )
-                for i, plugin_name in enumerate(required_tools_that_need_config)
-            },
+            **plugins,
             **{
                 plugin_name: PluginConfig(
                     enabled=True,
