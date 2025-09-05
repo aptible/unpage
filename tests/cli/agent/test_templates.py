@@ -34,7 +34,6 @@ def test_list_templates_success(unpage):
         f"* {template_file.relative_to(template_dir).with_suffix('')}"
         for template_file in template_dir.glob("**/*.yaml")
     ]
-    # expected_templates = ["* blank", "* default", "* demo_quickstart"]
     assert sorted(template_lines) == sorted(expected_templates)
 
 
