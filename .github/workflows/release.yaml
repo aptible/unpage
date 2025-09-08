@@ -50,7 +50,7 @@ jobs:
 
       - name: Action | Semantic Version Release
         id: release
-        uses: python-semantic-release/python-semantic-release@5b9d941d5b29da138b933660ce1a9df75b54ce25  # v10.3.1
+        uses: python-semantic-release/python-semantic-release@6df5e876c8682fe0753ec2f8c81eb45547e52747  # v10.4.0
         with:
           github_token: ${{ secrets.RELEASE_GH_TOKEN }}
           git_committer_name: "github-actions"
