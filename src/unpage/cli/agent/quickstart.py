@@ -146,16 +146,16 @@ async def _config_for_agent(agent: Agent) -> Config:
         "Before we test the agent, we need to configure some plugins. Based on the tools this agent has access to, it looks like we'll need API keys for the following:"
     )
     rich.print("")
-    required_tools = agent.required_plugins_from_tools()
-    if "llm" not in required_tools:
-        required_tools.insert(0, "llm")
-    required_tools_that_need_config = [
+    required_plugin_names = agent.required_plugins_from_tools()
+    if "llm" not in required_plugin_names:
+        required_plugin_names.insert(0, "llm")
+    required_plugin_names_that_need_config = [
         plugin_name
         for plugin_name in agent.required_plugins_from_tools()
         if "interactive_configure" in REGISTRY[plugin_name].__dict__
         and callable(REGISTRY[plugin_name].interactive_configure)
     ]
-    for plugin_name in required_tools_that_need_config:
+    for plugin_name in required_plugin_names_that_need_config:
         rich.print(f"• {plugin_name.upper() if plugin_name == 'llm' else plugin_name.capitalize()}")
     rich.print("")
     rich.print(
@@ -171,7 +171,7 @@ async def _config_for_agent(agent: Agent) -> Config:
     ).unsafe_ask_async()
     rich.print("")
     plugins = {}
-    for i, plugin_name in enumerate(required_tools_that_need_config):
+    for i, plugin_name in enumerate(required_plugin_names_that_need_config):
         while True:
             plugin_settings = await _interactive_plugin_config(
                 plugin_name=plugin_name, step_number=i + 1
@@ -193,8 +193,8 @@ async def _config_for_agent(agent: Agent) -> Config:
                     enabled=True,
                     settings=REGISTRY[plugin_name].default_plugin_settings,
                 )
-                for plugin_name in required_tools
-                if plugin_name not in required_tools_that_need_config
+                for plugin_name in required_plugin_names
+                if plugin_name not in required_plugin_names_that_need_config
             },
         },
     )
