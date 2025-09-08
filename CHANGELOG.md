@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.29 (2025-09-08)
+
+### Documentation
+
+- Add more example agents ([#133](https://github.com/aptible/unpage/pull/133),
+  [`e3cc381`](https://github.com/aptible/unpage/commit/e3cc3810fdb3744e63c7b7629573d2cb2c4db73a))
+
+- Update docs links to unpage.ai ([#130](https://github.com/aptible/unpage/pull/130),
+  [`26d3d20`](https://github.com/aptible/unpage/commit/26d3d20c2ffec32b53affe8838aab4d79542bc65))
+
+- Update getting started example ([#131](https://github.com/aptible/unpage/pull/131),
+  [`1c7a473`](https://github.com/aptible/unpage/commit/1c7a47381be510e8fcc5f38709d54f2a53810b53))
+
+- Update README.md with latest getting started info
+  ([#135](https://github.com/aptible/unpage/pull/135),
+  [`5afa78a`](https://github.com/aptible/unpage/commit/5afa78a5c8f7eb3196ba213af531d81082d67c53))
+
+### Features
+
+- Templates for example agents from docs.unpage.ai/examples/ [SC-34546]
+  ([#137](https://github.com/aptible/unpage/pull/137),
+  [`9eda900`](https://github.com/aptible/unpage/commit/9eda9001cf7e9082e277048c893095422a03b2c2))
+
+
 ## v0.1.0-alpha.28 (2025-08-25)
 
 ### Documentation

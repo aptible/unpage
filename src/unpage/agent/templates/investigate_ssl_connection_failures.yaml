@@ -1,0 +1,14 @@
+# https://docs.unpage.ai/examples/ssl_connection_failure
+description: Investigate SSL/TLS connection failures
+
+prompt: >
+  - Extract the domain/hostname from the PagerDuty alert about connection failures.
+  - Use shell command `shell_check_cert_expiration_date` to check the certificate expiration dates
+  - Parse the certificate dates to determine if the cert is expired or expiring soon
+  - If certificate is expired or expiring within 24 hours:
+    - Post high-priority status update to PagerDuty explaining the root cause
+    - Include the exact expiration date and affected resources
+
+tools:
+  - "shell_check_cert_expiration_date"
+  - "pagerduty_post_status_update"

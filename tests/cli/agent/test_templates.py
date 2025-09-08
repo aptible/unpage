@@ -1,5 +1,7 @@
 """Tests for the agent templates CLI command."""
 
+from pathlib import Path
+
 
 def test_list_templates_success(unpage):
     """Test successful listing of agent templates.
@@ -25,8 +27,14 @@ def test_list_templates_success(unpage):
     # Verify templates are listed in sorted order
     lines = stdout.strip().split("\n")
     template_lines = [line for line in lines if line.startswith("* ")]
-    expected_templates = ["* blank", "* default", "* demo_quickstart"]
-    assert template_lines == expected_templates
+    template_dir = (
+        Path(__file__).parent.parent.parent.parent / "src" / "unpage" / "agent" / "templates"
+    )
+    expected_templates = [
+        f"* {template_file.relative_to(template_dir).with_suffix('')}"
+        for template_file in template_dir.glob("**/*.yaml")
+    ]
+    assert sorted(template_lines) == sorted(expected_templates)
 
 
 def test_list_templates_without_fixture(unpage, test_profile):
