@@ -43,3 +43,58 @@ tools:
   - "get_resource_with_neighbors"
   - "ping"
   - "pagerduty_post_status_update"
+
+config:
+  # https://docs.unpage.ai/examples/k8s_crash_loop_backoff#defining-custom-tools
+  plugins:
+    shell:
+      settings:
+        commands:
+          - handle: kubectl_get_pod
+            description: Get detailed pod status including restarts and container states.
+            command: kubectl get pod {pod_name} -n {namespace} -o wide
+            args:
+              pod_name: The name of the pod to inspect
+              namespace: The Kubernetes namespace containing the pod
+          - handle: kubectl_describe_pod
+            description: Get detailed pod description including events and container status.
+            command: kubectl describe pod {pod_name} -n {namespace}
+            args:
+              pod_name: The name of the pod to inspect
+              namespace: The Kubernetes namespace containing the pod
+          - handle: kubectl_logs_current
+            description: Get current container logs from the pod.
+            command: kubectl logs {pod_name} -n {namespace} --tail=100 --timestamps
+            args:
+              pod_name: The name of the pod to get logs from
+              namespace: The Kubernetes namespace containing the pod
+          - handle: kubectl_logs_previous
+            description: Get logs from the previous failed container instance.
+            command: kubectl logs {pod_name} -n {namespace} --previous --tail=100 --timestamps || echo "No previous container logs available"
+            args:
+              pod_name: The name of the pod to get previous logs from
+              namespace: The Kubernetes namespace containing the pod
+          - handle: kubectl_get_events
+            description: Get Kubernetes events related to the pod and namespace.
+            command: kubectl get events -n {namespace} --field-selector involvedObject.name={pod_name} --sort-by='.lastTimestamp'
+            args:
+              pod_name: The name of the pod to get events for
+              namespace: The Kubernetes namespace to search for events
+          - handle: kubectl_top_pod
+            description: Get current resource usage for the pod to identify OOM or resource constraints.
+            command: kubectl top pod {pod_name} -n {namespace} --containers || echo "Metrics server not available or pod not running"
+            args:
+              pod_name: The name of the pod to check resource usage
+              namespace: The Kubernetes namespace containing the pod
+          - handle: kubectl_get_configmaps
+            description: List ConfigMaps in the namespace to verify pod dependencies.
+            command: kubectl get configmaps -n {namespace}
+            args:
+              pod_name: The name of the pod to check ConfigMap references
+              namespace: The Kubernetes namespace to search
+          - handle: kubectl_get_secrets
+            description: List Secrets in the namespace to verify pod dependencies.
+            command: kubectl get secrets -n {namespace}
+            args:
+              pod_name: The name of the pod to check Secret references
+              namespace: The Kubernetes namespace to search

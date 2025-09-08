@@ -7,7 +7,7 @@ from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
 
-from unpage.config import manager
+from unpage.config import Config, manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins.base import PluginManager
@@ -19,6 +19,10 @@ class Agent(BaseModel):
     description: str = Field(description="A description of the agent and when it should be used")
     prompt: str = Field(description="The prompt to use for the agent")
     tools: list[str] = Field(description="The tools the agent has access to")
+    config: Config | None = Field(
+        description="Agent specific configuration to add to, or even override, the global config",
+        default=None,
+    )
 
 
 class SelectAgent(dspy.Signature):
@@ -76,13 +80,14 @@ class AnalysisAgent(dspy.Module):
 
         self.mcp_server = None
 
-    async def get_mcp_server(self) -> FastMCP:
+    async def get_mcp_server(self, agent: Agent | None) -> FastMCP:
         if self.mcp_server is None:
+            config = self.config if agent is None else self.config.merge(agent.config)
             self.mcp_server = await build_mcp_server(
                 Context(
                     profile=self.profile,
-                    config=self.config,
-                    plugins=PluginManager(config=self.config),
+                    config=config,
+                    plugins=PluginManager(config=config),
                     graph=Graph(self.config_dir / "graph.json"),
                 )
             )
@@ -137,7 +142,7 @@ class AnalysisAgent(dspy.Module):
         # Inject the selected prompt into the signature.
         signature = Analyze.with_instructions(agent.prompt)
 
-        async with self.unpage_agent(signature, agent.tools, max_iters=max_iters) as unpage:
+        async with self.unpage_agent(signature, agent, max_iters=max_iters) as unpage:
             result = await unpage.acall(payload=payload)
             return result.analysis
 
@@ -165,13 +170,13 @@ class AnalysisAgent(dspy.Module):
     async def unpage_agent(
         self,
         signature: type[dspy.Signature],
-        allowed_tool_patterns: list[str] | None = None,
+        agent: Agent | None = None,
         max_iters: int = 5,
     ) -> AsyncGenerator[dspy.Module, None]:
         """Yield a configured Unpage agent."""
-        allowed_tool_patterns = allowed_tool_patterns or ["*"]
+        allowed_tool_patterns = ["*"] if agent is None or not agent.tools else agent.tools
 
-        async with Client(await self.get_mcp_server()) as client:
+        async with Client(await self.get_mcp_server(agent)) as client:
             yield dspy.ReAct(
                 signature,
                 tools=[
