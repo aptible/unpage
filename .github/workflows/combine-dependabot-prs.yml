@@ -1,6 +1,8 @@
 name: Combine Dependabot PRs
 
 on:
+  schedule:
+    - cron: '3 10 * * 1-5'  # 10:03 AM UTC, Monday through Friday
   workflow_dispatch:
     inputs:
       pr_type_filter:
@@ -28,6 +30,5 @@ jobs:
         uses: github/combine-prs@2909f404763c3177a456e052bdb7f2e85d3a7cb3 # v5.2.0
         with:
           ignore_label: "nocombine"
-          select_label: ${{ github.event.inputs.pr_type_filter }}
           labels: "dependencies, combined-pr, no-ticket"
           pr_title: "chore(deps): Combine Dependabot PRs"
