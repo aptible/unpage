@@ -75,7 +75,7 @@ async def _select_and_edit_agent() -> Agent:
     rich.print("")
     rich.print("----------")
     rich.print("")
-    demo_template_names = [t for t in get_agent_templates() if "demo" in t]
+    demo_template_names = get_agent_templates()
     choices = [
         Choice(
             title=t,
@@ -147,6 +147,8 @@ async def _config_for_agent(agent: Agent) -> Config:
     )
     rich.print("")
     required_tools = agent.required_plugins_from_tools()
+    if "llm" not in required_tools:
+        required_tools.insert(0, "llm")
     required_tools_that_need_config = [
         plugin_name
         for plugin_name in agent.required_plugins_from_tools()
