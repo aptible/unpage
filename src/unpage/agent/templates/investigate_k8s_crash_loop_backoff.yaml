@@ -1,0 +1,45 @@
+# https://docs.unpage.ai/examples/k8s_crash_loop_backoff
+description: Investigate Kubernetes pods stuck in crash loops
+
+prompt: >
+  - Extract pod name and namespace from the PagerDuty alert
+  - Use `shell_kubectl_get_pod` to get current pod status, restart count, and container states
+  - Use `shell_kubectl_describe_pod` to get detailed pod information and recent events
+  - Use `shell_kubectl_logs_current` to get current container logs
+  - Use `shell_kubectl_logs_previous` to get logs from the previous failed container
+  - Use `shell_kubectl_get_events` to get cluster events related to the pod and namespace
+  - Use `shell_kubectl_top_pod` to check current resource usage and identify potential OOM issues
+  - Use `shell_kubectl_get_configmaps` to verify referenced ConfigMaps exist
+  - Use `shell_kubectl_get_secrets` to verify referenced Secrets exist
+  - Use search_datadog_logs to search for application errors and stack traces from the pod
+  - If the pod depends on external services, use get_resource_with_neighbors to identify them
+  - For each external dependency, use ping or appropriate connectivity tools to verify reachability
+  - Analyze all collected data to determine the root cause:
+    - Application crashes (check exit codes and error logs)
+    - Resource constraints (OOM kills, CPU throttling)
+    - Configuration issues (missing ConfigMaps/Secrets, bad environment variables)
+    - Connectivity problems (external service failures, DNS issues)
+    - Image pull failures (registry authentication, missing tags)
+  - Create a comprehensive status update including:
+    - Pod restart count and crash frequency pattern
+    - Exit codes and termination reasons
+    - Critical error messages from logs
+    - Resource usage patterns and OOM evidence
+    - Missing or invalid configurations
+    - External dependency status
+    - Root cause analysis and recommended immediate actions
+  - Post findings to PagerDuty with pagerduty_post_status_update for immediate remediation
+
+tools:
+  - "shell_kubectl_get_pod"
+  - "shell_kubectl_describe_pod"
+  - "shell_kubectl_logs_current"
+  - "shell_kubectl_logs_previous"
+  - "shell_kubectl_get_events"
+  - "shell_kubectl_top_pod"
+  - "shell_kubectl_get_configmaps"
+  - "shell_kubectl_get_secrets"
+  - "search_datadog_logs"
+  - "get_resource_with_neighbors"
+  - "ping"
+  - "pagerduty_post_status_update"

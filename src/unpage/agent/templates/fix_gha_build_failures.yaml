@@ -1,0 +1,16 @@
+# https://docs.unpage.ai/examples/failing_gha_build
+description: Investigate a failed GitHub Actions workflow (on a main branch or a release; not relevant to pull request failures)
+
+prompt: >
+  - Extract the repository name from the PagerDuty alert
+  - Use `shell_get_last_failing_run` to get the most recent failing GitHub Actions run ID for the repository
+  - Use `shell_fetch_run_logs` to fetch the complete logs from the failing run
+  - Use `shell_noninteractive_claude_code_run` to provide the error logs to Claude Code and ask it to fix the error
+  - If Claude Code successfully made a change, use `shell_commit_and_open_pull_request` to commit that change and open a pull request with Claude Code's explanation of the fix in the description for human review
+  - If Claude Code did not successfully make a change, log the output and stop - no automated action will be taken and human intervention is required
+
+tools:
+  - "shell_get_last_failing_run"
+  - "shell_fetch_run_logs"
+  - "shell_noninteractive_claude_code_run"
+  - "shell_commit_and_open_pull_request"
