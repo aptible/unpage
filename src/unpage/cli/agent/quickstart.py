@@ -2,10 +2,8 @@ import asyncio
 import os
 import sys
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
 from typing import Any, cast
 
-import human_readable
 import questionary
 import rich
 from pydantic import BaseModel
@@ -41,6 +39,11 @@ async def _send_event(step: str, extra_params: dict[Any, Any] | None = None) -> 
     )
 
 
+def _panel(text: str) -> None:
+    console = Console()
+    console.print(Panel(f"[bold]{text}[/bold]", width=80))
+
+
 @agent_app.command
 async def quickstart() -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
@@ -69,6 +72,7 @@ This quickstart flow will show you how easily you can build your own custom agen
 
 
 async def _select_and_edit_agent() -> Agent:
+    _panel("Create your first agent")
     rich.print(
         "First, which agent would you like to try? Choose a template, or make one from scratch. If it's your first time, we recommend starting with a template."
     )
@@ -107,6 +111,7 @@ async def _select_and_edit_agent() -> Agent:
         f"Great! You selected {template_selected if template_selected != 'blank' else 'to build your own template'}. When you're ready, we'll open the agent's configuration file in your default editor so you can (optionally) make changes. Make note of the tools that the agent has access to, as this will determine the plugins we'll need to setup before we can test the agent."
     )
     rich.print("")
+    _panel("Edit your agent")
     await questionary.press_any_key_to_continue("Hit [enter] to open the editor").unsafe_ask_async()
     await edit_file(agent_file)
     rich.print("")
@@ -115,16 +120,16 @@ async def _select_and_edit_agent() -> Agent:
     return load_agent(agent_name)
 
 
-async def _interactive_plugin_config(plugin_name: str, step_number: int) -> PluginSettings:
-    console = Console()
-    console.print(
-        Panel(
-            f"[bold]{step_number}. {plugin_name.upper() if plugin_name == 'llm' else plugin_name.capitalize()} configuration[/bold]",
-            width=80,
-        )
-    )
+async def _interactive_plugin_config(
+    plugin_name: str, existing_plugin_settings: PluginSettings | None
+) -> PluginSettings:
     plugin_cls = REGISTRY[plugin_name]
-    plugin = plugin_cls(**plugin_cls.default_plugin_settings)
+    plugin = plugin_cls(
+        **{
+            **plugin_cls.default_plugin_settings,
+            **(existing_plugin_settings if existing_plugin_settings else {}),
+        }
+    )
     return await plugin.interactive_configure()
 
 
@@ -142,6 +147,7 @@ async def _plugin_settings_valid(plugin_name: str, plugin_settings: PluginSettin
 
 
 async def _config_for_agent(agent: Agent) -> Config:
+    _panel("Configure the agent")
     rich.print(
         "Before we test the agent, we need to configure some plugins. Based on the tools this agent has access to, it looks like we'll need API keys for the following:"
     )
@@ -151,7 +157,7 @@ async def _config_for_agent(agent: Agent) -> Config:
         required_plugin_names.insert(0, "llm")
     required_plugin_names_that_need_config = [
         plugin_name
-        for plugin_name in agent.required_plugins_from_tools()
+        for plugin_name in required_plugin_names
         if "interactive_configure" in REGISTRY[plugin_name].__dict__
         and callable(REGISTRY[plugin_name].interactive_configure)
     ]
@@ -170,19 +176,37 @@ async def _config_for_agent(agent: Agent) -> Config:
         "When you're ready to configure these plugins, hit [enter]"
     ).unsafe_ask_async()
     rich.print("")
+    rich.print("")
+    existing_plugins: dict[str, PluginConfig] = {}
+    try:
+        existing_config = manager.get_active_profile_config()
+        existing_plugins = existing_config.plugins
+    except Exception:  # noqa: S110 try-except-pass
+        pass
     plugins = {}
     for i, plugin_name in enumerate(required_plugin_names_that_need_config):
+        existing_plugin_settings = None
+        if plugin_name in existing_plugins:
+            existing_plugin_settings = existing_plugins[plugin_name].settings
+        step_number = i + 1
+        rich.print(
+            f"[bold] {step_number}. {plugin_name.upper() if plugin_name == 'llm' else plugin_name.capitalize()} configuration[/bold]"
+        )
+        rich.print("-" * 80)
         while True:
             plugin_settings = await _interactive_plugin_config(
-                plugin_name=plugin_name, step_number=i + 1
+                plugin_name=plugin_name,
+                existing_plugin_settings=existing_plugin_settings,
             )
             if await _plugin_settings_valid(plugin_name, plugin_settings):
                 plugins[plugin_name] = PluginConfig(enabled=True, settings=plugin_settings)
+                rich.print("")
                 break
             rich.print(f"Validation failed for {plugin_name}")
             if not await confirm("Retry?"):
                 sys.exit(1)
             rich.print("")
+        rich.print("")
     cfg = manager.get_empty_config(
         profile=manager.get_active_profile(),
         telemetry_enabled=not UNPAGE_TELEMETRY_DISABLED,
@@ -460,84 +484,123 @@ async def _select_pagerduty_incident(pd: PagerDutyPlugin) -> PagerDutyIncident |
             return None
 
 
+async def _select_payload() -> Any:
+    return {
+        "error": """[01:23:45 AM] CRITICAL - Pod CrashLoopBackOff
+Namespace: production
+Pod: api-server-deployment-7d8f6b9c4-x7k2m
+Restarts: 15
+Last State: Terminated (exit code 1)"""
+    }
+
+
 async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager) -> None:
+    _panel("Test out your new agent!")
     rich.print(f"You/re ready to test the new {agent.name} agent!")
     rich.print(
         "There are many ways to provide an incident for testing. Use the arrows to confirm your preference:"
     )
     rich.print("")
+    payload = await _select_payload()
     pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
-    incident = await _select_pagerduty_incident(pd)
-    if not incident:
-        rich.print("Did not get an incident, skipping the demo.")
-        return
+    # incident = await _select_pagerduty_incident(pd)
+    # if not incident:
+    #     rich.print("Did not get an incident, skipping the demo.")
+    #     return
     try:
         agent = load_agent(agent.name)
         analysis_agent = AnalysisAgent()
         rich.print("")
-        rich.print("Details of the incident we're going to demo:")
-        rich.print(f"> Title: {incident.title}")
-        time_since = datetime.now(UTC) - incident.created_at
-        rich.print(
-            f"> Created: {incident.created_at} ({human_readable.precise_delta(time_since)} ago)"
-        )
+        rich.print("Details of the payload we're going to demo:")
+        rich.print(payload)
+        # rich.print(f"> Title: {incident.title}")
+        # time_since = datetime.now(UTC) - incident.created_at
+        # rich.print(
+        #     f"> Created: {incident.created_at} ({human_readable.precise_delta(time_since)} ago)"
+        # )
 
-        def _color(status: str) -> str:
-            match status:
-                case "triggered":
-                    return f"[red]{incident.status}[/red]"
-                case "acknowledged":
-                    return f"[yellow]{incident.status}[/yellow]"
-            return incident.status
+        # def _color(status: str) -> str:
+        #     match status:
+        #         case "triggered":
+        #             return f"[red]{incident.status}[/red]"
+        #         case "acknowledged":
+        #             return f"[yellow]{incident.status}[/yellow]"
+        #     return incident.status
 
-        rich.print(f"> Status: {_color(incident.status)}")
-        rich.print(f"> Urgency: {incident.urgency}")
-        rich.print(f"> Url: {incident.html_url}")
-        rich.print("")
-        rich.print("> Ready to run the demo agent on this incident?")
+        # rich.print(f"> Status: {_color(incident.status)}")
+        # rich.print(f"> Urgency: {incident.urgency}")
+        # rich.print(f"> Url: {incident.html_url}")
+        # rich.print("")
+        rich.print("> Ready to run the demo agent on this payload?")
         rich.print("")
         await questionary.press_any_key_to_continue().unsafe_ask_async()
-        incident_json = incident.model_dump_json(indent=2)
-        incident_json_lines = incident_json.splitlines()
-        truncated = False
-        if len(incident_json_lines) > 20:
-            incident_json = "\n".join(incident_json_lines[-20:])
-            truncated = True
-        rich.print("")
-        rich.print(f"> PagerDuty incident payload{' (last 20 lines)' if truncated else ''}:")
-        if truncated:
-            rich.print("...")
-        rich.print(incident_json)
+        # incident_json = incident.model_dump_json(indent=2)
+        # incident_json_lines = incident_json.splitlines()
+        # truncated = False
+        # if len(incident_json_lines) > 20:
+        #     incident_json = "\n".join(incident_json_lines[-20:])
+        #     truncated = True
+        # rich.print("")
+        # rich.print(f"> PagerDuty incident payload{' (last 20 lines)' if truncated else ''}:")
+        # if truncated:
+        #     rich.print("...")
+        # rich.print(incident_json)
         rich.print("> Computing status update... (this may take a minute!)")
         console = Console()
         with console.status("working...", spinner="dots") as status:
-            result = await analysis_agent.acall(payload=incident.model_dump_json(), agent=agent)
+            result = await analysis_agent.acall(payload=payload, agent=agent)
             status.update("Done 🎉")
         rich.print("")
-        rich.print(
-            f"> Status update that would be posted to PagerDuty by the {pd.default_from} user:\n"
-        )
-        rich.print("-----")
+        # rich.print(
+        #     f"> Status update that would be posted to PagerDuty by the {pd.default_from} user:\n"
+        # )
+        _panel("✅ Agent run complete!")
         rich.print(result)
-        rich.print("-----")
+        rich.print("")
         rich.print("")
         rich.print("You can re-run this demo at any point with:")
         rich.print("")
-        rich.print(
-            f"  [bold deep_sky_blue1]unpage agent run --pagerduty-incident {incident.id} demo-quickstart[/bold deep_sky_blue1]"
-        )
+        rich.print(f"  [bold deep_sky_blue1]unpage agent run {agent.name}[/bold deep_sky_blue1]")
         rich.print("")
     except Exception as ex:
         rich.print(f"[red] Demo failed:[/red] {ex}")
         sys.exit(1)
+    _panel("🎉 You did it! Next steps")
     rich.print(
-        "🎉 You did it! Don/t stop now—what do you want to do next? Here are some suggestions below; use the arrow keys to move through each one and see a description."
+        "🎉 You did it! Don't stop now—what do you want to do next? Here are some suggestions below; use the arrow keys to move through each one and see a description."
     )
     rich.print("")
+    _ = await select(
+        message="Use the arrows to move through the options",
+        choices=[
+            Choice(
+                title="Edit the agent you just ran, or try a different one",
+                value="edit_agents",
+                description="You can run `unpage agent -h` to see the full list of available agent commands as you continue to build out your agents",
+            ),
+            Choice(
+                title="Learn how to deploy your agent remotely",
+                value="learn_to_deploy",
+                description="There are multiple options for deploying your agents. We recommend starting with Guide to Deploying Agents on our docs site. https://docs.unpage.ai/",
+            ),
+            Choice(
+                title="Configure more plugins & tools, and build a knowledge graph of your infrastructure",
+                value="configure_more",
+                description="""Unpage supports a rich infrastructure knowledge graph builder, which can provide helpful context to your Unpage Agents. The graph can be built from your infrastructure tools (like AWS or Aptible) and your observability tools (like Datadog and CloudWatch).
+
+For a full list of our currently-supported Plugins, check out our docs. https://docs.unpage.ai/
+
+If you want to try configuring some more plugins and building the graph, you can run `unpage configure`""",
+            ),
+        ],
+    )
     rich.print(
         "Don't forget to join the Slack community if you haven't already. The Unpage team is always available to answer questions, and you'll be among the first to hear about new updates!"
     )
+    # FIXME: make a community landing page
+    rich.print("https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw")
     rich.print("")
+    rich.print("📖 Docs are at https://docs.unpage.ai/")
     await questionary.press_any_key_to_continue().unsafe_ask_async()
     rich.print("")
 

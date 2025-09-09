@@ -11,9 +11,9 @@ prompt: >
   - Use `shell_kubectl_top_pod` to check current resource usage and identify potential OOM issues
   - Use `shell_kubectl_get_configmaps` to verify referenced ConfigMaps exist
   - Use `shell_kubectl_get_secrets` to verify referenced Secrets exist
-  - Use search_datadog_logs to search for application errors and stack traces from the pod
-  - If the pod depends on external services, use get_resource_with_neighbors to identify them
-  - For each external dependency, use ping or appropriate connectivity tools to verify reachability
+  - Use datadog_search_logs to search for application errors and stack traces from the pod
+  - If the pod depends on external services, use graph_get_neighboring_resources to identify them
+  - For each external dependency, use networking_ping or appropriate connectivity tools to verify reachability
   - Analyze all collected data to determine the root cause:
     - Application crashes (check exit codes and error logs)
     - Resource constraints (OOM kills, CPU throttling)
@@ -39,9 +39,9 @@ tools:
   - "shell_kubectl_top_pod"
   - "shell_kubectl_get_configmaps"
   - "shell_kubectl_get_secrets"
-  - "search_datadog_logs"
-  - "get_resource_with_neighbors"
-  - "ping"
+  - "datadog_search_logs"
+  - "graph_get_neighboring_resources"
+  - "networking_ping"
   - "pagerduty_post_status_update"
 
 config:
