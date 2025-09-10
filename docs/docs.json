@@ -72,7 +72,8 @@
           "plugins/pagerduty",
           "plugins/papertrail",
           "plugins/solarwinds",
-          "plugins/shell"
+          "plugins/shell",
+          "plugins/customalerts"
         ]
       },
       {
