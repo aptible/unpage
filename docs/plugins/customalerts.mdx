@@ -1,0 +1,23 @@
+---
+title: "Custom Alerts"
+description: "Description of your new file."
+---
+
+If you use an alerting provider that isn't supported by an Unpage plugin, you can still send alert payloads to your Unpage agents via webhooks.
+
+<Steps>
+  <Step title="Start your Unpage Server">
+    Start your server with `uv run unpage agent serve` .
+
+    During development you can tunnel to your local Unpage instance using ngrok by running `uv run unpage agent serve --tunnel` (see [**Unpage Server**](/commands/agent#subcommand%3A-serve) for details).
+  </Step>
+  <Step title="Create a webhook through your alerting provider">
+    The webhook URL should be the hostname of your running Unpage Server, with a path of `/webhook` (like `https://unpage.yourdomain.com/webhook`).
+
+    The webhook should send whatever events you want to run Agent workflows on, for example `incident.triggered`.
+  </Step>
+</Steps>
+
+Unpage will now receive webhooks from your alerting provider and send them to the [**Router**](/concepts/router), which will decide which [**Agent**](/concepts/agents) workflow to run.
+
+Our [Plugins](/concepts/plugins) include tools that allow agents to comment on and resolve alerts; for full plugin support for your alerting provider, send us a feature request on [GitHub](https://github.com/aptible/unpage/issues).
