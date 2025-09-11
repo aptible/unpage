@@ -503,8 +503,7 @@ If you want to try configuring some more plugins and building the graph, you can
     rich.print(
         "Don't forget to join the Slack community if you haven't already. The Unpage team is always available to answer questions, and you'll be among the first to hear about new updates!"
     )
-    # FIXME: make a community landing page
-    rich.print("https://join.slack.com/t/unpage/shared_invite/zt-3a85b8rnp-Hf1OIZq8SNu5FyrFhWaGQw")
+    rich.print("https://docs.unpage.ai/#learn-more?utm_source=unpage")
     rich.print("")
     rich.print("📖 Docs are at https://docs.unpage.ai/?utm_source=unpage")
     rich.print("")
