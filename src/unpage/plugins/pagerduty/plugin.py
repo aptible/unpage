@@ -43,7 +43,7 @@ class PagerDutyPlugin(Plugin, McpServerMixin):
     async def interactive_configure(self) -> PluginSettings:
         defaults = self.default_plugin_settings
         rich.print(
-            "[bold]If you don't user PagerDuty:[/bold] No worries! You can test this agent with any alert payload (Details here: https://docs.unpage.ai/examples/creating_new_agents#step-1%3A-identify-your-input-source). The main difference is that the agent can only post updates to PagerDuty, as that's what our current tools support. "
+            "[bold]If you don't use PagerDuty:[/bold] No worries! You can test this agent with any alert payload (Details here: https://docs.unpage.ai/examples/creating_new_agents#step-1%3A-identify-your-input-source). The main difference is that the agent can only post updates to PagerDuty, as that's what our current tools support. "
         )
         rich.print("")
         return PagerDutyPluginSettings(
