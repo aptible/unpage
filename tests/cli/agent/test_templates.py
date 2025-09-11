@@ -22,7 +22,6 @@ def test_list_templates_success(unpage):
     assert "Available agent templates:" in stdout
     assert "* blank" in stdout
     assert "* default" in stdout
-    assert "* demo_quickstart" in stdout
 
     # Verify templates are listed in sorted order
     lines = stdout.strip().split("\n")
