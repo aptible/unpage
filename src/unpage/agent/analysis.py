@@ -18,6 +18,14 @@ class PartialConfigForAgent(BaseModel):
     plugins: dict[str, PluginConfig] | None = Field(default=None)
 
 
+class AgentTestPayload(BaseModel):
+    description: str | None = Field(
+        description="A description of the test payload and what it is testing",
+        default=None,
+    )
+    payload: str = Field(description="The test payload to use")
+
+
 class Agent(BaseModel):
     name: str = Field(description="The name of the agent", default="")
     description: str = Field(description="A description of the agent and when it should be used")
@@ -25,6 +33,10 @@ class Agent(BaseModel):
     tools: list[str] = Field(description="The tools the agent has access to")
     config: PartialConfigForAgent | None = Field(
         description="Agent specific configuration to add to, or even override, the global config",
+        default=None,
+    )
+    test_payloads: dict[str, AgentTestPayload] | None = Field(
+        description="Test payloads for testing the agent",
         default=None,
     )
 

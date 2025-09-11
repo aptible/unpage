@@ -56,3 +56,12 @@ config:
               base_branch_name: The name of the target branch for the pull request
               commit_message: A commit message to use for the single commit
               pr_description: A description for the pull request
+
+test_payloads:
+  build_failure:
+    description: Example GitHub Actions build failure alert our Agent will investigate
+    payload: >
+      Annotations
+      1 error
+      ❌ deploy
+      Process completed with exit code 1.

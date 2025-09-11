@@ -12,3 +12,98 @@ prompt: >
 tools:
   - "shell_check_cert_expiration_date"
   - "pagerduty_post_status_update"
+
+config:
+  # https://docs.unpage.ai/examples/ssl_connection_failure#defining-custom-tools
+  plugins:
+    shell:
+      enabled: true
+      settings:
+        commands:
+          - handle: check_cert_expiration_date
+            description: Check the expiration date of a certificate.
+            command: echo | openssl s_client -servername {domain} -connect {domain}:443 2>/dev/null | openssl x509 -noout -dates
+            args:
+              domain: The domain to check the certificate for
+
+
+test_payloads:
+  pagerduty_incident:
+    description: "An example PagerDuty alert our Agent will investigate"
+    payload: >
+      {
+        "incident": {
+          "incident_number": 1797577,
+          "title": "SSL connection failed: invalid SSL certificate for domain \"expired-rsa-dv.ssl.com\"",
+          "description": "SSL connection failed: invalid SSL certificate for domain \"expired-rsa-dv.ssl.com\"",
+          "created_at": "2025-08-15T14:05:20Z",
+          "updated_at": "2025-08-15T14:15:24Z",
+          "status": "resolved",
+          "incident_key": "455c6ee6393609d98380e2776dfda8db",
+          "service": {
+            "id": "PABCDEF",
+            "type": "service_reference",
+            "summary": "Unpage Testing",
+            "self": "https://api.pagerduty.com/services/PABCDEF",
+            "html_url": "https://aptible.pagerduty.com/service-directory/PABCDEF"
+          },
+          "assignments": [],
+          "assigned_via": "escalation_policy",
+          "last_status_change_at": "2025-08-15T14:15:24Z",
+          "resolved_at": "2025-08-15T14:15:24Z",
+          "first_trigger_log_entry": {
+            "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "type": "trigger_log_entry_reference",
+            "summary": "Triggered through the website.",
+            "self": "https://api.pagerduty.com/log_entries/ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "html_url": "https://aptible.pagerduty.com/incidents/ABCDEFGHIJKLMN/log_entries/ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          },
+          "alert_counts": {
+            "all": 0,
+            "triggered": 0,
+            "resolved": 0
+          },
+          "is_mergeable": true,
+          "incident_type": {
+            "name": "incident_default"
+          },
+          "escalation_policy": {
+            "id": "PUVWXYZ",
+            "type": "escalation_policy_reference",
+            "summary": "Unpage Testing Policy",
+            "self": "https://api.pagerduty.com/escalation_policies/PUVWXYZ",
+            "html_url": "https://aptible.pagerduty.com/escalation_policies/PUVWXYZ"
+          },
+          "teams": [],
+          "impacted_services": [
+            {
+              "id": "PABCDEF",
+              "type": "service_reference",
+              "summary": "Unpage Testing",
+              "self": "https://api.pagerduty.com/services/PABCDEF",
+              "html_url": "https://aptible.pagerduty.com/service-directory/PABCDEF"
+            }
+          ],
+          "pending_actions": [],
+          "acknowledgements": [],
+          "basic_alert_grouping": null,
+          "alert_grouping": null,
+          "last_status_change_by": {
+            "id": "PFEDCBA",
+            "type": "user_reference",
+            "summary": "SRE SAM",
+            "self": "https://api.pagerduty.com/users/PFEDCBA",
+            "html_url": "https://aptible.pagerduty.com/users/PFEDCBA"
+          },
+          "resolve_reason": null,
+          "incidents_responders": [],
+          "responder_requests": [],
+          "subscriber_requests": [],
+          "urgency": "low",
+          "id": "ABCDEFGHIJKLMN",
+          "type": "incident",
+          "summary": "[#1797577] SSL connection failed: invalid SSL certificate for domain \"expired-rsa-dv.ssl.com\"",
+          "self": "https://api.pagerduty.com/incidents/ABCDEFGHIJKLMN",
+          "html_url": "https://aptible.pagerduty.com/incidents/ABCDEFGHIJKLMN"
+        }
+      }

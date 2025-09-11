@@ -27,3 +27,33 @@ tools:
   - "search_datadog_logs"
   - "get_resource_with_neighbors"
   - "pagerduty_post_status_update"
+
+config:
+  # https://docs.unpage.ai/examples/db_connection_pool#defining-custom-tools
+  plugins:
+    shell:
+      enabled: true
+      settings:
+        commands:
+          - handle: check_db_connections
+            description: Check current database connections and limits.
+            command: psql -c "SELECT count(*) as active_connections, setting as max_connections FROM pg_stat_activity, pg_settings WHERE name = '\''max_connections'\'';" -c "SELECT datname, count(*) as connections FROM pg_stat_activity GROUP BY datname ORDER BY connections DESC;"
+          - handle: check_db_pool_stats
+            description: Analyze connection pool statistics by database, user, and state.
+            command: psql -c "SELECT datname, usename, state, count(*) FROM pg_stat_activity GROUP BY datname, usename, state ORDER BY count DESC;" -c "SELECT application_name, count(*) FROM pg_stat_activity WHERE state = '\''active'\'' GROUP BY application_name ORDER BY count DESC LIMIT 10;"
+          - handle: check_long_queries
+            description: Find long-running queries that might be holding connections.
+            command: psql -c "SELECT pid, now() - pg_stat_activity.query_start AS duration, query, state, wait_event FROM pg_stat_activity WHERE (now() - pg_stat_activity.query_start) > interval '\''5 minutes'\'' ORDER BY duration DESC;"
+          - handle: check_db_locks
+            description: Check for database locks that might prevent connection cleanup.
+            command: psql -c "SELECT blocked_locks.pid AS blocked_pid, blocked_activity.usename AS blocked_user, blocking_locks.pid AS blocking_pid, blocking_activity.usename AS blocking_user, blocked_activity.query AS blocked_statement, blocking_activity.query AS current_statement_in_blocking_process FROM pg_catalog.pg_locks blocked_locks JOIN pg_catalog.pg_stat_activity blocked_activity ON blocked_activity.pid = blocked_locks.pid JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.locktype = blocked_locks.locktype AND blocking_locks.DATABASE IS NOT DISTINCT FROM blocked_locks.DATABASE AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid AND blocking_locks.pid != blocked_locks.pid JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid WHERE NOT blocked_locks.GRANTED;"
+
+test_payloads:
+  pagerduty_incident:
+    description: "An example database connection pool alert our Agent will investigate"
+    payload: >
+      Database: prod-postgres.us-east-1
+      Status: Connection limit reached (200/200)
+      Impact: order-service (42 connections), user-api (38 connections), analytics (31 connections)
+      Duration: 12 minutes
+      Error: "FATAL: remaining connection slots are reserved"

@@ -98,3 +98,13 @@ config:
             args:
               pod_name: The name of the pod to check Secret references
               namespace: The Kubernetes namespace to search
+
+test_payloads:
+  k8s_log:
+    description: Example log from a Kubernetes pod stuck in a CrashLoopBackOff state
+    payload: >
+      [01:23:45 AM] CRITICAL - Pod CrashLoopBackOff
+      Namespace: production
+      Pod: api-server-deployment-7d8f6b9c4-x7k2m
+      Restarts: 15
+      Last State: Terminated (exit code 1)

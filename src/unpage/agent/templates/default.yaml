@@ -1,8 +1,6 @@
 # Edit the list of criteria in this description.
 description: >
-  Use this agent to analyze alerts that meet the following criteria:
-
-    - Any alert that doesn't meet the criteria for any other agent
+  Use this agent to analyze any alert that doesn't meet the criteria for any other agent
 
 # Instructions for the agent for investigating the alert.
 prompt: >

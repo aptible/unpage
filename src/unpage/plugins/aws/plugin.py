@@ -1,6 +1,6 @@
 import warnings
 from collections.abc import AsyncGenerator
-from typing import Literal
+from typing import Any, Literal
 
 import anyio
 import boto3.session
@@ -29,7 +29,7 @@ from unpage.plugins.aws.utils import (
     swallow_boto_client_access_errors,
 )
 from unpage.plugins.mixins import KnowledgeGraphMixin, McpServerMixin, tool
-from unpage.utils import Choice, confirm, print, select
+from unpage.utils import Choice, classproperty, confirm, print, select
 
 warnings.filterwarnings(
     "ignore",
@@ -49,7 +49,11 @@ class AwsPluginSettings(BaseModel):
 
 
 class AwsPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
-    aws_settings: AwsPluginSettings = Field(default_factory=AwsPluginSettings)
+    aws_settings: AwsPluginSettings
+
+    def __init__(self, *args: Any, aws_settings: AwsPluginSettings | None = None, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.aws_settings = aws_settings if aws_settings else AwsPluginSettings()
 
     def init_plugin(self) -> None:
         aws_accounts = self._settings.get("accounts")
@@ -79,6 +83,10 @@ class AwsPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
     async def validate_plugin_config(self) -> None:
         await super().validate_plugin_config()
         await ensure_aws_session(self.session)
+
+    @classproperty
+    def default_plugin_settings(cls) -> PluginSettings:
+        return AwsPluginSettings().model_dump()
 
     async def interactive_configure(self) -> PluginSettings:
         rich.print("> The AWS plugin will add resources from AWS to your infra knowledge graph")
