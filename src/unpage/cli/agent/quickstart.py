@@ -79,7 +79,10 @@ async def _select_and_edit_agent() -> Agent:
     rich.print("")
     rich.print("----------")
     rich.print("")
-    demo_template_names = get_agent_templates()
+    demo_template_names = [
+        "default",
+        *sorted(t for t in get_agent_templates() if t != "default" and t != "blank"),
+    ]
     choices = [
         Choice(
             title=t,
