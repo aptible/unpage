@@ -51,7 +51,9 @@ class AwsPluginSettings(BaseModel):
 class AwsPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
     aws_settings: AwsPluginSettings
 
-    def __init__(self, *args: Any, aws_settings: AwsPluginSettings | None = None, **kwargs: Any) -> None:
+    def __init__(
+        self, *args: Any, aws_settings: AwsPluginSettings | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.aws_settings = aws_settings if aws_settings else AwsPluginSettings()
 

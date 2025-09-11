@@ -1,9 +1,7 @@
-import asyncio
 import json
-import os
 import sys
 from collections.abc import Awaitable, Callable
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import questionary
 import rich
@@ -19,14 +17,13 @@ from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
 from unpage.config import Config, PluginConfig, PluginSettings, manager
 from unpage.plugins.base import REGISTRY, PluginManager
-from unpage.plugins.datadog.plugin import DatadogPlugin
-from unpage.plugins.llm.plugin import LlmPlugin
-from unpage.plugins.pagerduty.models import PagerDutyIncident
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
-from unpage.plugins.solarwinds.plugin import SolarWindsPlugin
 from unpage.telemetry import UNPAGE_TELEMETRY_DISABLED, hash_value, prepare_profile_for_telemetry
 from unpage.telemetry import client as telemetry
 from unpage.utils import confirm, edit_file, select
+
+if TYPE_CHECKING:
+    from unpage.plugins.pagerduty.models import PagerDutyIncident
 
 
 class events:
@@ -118,7 +115,9 @@ async def _select_and_edit_agent(e: events) -> Agent:
         overwrite=True,
         template=template_selected,
     )
-    await e.send("agent created", {"template": template_selected, "agent_name_hash": hash_value(agent_name)})
+    await e.send(
+        "agent created", {"template": template_selected, "agent_name_hash": hash_value(agent_name)}
+    )
     rich.print("")
     rich.print(
         f"Great! You selected {template_selected if template_selected != 'blank' else 'to build your own template'}. When you're ready, we'll open the agent's configuration file in your default editor so you can (optionally) make changes. Make note of the tools that the agent has access to, as this will determine the plugins we'll need to setup before we can test the agent."
@@ -176,7 +175,13 @@ async def _config_for_agent(agent: Agent, e: events) -> Config:
         if "interactive_configure" in REGISTRY[plugin_name].__dict__
         and callable(REGISTRY[plugin_name].interactive_configure)
     ]
-    await e.send("plugins identified", {"required_plugins": required_plugin_names, "required_plugins_that_need_config": required_plugin_names_that_need_config})
+    await e.send(
+        "plugins identified",
+        {
+            "required_plugins": required_plugin_names,
+            "required_plugins_that_need_config": required_plugin_names_that_need_config,
+        },
+    )
     for plugin_name in required_plugin_names_that_need_config:
         rich.print(f"• {plugin_name.upper() if plugin_name == 'llm' else plugin_name.capitalize()}")
     rich.print("")
@@ -216,7 +221,9 @@ async def _config_for_agent(agent: Agent, e: events) -> Config:
                 plugin_name=plugin_name,
                 existing_plugin_settings=existing_plugin_settings,
             )
-            if plugin_config_validated := await _plugin_settings_valid(plugin_name, plugin_settings):
+            if plugin_config_validated := await _plugin_settings_valid(
+                plugin_name, plugin_settings
+            ):
                 plugins[plugin_name] = PluginConfig(enabled=True, settings=plugin_settings)
                 rich.print("")
                 break
@@ -226,7 +233,10 @@ async def _config_for_agent(agent: Agent, e: events) -> Config:
                 break
             rich.print("")
             attempts += 1
-        await e.send(f"plugin configured {plugin_name}", {"attempts": attempts, "plugin_config_validated": plugin_config_validated})
+        await e.send(
+            f"plugin configured {plugin_name}",
+            {"attempts": attempts, "plugin_config_validated": plugin_config_validated},
+        )
         rich.print("")
     cfg = manager.get_empty_config(
         profile=manager.get_active_profile(),
@@ -270,7 +280,9 @@ async def _provide_incident_id_or_url(pd: PagerDutyPlugin) -> str | None:
                 return None
 
 
-async def _select_from_recent_incidents(pd: PagerDutyPlugin, incidents_to_consider: int = 20) -> str | None:
+async def _select_from_recent_incidents(
+    pd: PagerDutyPlugin, incidents_to_consider: int = 20
+) -> str | None:
     incidents: list[PagerDutyIncident] = []
     console = Console()
 
@@ -402,7 +414,10 @@ async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: even
         choices=[Choice(opt.title, value=i) for i, opt in enumerate(options)],
     )
     payload = await options[int(selected_option)].func()
-    await e.send("payload option selected", {"option": options[int(selected_option)].title, "payload_provided": bool(payload)})
+    await e.send(
+        "payload option selected",
+        {"option": options[int(selected_option)].title, "payload_provided": bool(payload)},
+    )
 
     if not payload:
         rich.print("[yellow]No payload provided, skipping the demo.[/yellow]")
@@ -445,7 +460,9 @@ async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: even
     except Exception as ex:
         rich.print(f"[red] Demo failed:[/red] {ex}")
         sys.exit(1)
-    await questionary.press_any_key_to_continue(message="Ready to wrap up quickstart?").unsafe_ask_async()
+    await questionary.press_any_key_to_continue(
+        message="Ready to wrap up quickstart?"
+    ).unsafe_ask_async()
     _panel("🎉 You did it! Next steps")
     rich.print(
         "🎉 You did it! Don't stop now—what do you want to do next? Here are some suggestions below; use the arrow keys to move through each one and see a description."
