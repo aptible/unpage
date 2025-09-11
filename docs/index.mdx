@@ -100,6 +100,35 @@ unpage agent quickstart
 
 This will get you up and running with your first agent, which will automatically investigate and add context to alerts from PagerDuty ([or your preferred alerting provider](/plugins/customalerts)). You will also have a chance to set up your infrastructure knowledge graph to provide your agent with more context.
 
+## Usage Telemetry
+
+Unpage collects anonymous usage telemetry to help us understand how the tool is being used and improve the product. This data helps us prioritize features and identify issues.
+
+### What data is collected
+
+Our telemetry includes:
+
+- Unpage version information
+- Operating system details (OS name and version, system architecture)
+- Anonymous user identifier (generated UUID)
+- Command names (but no potentially-sensitive arguments)
+
+**No personal information, infrastructure details, or sensitive data is collected.**
+
+### How to disable telemetry
+
+You can disable telemetry in two ways:
+
+**Option 1: Environment variable**
+```shell
+export UNPAGE_TELEMETRY_DISABLED=true
+```
+
+**Option 2: Configuration file**
+Set `telemetry_enabled: false` in your Unpage configuration profile (typically at `~/.unpage/config.yaml`).
+
+When telemetry is disabled, Unpage will display "Telemetry is disabled" to confirm that your preference is being respected.
+
 ## Learn More
 
 - [Test and run your agents](/commands/agent)
