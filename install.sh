@@ -304,7 +304,7 @@ main() {
     if command_exists uv; then
         UV_VERSION=$(uv --version 2>/dev/null || echo "unknown")
         print_success "uv is already installed (${UV_VERSION})"
-        telemetry_event 'uv_detected' "version=$UV_VERSION"
+        telemetry_event 'uv_detected' "uv_version=$UV_VERSION"
     else
         print_warning "uv is not installed on your system."
         print_info "uv is required to install unpage. It's a fast Python package manager."
