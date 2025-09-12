@@ -334,7 +334,7 @@ main() {
     if uv tool list 2>/dev/null | grep -q "unpage"; then
         UNPAGE_VERSION=$(uv tool list 2>/dev/null | grep "unpage" | awk '{print $2}' || echo "unknown")
         print_warning "unpage appears to already be installed."
-        telemetry_event 'unpage_detected' "version=$UNPAGE_VERSION"
+        telemetry_event 'unpage_detected' "current_version=$UNPAGE_VERSION"
         if confirm "Would you like to upgrade to the latest version?" "Y"; then
             telemetry_event 'unpage_upgrade_accepted' "current_version=$UNPAGE_VERSION"
             print_info "Upgrading unpage..."
