@@ -15,7 +15,7 @@ This guide covers how to deploy Unpage using Docker. Unpage is a python package 
 
 ### Creating a Dockerfile
 
-Create a `Dockerfile` in your project root:
+Create a `Dockerfile` in your desired profile directory (e.g., `~/.unpage/profiles/default`) so it has access to your config.yaml and agent files:
 
 ```dockerfile
 # Use Python 3.12+ as required by Unpage
@@ -28,44 +28,24 @@ RUN useradd -m unpage
 RUN mkdir -p /home/unpage/.unpage/profiles/default/ \
  && chown -R unpage:unpage /home/unpage/.unpage
 
+# Install unpage
+RUN apt update -y \
+ && apt install -y \
+  build-essential \
+  curl \
+  ;
+RUN curl -fsSL https://install.unpage.ai | bash \
+ && unpage --version
+
 # Copy your agent configurations and config files
 COPY --chown=unpage:unpage config.yaml /home/unpage/.unpage/profiles/default/config.yaml
 COPY --chown=unpage:unpage ./agents/ /home/unpage/.unpage/profiles/default/agents/
 
-# Use the entrypoint.sh defined below
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Switch to the new user
 USER unpage
 
-ENTRYPOINT ["/entrypoint.sh"]
-# 5678 is the MCP server for running tools
 EXPOSE 5678
-# 5679 is the unpage agent service
-EXPOSE 5679
-```
-
-Create this `entrypoint.sh` file:
-
-```bash
-#!/bin/sh
-set -eo pipefail
-
-main () {
-  # If any arguments were provided, consider it a command and run it directly
-  if [ $# -gt 0 ]; then
-    exec "$@"
-  fi
-
-  uvx unpage version
-  uvx unpage agent list
-  uvx unpage mcp start --disable-stdio --http-host ${MCP_HOST:-0.0.0.0} --http-port ${MCP_PORT:-5678} &
-  uvx unpage agent serve --host ${AGENT_HOST:-0.0.0.0} --port ${AGENT_PORT:-5679} &
-  wait
-}
-
-main "$@"
+CMD ["unpage", "agent", "serve", "--host", "0.0.0.0", "--port", "5678"]
 ```
 
 
@@ -81,7 +61,6 @@ services:
     build: .
     ports:
       - "5678:5678"
-      - "5679:5679"
     environment:
       - UNPAGE_PROFILE=default
       # Add your environment-specific variables
