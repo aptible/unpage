@@ -57,9 +57,13 @@ def get_agents() -> list[str]:
     return agents
 
 
+def get_agent_file(agent_name: str) -> Path:
+    return manager.get_active_profile_directory() / "agents" / f"{agent_name}.yaml"
+
+
 def load_agent(agent_name: str) -> Agent:
     """Load the agent with the given name from the active profile."""
-    agent_file = manager.get_active_profile_directory() / "agents" / f"{agent_name}.yaml"
+    agent_file = get_agent_file(agent_name)
 
     # If they're trying to load the default agent and it doesn't exist, create it.
     if not agent_file.exists() and agent_name == "default":

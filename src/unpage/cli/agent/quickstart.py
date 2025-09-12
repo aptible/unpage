@@ -12,7 +12,12 @@ from rich.console import Console
 from rich.panel import Panel
 
 from unpage.agent.analysis import Agent, AnalysisAgent
-from unpage.agent.utils import get_agent_template_description, get_agent_templates, load_agent
+from unpage.agent.utils import (
+    get_agent_file,
+    get_agent_template_description,
+    get_agent_templates,
+    load_agent,
+)
 from unpage.cli.agent._app import agent_app
 from unpage.cli.agent.create import create_agent
 from unpage.cli.configure import welcome_to_unpage
@@ -58,8 +63,22 @@ async def quickstart() -> None:
         await e.send("abandon", {"abandon_reason": "user_declined_intro"})
         return
     rich.print("")
-    agent = await _select_and_edit_agent(e)
-    cfg = await _config_for_agent(agent, e)
+    agent = await _select_template_and_create_agent(e)
+    agent = await _edit_agent(agent, e)
+    required_plugins, required_plugin_names_that_need_config = await _plugins_to_config_for_agent(
+        agent, e
+    )
+    while not await confirm("Ready to configure these plugins? (No to edit the agent file again)"):
+        agent = await _edit_agent(agent, e)
+        (
+            required_plugins,
+            required_plugin_names_that_need_config,
+        ) = await _plugins_to_config_for_agent(agent, e)
+    rich.print("")
+    rich.print("")
+    cfg = await _configure_plugins(
+        agent, required_plugins, required_plugin_names_that_need_config, e
+    )
     plugin_manager = PluginManager(cfg)
     await _demo_an_incident(agent, plugin_manager, e)
     await e.send("complete")
@@ -78,7 +97,7 @@ This quickstart flow will show you how easily you can build your own custom agen
     return await confirm("That's it! Ready to get started?")
 
 
-async def _select_and_edit_agent(e: events) -> Agent:
+async def _select_template_and_create_agent(e: events) -> Agent:
     _panel("Create your first agent")
     rich.print(
         "First, which agent would you like to try? Choose a template, or make one from scratch. If it's your first time, we recommend starting with a template."
@@ -111,7 +130,7 @@ async def _select_and_edit_agent(e: events) -> Agent:
     )
     rich.print("")
     agent_name = f"demo_quickstart__{template_selected}"
-    agent_file = await create_agent(
+    await create_agent(
         agent_name=agent_name,
         overwrite=True,
         template=template_selected,
@@ -124,14 +143,18 @@ async def _select_and_edit_agent(e: events) -> Agent:
         f"Great! You selected {template_selected if template_selected != 'blank' else 'to build your own template'}. When you're ready, we'll open the agent's configuration file in your default editor so you can (optionally) make changes. Make note of the tools that the agent has access to, as this will determine the plugins we'll need to setup before we can test the agent."
     )
     rich.print("")
+    return load_agent(agent_name)
+
+
+async def _edit_agent(agent: Agent, e: events) -> Agent:
     _panel("Edit your agent")
     await questionary.press_any_key_to_continue("Hit [enter] to open the editor").unsafe_ask_async()
-    await edit_file(agent_file)
-    await e.send("agent edited", {"agent_name_hash": hash_value(agent_name)})
+    await edit_file(get_agent_file(agent.name))
+    await e.send("agent edited", {"agent_name_hash": hash_value(agent.name)})
     rich.print("")
-    rich.print(f"You successfully edited the {agent_name} agent! ✨")
+    rich.print(f"You successfully edited the {agent.name} agent! ✨")
     rich.print("")
-    return load_agent(agent_name)
+    return load_agent(agent.name)
 
 
 async def _interactive_plugin_config(
@@ -160,7 +183,7 @@ async def _plugin_settings_valid(plugin_name: str, plugin_settings: PluginSettin
     return True
 
 
-async def _config_for_agent(agent: Agent, e: events) -> Config:
+async def _plugins_to_config_for_agent(agent: Agent, e: events) -> tuple[list[str], list[str]]:
     _panel("Configure the agent")
     rich.print(
         "Before we test the agent, we need to configure some plugins. Based on the tools this agent has access to, it looks like we'll need API keys for the following:"
@@ -194,11 +217,15 @@ async def _config_for_agent(agent: Agent, e: events) -> Config:
         "Don't use one of these services? You can still use this agent! Learn more in our Getting Started guide at: https://docs.unpage.ai/?utm_source=unpage"
     )
     rich.print("")
-    await questionary.press_any_key_to_continue(
-        "When you're ready to configure these plugins, hit [enter]"
-    ).unsafe_ask_async()
-    rich.print("")
-    rich.print("")
+    return required_plugin_names, required_plugin_names_that_need_config
+
+
+async def _configure_plugins(
+    agent: Agent,
+    required_plugin_names: list[str],
+    required_plugin_names_that_need_config: list[str],
+    e: events,
+) -> Config:
     existing_plugins: dict[str, PluginConfig] = {}
     try:
         existing_config = manager.get_active_profile_config()
