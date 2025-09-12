@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.30 (2025-09-12)
+
+### Bug Fixes
+
+- Disambiguate install.sh version json [SC-34613]
+  ([#157](https://github.com/aptible/unpage/pull/157),
+  [`082ac03`](https://github.com/aptible/unpage/commit/082ac0328dc20084171a2276fd3dc1cb6f247a6a))
+
+### Documentation
+
+- Add docs for disabling telemetry ([#155](https://github.com/aptible/unpage/pull/155),
+  [`cfe66bc`](https://github.com/aptible/unpage/commit/cfe66bc725267fcd8ddaf8e6f7525dc918635981))
+
+- Create custom alerting plugin doc ([#153](https://github.com/aptible/unpage/pull/153),
+  [`13977ae`](https://github.com/aptible/unpage/commit/13977ae732c0142c9f20fff394eb01d7b316eeb6))
+
+- Update docs GA4 property ([#154](https://github.com/aptible/unpage/pull/154),
+  [`37f3716`](https://github.com/aptible/unpage/commit/37f3716fd2b9e86c7e9ba0e6fcaaf59163bde122))
+
+
 ## v0.1.0-alpha.29 (2025-09-08)
 
 ### Documentation
