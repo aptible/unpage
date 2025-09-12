@@ -76,7 +76,7 @@ class TunaClient(httpx.AsyncClient):
         self._telemetry_enabled = active_config.telemetry_enabled and not UNPAGE_TELEMETRY_DISABLED
         if not self._telemetry_enabled:
             # Let the user know that their preference is being respected
-            print("Telemetry is disabled")
+            print("Telemetry is disabled", file=sys.stderr)
         if _unpage_telemetry_log_events:
             print("enabled telemetry event logging", file=sys.stderr)
 
