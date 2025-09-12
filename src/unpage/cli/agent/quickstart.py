@@ -1,3 +1,4 @@
+import contextlib
 import json
 import sys
 from collections.abc import Awaitable, Callable
@@ -326,7 +327,7 @@ async def _use_test_payload_from_agent(agent: Agent) -> str | None:
         return None
 
     if len(agent.test_payloads) == 1:
-        return json.dumps(next(iter(agent.test_payloads.values())).payload, indent=2)
+        return next(iter(agent.test_payloads.values())).payload
 
     choices = [
         Choice(test_name, value=payload) for test_name, payload in agent.test_payloads.items()
@@ -337,7 +338,7 @@ async def _use_test_payload_from_agent(agent: Agent) -> str | None:
         choices=choices,
     )
 
-    return json.dumps(agent.test_payloads[selected_test].payload, indent=2)
+    return agent.test_payloads[selected_test].payload
 
 
 async def _provide_json_directly() -> str | None:
@@ -428,12 +429,15 @@ async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: even
         analysis_agent = AnalysisAgent()
         rich.print("")
         rich.print("Details of the payload we're going to demo:")
-
-        payload_lines = payload.splitlines()
+        rich.print("-" * 80)
+        json_payload = payload
+        with contextlib.suppress(json.JSONDecodeError):
+            json_payload = json.dumps(json.loads(payload), indent=2)
+        payload_lines = json_payload.splitlines()
         if len(payload_lines) > 20:
-            display_payload = "\n".join(payload_lines[:20]) + "\n... (truncated)"
+            display_payload = "...(snipped)...\n" + "\n".join(payload_lines[-20:])
         else:
-            display_payload = payload
+            display_payload = json_payload
         rich.print(display_payload)
 
         rich.print("")
