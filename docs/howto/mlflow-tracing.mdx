@@ -1,0 +1,31 @@
+---
+title: "Debug Unpage Agents With MLflow Tracing"
+description: "Setup instructions for accessing MLflow tracing data to debug Unpage agents"
+---
+
+MLflow is an expansive platform to build AI applications and models. We use a sliver of it that provides a tracing UI for LLM agents.
+
+## Setting Up MLflow
+
+Use Unpage's built-in tracing to monitor agent execution:
+
+```bash
+unpage mlflow serve
+```
+
+## Running Unpage and Capturing Traces
+
+Unpage will automatically send traces to the MLflow server when the `MLFLOW_TRACKING_URI` environment variable is set.
+
+```bash
+MLFLOW_TRACKING_URI=http://127.0.0.1:5566 unpage agent run
+MLFLOW_TRACKING_URI=http://127.0.0.1:5566 unpage agent serve
+```
+
+View execution traces at `${MLFLOW_TRACKING_URI}/#/experiments/1?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D&compareRunsMode=TRACES` to see:
+- Tool usage patterns
+- Execution timing
+- Error rates and types
+- Agent decision flows
+
+The default MLflow server will have traces at: `http://127.0.0.1:5566/#/experiments/1?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D&compareRunsMode=TRACES`

@@ -1,0 +1,184 @@
+---
+title: "Deploy an Agent to a Remote Environment"
+description: "Complete guide for deploying Unpage agents to production environments with Docker, PagerDuty integration, and GitHub Actions CI/CD"
+---
+
+This guide walks you through deploying Unpage agents to a remote production environment, including containerization, PagerDuty webhook integration, and automated deployment via GitHub Actions.
+
+## Prerequisites
+
+Before you begin, ensure you have basic familiarity with [Unpage concepts](/concepts/agents) and [agent configuration](/commands/agent)
+
+## Containerizing Your Unpage Deployment
+
+This guide covers how to deploy Unpage using Docker. Unpage is a python package and can be deployed using your favorite method for deploying python services!
+
+### Creating a Dockerfile
+
+Create a `Dockerfile` in your desired profile directory (e.g., `~/.unpage/profiles/default`) so it has access to your config.yaml and agent files:
+
+```dockerfile
+# Use Python 3.12+ as required by Unpage
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_TOOL_DIR=/usr/local/share/uv/tools
+
+# Create a new user to run the container as
+RUN useradd -m unpage
+
+# Create the unpage profile
+RUN mkdir -p /home/unpage/.unpage/profiles/default/ \
+ && chown -R unpage:unpage /home/unpage/.unpage
+
+# Install unpage
+RUN apt update -y \
+ && apt install -y \
+  build-essential \
+  curl \
+  ;
+RUN curl -fsSL https://install.unpage.ai | bash \
+ && unpage --version
+
+# Copy your agent configurations and config files
+COPY --chown=unpage:unpage config.yaml /home/unpage/.unpage/profiles/default/config.yaml
+COPY --chown=unpage:unpage ./agents/ /home/unpage/.unpage/profiles/default/agents/
+
+# Switch to the new user
+USER unpage
+
+WORKDIR /home/unpage
+
+EXPOSE 5678
+CMD ["unpage", "agent", "serve", "--host", "0.0.0.0", "--port", "5678"]
+```
+
+
+### Docker Compose Configuration
+
+For local development and testing, create a `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  unpage:
+    build: .
+    ports:
+      - "5678:5678"
+    environment:
+      - UNPAGE_PROFILE=default
+      # Add your environment-specific variables
+      - PAGERDUTY_API_KEY=${PAGERDUTY_API_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - LLM_API_KEY=${LLM_API_KEY}
+    volumes:
+      # Mount config file and agents directory for development
+      - ./config.yaml:/root/.unpage/profiles/default/config.yaml
+      - ./agents:/root/.unpage/profiles/default/agents
+    restart: unless-stopped
+```
+
+### Configuration Management
+
+Create a production-ready `config.yaml`:
+
+```yaml
+plugins:
+  core:
+    enabled: true
+
+  networking:
+    enabled: true
+
+  aws:
+    enabled: true
+
+  llm:
+    enabled: true
+    settings:
+      model: claude-4-sonnet-20250514
+      api_key: ${LLM_API_KEY}
+
+  pagerduty:
+    enabled: true
+    settings:
+      api_key: ${PAGERDUTY_API_KEY}
+      from_email: alerts@yourcompany.com
+
+  shell:
+    enabled: true
+    settings:
+      # Add your custom shell commands here
+      commands: []
+```
+
+## PagerDuty Integration
+
+### Setting Up PagerDuty Webhooks
+
+<Steps>
+  <Step title="Configure your production webhook URL">
+    Determine your public webhook URL. This should be your deployed Unpage server with the `/webhook` path:
+    ```
+    https://unpage.yourcompany.com/webhook
+    ```
+  </Step>
+
+  <Step title="Create PagerDuty webhook">
+    1. In PagerDuty, navigate to **Integrations** → **Generic Webhooks (v3)**
+    2. Click **+ New Webhook**
+    3. Configure the webhook:
+       - **Webhook URL**: `https://unpage.yourcompany.com/webhook`
+       - **Event Subscriptions**: Select events you want agents to handle:
+         - `incident.triggered` - When new incidents are created
+         - `incident.acknowledged` - When incidents are acknowledged
+         - `incident.escalated` - When incidents escalate
+         - `incident.resolved` - When incidents are resolved
+       - **Custom Headers** (optional): Add authentication headers if needed
+  </Step>
+
+  <Step title="Test the webhook">
+    Use PagerDuty's webhook testing feature or create a test incident to verify your deployment receives webhooks correctly.
+  </Step>
+</Steps>
+
+### Agent Configuration for Production
+
+Create production agents in your `agents/` directory. Here's an example production agent (`agents/ssl-investigation.yaml`):
+
+```yaml
+description: Investigate SSL/TLS connection failures in production environments
+
+prompt: |
+  - Extract the affected domain/hostname from the PagerDuty incident
+  - Use knowledge graph to identify related infrastructure components
+  - Check SSL certificate expiration using shell commands
+  - Verify DNS resolution and connectivity
+  - If certificate is expired or expiring within 48 hours:
+    - Post detailed status update to incident with specific remediation steps
+    - Include certificate expiration date and affected services
+  - If DNS issues detected:
+    - Check Route53 records and provide resolution guidance
+  - Escalate to on-call engineer if critical infrastructure is affected
+
+tools:
+  - "pagerduty_post_status_update"
+  - "pagerduty_get_incident_details"
+  - "shell_check_ssl_certificate"
+  - "shell_check_dns_resolution"
+  - "aws_route53_list_records"
+  - "graph_find_related_nodes"
+```
+
+## Troubleshooting
+
+### Debug logs
+
+Add the `--debug` flag to `unpage agent serve` to get detailed logs about what actions the server is taking.
+
+### MLflow tracing
+
+See the [Debugging with MLflow tracing](./mlflow-tracing) page.
