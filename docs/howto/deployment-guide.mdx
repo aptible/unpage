@@ -21,6 +21,10 @@ Create a `Dockerfile` in your desired profile directory (e.g., `~/.unpage/profil
 # Use Python 3.12+ as required by Unpage
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_TOOL_DIR=/usr/local/share/uv/tools
+
 # Create a new user to run the container as
 RUN useradd -m unpage
 
@@ -43,6 +47,8 @@ COPY --chown=unpage:unpage ./agents/ /home/unpage/.unpage/profiles/default/agent
 
 # Switch to the new user
 USER unpage
+
+WORKDIR /home/unpage
 
 EXPOSE 5678
 CMD ["unpage", "agent", "serve", "--host", "0.0.0.0", "--port", "5678"]
