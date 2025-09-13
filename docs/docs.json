@@ -77,6 +77,13 @@
         ]
       },
       {
+        "group": "How-To Guides",
+        "pages": [
+          "howto/deployment-guide",
+          "howto/mlflow-tracing"
+        ]
+      },
+      {
         "group": "Command Reference",
         "pages": [
           "commands/configure",
