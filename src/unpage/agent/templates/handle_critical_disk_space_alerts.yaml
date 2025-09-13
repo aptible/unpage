@@ -17,3 +17,112 @@ tools:
   - "shell_check_large_files"
   - "solarwinds_search_logs"
   - "pagerduty_post_status_update"
+
+config:
+  # https://docs.unpage.ai/examples/disk_space_alerts#defining-custom-tools
+  plugins:
+    shell:
+      enabled: true
+      settings:
+        commands:
+          - handle: check_disk_space
+            description: Check the disk space of a host.
+            command: ssh -o StrictHostKeyChecking=no ec2-user@{host} 'df -h && echo "---" && du -h / --max-depth=2 2>/dev/null | sort -hr | head -20'
+            args:
+              host: The hostname or IP address of the host to check the disk space for
+          - handle: check_large_files
+            description: Check the large files in a host.
+            command: ssh -o StrictHostKeyChecking=no ec2-user@{host} 'find /var/log /tmp /var/lib/docker -type f -size +100M 2>/dev/null | xargs -I {{}} ls -lh {{}} | sort -k5 -hr | head -20'
+            args:
+              host: The hostname or IP address of the host to check the large files for
+
+test_payloads:
+  pagerduty_incident:
+    description: "An example PagerDuty disk space alert our Agent will investigate"
+    payload: >
+      {
+        "incident": {
+          "incident_number": 1797836,
+          "title": "prod-web-03: Disk space CRITICAL - / 96% used",
+          "description": "prod-web-03: Disk space CRITICAL - / 96% used",
+          "created_at": "2025-08-18T19:39:45Z",
+          "updated_at": "2025-08-18T19:48:28Z",
+          "status": "triggered",
+          "incident_key": "455c6ee6393609d98380e2776dfda8db",
+          "service": {
+            "id": "PABCDEF",
+            "type": "service_reference",
+            "summary": "Unpage Testing",
+            "self": "https://api.pagerduty.com/services/PABCDEF",
+            "html_url": "https://aptible.pagerduty.com/service-directory/PABCDEF"
+          },
+          "assignments": [
+            {
+              "at": "2025-08-18T19:39:45Z",
+              "assignee": {
+                "id": "PAZ2AWZ",
+                "type": "user_reference",
+                "summary": "Nobody",
+                "self": "https://api.pagerduty.com/users/PAZ2AWZ",
+                "html_url": "https://aptible.pagerduty.com/users/PAZ2AWZ"
+              }
+            }
+          ],
+          "assigned_via": "escalation_policy",
+          "last_status_change_at": "2025-08-18T19:48:28Z",
+          "resolved_at": null,
+          "first_trigger_log_entry": {
+            "id": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "type": "trigger_log_entry_reference",
+            "summary": "Triggered through the website.",
+            "self": "https://api.pagerduty.com/log_entries/ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "html_url": "https://aptible.pagerduty.com/incidents/ABCDEFGHIJKLMN/log_entries/ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          },
+          "alert_counts": {
+            "all": 0,
+            "triggered": 0,
+            "resolved": 0
+          },
+          "is_mergeable": true,
+          "incident_type": {
+            "name": "incident_default"
+          },
+          "escalation_policy": {
+            "id": "PUVWXYZ",
+            "type": "escalation_policy_reference",
+            "summary": "Unpage Testing Policy",
+            "self": "https://api.pagerduty.com/escalation_policies/PUVWXYZ",
+            "html_url": "https://aptible.pagerduty.com/escalation_policies/PUVWXYZ"
+          },
+          "teams": [],
+          "impacted_services": [
+            {
+              "id": "PABCDEF",
+              "type": "service_reference",
+              "summary": "Unpage Testing",
+              "self": "https://api.pagerduty.com/services/PABCDEF",
+              "html_url": "https://aptible.pagerduty.com/service-directory/PABCDEF"
+            }
+          ],
+          "pending_actions": [],
+          "acknowledgements": [],
+          "basic_alert_grouping": null,
+          "alert_grouping": null,
+          "last_status_change_by": {
+            "id": "PABCDEF",
+            "type": "service_reference",
+            "summary": "Unpage Testing",
+            "self": "https://api.pagerduty.com/services/PABCDEF",
+            "html_url": "https://aptible.pagerduty.com/service-directory/PABCDEF"
+          },
+          "incidents_responders": [],
+          "responder_requests": [],
+          "subscriber_requests": [],
+          "urgency": "low",
+          "id": "ABCDEFGHIJKLMN",
+          "type": "incident",
+          "summary": "[#1797836] prod-web-03: Disk space CRITICAL - / 96% used",
+          "self": "https://api.pagerduty.com/incidents/ABCDEFGHIJKLMN",
+          "html_url": "https://aptible.pagerduty.com/incidents/ABCDEFGHIJKLMN"
+        }
+      }

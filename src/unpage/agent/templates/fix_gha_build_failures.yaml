@@ -14,3 +14,54 @@ tools:
   - "shell_fetch_run_logs"
   - "shell_noninteractive_claude_code_run"
   - "shell_commit_and_open_pull_request"
+
+config:
+  # https://docs.unpage.ai/examples/failing_gha_build#defining-custom-tools
+  plugins:
+    shell:
+      enabled: true
+      settings:
+        tools:
+          - handle: get_last_failing_run
+            description: Get the most recent failing GitHub Actions run ID for a repository.
+            command: gh run list --repo {github_repo} --status failure --limit 1 --json databaseId --jq '.[0].databaseId'
+            args:
+              github_repo: The GitHub repository in owner/repo format
+          - handle: fetch_run_logs
+            description: Fetch complete logs from a specific GitHub Actions run.
+            command: gh run view {run_id} --repo {github_repo} --log
+            args:
+              run_id: The GitHub Actions run ID
+              github_repo: The GitHub repository in owner/repo format
+          - handle: noninteractive_claude_code_run
+            description: Run Claude Code in non-interactive mode to analyze and fix GitHub Actions build errors.
+            command: |
+              cd {repo_path} && echo "{log_content}" | claude -p --append-system-prompt "The GitHub Actions build failed. Here are the relevant error logs from the failing run. Please analyze the error and fix the problem in the codebase."
+            args:
+              repo_path: The local path to the git repository
+              log_content: The relevant error logs from the failing GitHub Actions run
+          - handle: commit_and_open_pull_request
+            description: Commit changes and open a pull request with the fix.
+            command: |
+              cd {repo_path} &&
+              git checkout -b {head_branch_name} &&
+              git add -A &&
+              git commit -m "{commit_message}" &&
+              git push -u origin {head_branch_name} &&
+              gh pr create --title "🤖 Automated fix for failing GitHub Actions build" --body "{pr_description}" --base {base_branch_name} --head {head_branch_name} --repo {github_repo}
+            args:
+              repo_path: The local path to the git repository
+              github_repo: The GitHub repo on which to open the pull request
+              head_branch_name: The name of a branch to which the commit should be pushed
+              base_branch_name: The name of the target branch for the pull request
+              commit_message: A commit message to use for the single commit
+              pr_description: A description for the pull request
+
+test_payloads:
+  build_failure:
+    description: Example GitHub Actions build failure alert our Agent will investigate
+    payload: >
+      Annotations
+      1 error
+      ❌ deploy
+      Process completed with exit code 1.

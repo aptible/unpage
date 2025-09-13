@@ -4,7 +4,7 @@ import shutil
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import yaml
 from pydantic import BaseModel, Field
@@ -93,6 +93,24 @@ class Config(BaseModel):
 
         with self.file_path.open("w") as f:
             yaml.dump(self.model_dump(), f, default_flow_style=False)
+
+    def merge_plugins(self, other_plugins: dict[str, PluginConfig] | None) -> Self:
+        """Merge another plugins dict into this config's plugins, returning a new Config instance.
+
+        Args:
+            other_plugins: Another plugins dict to mergee, may be None in which case self is returned
+
+        Returns:
+            Config new instance with merged values
+        """
+        if other_plugins is None:
+            return self
+        new_config = {
+            **{"file_path": self.file_path, "profile": self.profile},
+            **self.model_dump(),
+            **{"plugins": {**self.plugins, **other_plugins}},
+        }
+        return self.__class__(**new_config)
 
 
 class ConfigManager:

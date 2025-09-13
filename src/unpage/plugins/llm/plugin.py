@@ -59,6 +59,9 @@ class LlmPlugin(Plugin):
                         "title": "gpt-4o (recommended)",
                         "description": "Fast, intelligent, flexible GPT model https://platform.openai.com/docs/models/gpt-4o",
                     },
+                    "gpt-5": {
+                        "description": "The latest and greatest GPT model https://platform.openai.com/docs/models/gpt-5",
+                    },
                     "gpt-4o-mini": {
                         "description": "Fast, affordable small model for focused tasks https://platform.openai.com/docs/models/gpt-4o-mini",
                     },
@@ -75,6 +78,9 @@ class LlmPlugin(Plugin):
                     "claude-4-opus-20250514": {
                         "description": "Highest level of intelligence and capability https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
                     },
+                    "claude-opus-4-1-20250805": {
+                        "description": "Highest level of intelligence and capability https://docs.anthropic.com/en/docs/about-claude/models/overview#model-comparison-table",
+                    },
                 },
             },
             "bedrock": {
@@ -88,10 +94,16 @@ class LlmPlugin(Plugin):
                     "us.anthropic.claude-opus-4-20250514-v1:0": {
                         "description": "Highest level of intelligence and capability, billed and run through your AWS account",
                     },
+                    "us.anthropic.claude-opus-4-1-20250805-v1:0": {
+                        "description": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    },
                     "eu.anthropic.claude-sonnet-4-20250514-v1:0": {
                         "description": "High intelligence and balanced performance, billed and run through your AWS account",
                     },
                     "eu.anthropic.claude-opus-4-20250514-v1:0": {
+                        "description": "Highest level of intelligence and capability, billed and run through your AWS account",
+                    },
+                    "eu.anthropic.claude-opus-4-1-20250805-v1:0": {
                         "description": "Highest level of intelligence and capability, billed and run through your AWS account",
                     },
                 },
