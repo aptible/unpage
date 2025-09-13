@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.31 (2025-09-13)
+
+### Documentation
+
+- Add remote deployment guide and debugging with mlflow guide [SC-33935] [SC-34007]
+  ([#156](https://github.com/aptible/unpage/pull/156),
+  [`c60adc6`](https://github.com/aptible/unpage/commit/c60adc6bd31b0a3372b99dfead6d5e467ad956b9))
+
+### Features
+
+- Update `unpage agent quickstart` experience [SC-34429]
+  ([#136](https://github.com/aptible/unpage/pull/136),
+  [`91b55a7`](https://github.com/aptible/unpage/commit/91b55a7d4a15fd9f2cd35127d0cfafca666212a0))
+
+
 ## v0.1.0-alpha.30 (2025-09-12)
 
 ### Bug Fixes
