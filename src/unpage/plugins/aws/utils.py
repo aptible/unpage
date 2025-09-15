@@ -77,7 +77,7 @@ async def run_sso_login(profile: str | None = None) -> None:
         process = await asyncio.create_subprocess_exec(
             *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
-        stdout, stderr = await process.communicate()
+        _, stderr = await process.communicate()
 
         if process.returncode != 0:
             error_msg = stderr.decode() if stderr else "Unknown error"
