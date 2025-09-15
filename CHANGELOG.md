@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.32 (2025-09-15)
+
+### Bug Fixes
+
+- Unused var flagged by ruff 0.13.0 [SC-34638] ([#171](https://github.com/aptible/unpage/pull/171),
+  [`5fd1bfd`](https://github.com/aptible/unpage/commit/5fd1bfdf0acd113c33edd5ebf5f1b78e6b7f8e4f))
+
+
 ## v0.1.0-alpha.31 (2025-09-13)
 
 ### Documentation
