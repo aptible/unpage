@@ -58,7 +58,7 @@ async def configure(
     Parameters
     ----------
     use_uv_run
-        Use uv run instead of uvx to start the Unpage MCP server (useful for developing Unpage)
+        Use uv run to start the Unpage MCP server (useful for developing Unpage)
     """
     await _send_event(
         "start",
@@ -257,7 +257,7 @@ async def _suggest_building_graph(use_uv_run: bool) -> None:
     rich.print("")
     rich.print("> Create the graph by running:")
     rich.print(">")
-    rich.print(f">   {'uvx' if not use_uv_run else 'uv run'} unpage graph build")
+    rich.print(f">   {'' if not use_uv_run else 'uv run '}unpage graph build")
     rich.print(">")
     rich.print("> This is full usage for `unpage graph build`:")
     rich.print("")
