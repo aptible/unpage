@@ -36,6 +36,7 @@ dependencies = [
     "litellm>=1.75.5.post1",
     "dspy>=3.0.0,<4.0.0",
     "rich-gradient>=0.3.4",
+    "expandvars>=1.1.2",
 ]
 
 [tool.hatch.metadata]

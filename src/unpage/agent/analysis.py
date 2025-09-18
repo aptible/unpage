@@ -7,15 +7,15 @@ from fastmcp import Client, FastMCP
 from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as
 
-from unpage.config import PluginConfig, manager
+from unpage.config import EnvironmentVariablesMixin, PluginConfig, manager
 from unpage.knowledge.graph import Graph
 from unpage.mcp import Context, build_mcp_server
 from unpage.plugins.base import REGISTRY, PluginManager
 from unpage.utils import wildcard_or_regex_match_any
 
 
-class PartialConfigForAgent(BaseModel):
-    plugins: dict[str, PluginConfig] | None = Field(default=None)
+class PartialConfigForAgent(EnvironmentVariablesMixin, BaseModel):
+    plugins: dict[str, PluginConfig] = Field(default_factory=dict)
 
 
 class AgentTestPayload(BaseModel):
@@ -31,9 +31,9 @@ class Agent(BaseModel):
     description: str = Field(description="A description of the agent and when it should be used")
     prompt: str = Field(description="The prompt to use for the agent")
     tools: list[str] = Field(description="The tools the agent has access to")
-    config: PartialConfigForAgent | None = Field(
+    config: PartialConfigForAgent = Field(
         description="Agent specific configuration to add to, or even override, the global config",
-        default=None,
+        default_factory=PartialConfigForAgent,
     )
     test_payloads: dict[str, AgentTestPayload] | None = Field(
         description="Test payloads for testing the agent",
