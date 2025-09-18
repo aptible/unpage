@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any, Self
 
 import yaml
-from pydantic import BaseModel, Field
+from expandvars import expandvars
+from pydantic import BaseModel, Field, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -93,6 +94,25 @@ class Config(BaseModel):
 
         with self.file_path.open("w") as f:
             yaml.dump(self.model_dump(), f, default_flow_style=False)
+
+    @model_validator(mode="before")
+    @classmethod
+    def expand_env_vars(cls, data: Any) -> Any:  # noqa: ANN401
+        """Recursively expand environment variables in all string fields."""
+        if not isinstance(data, dict):
+            return data
+
+        def _expand(value: Any) -> Any:  # noqa: ANN401
+            if isinstance(value, str):
+                return expandvars(value, nounset=True)
+            elif isinstance(value, dict):
+                return {k: _expand(v) for k, v in value.items()}
+            elif isinstance(value, list):
+                return [_expand(item) for item in value]
+            else:
+                return value
+
+        return _expand(data)
 
     def merge_plugins(self, other_plugins: dict[str, PluginConfig] | None) -> Self:
         """Merge another plugins dict into this config's plugins, returning a new Config instance.
