@@ -8,7 +8,7 @@ from unpage.plugins.base import Plugin
 from unpage.plugins.mixins.mcp_proxy import McpProxyMixin
 
 
-class McpproxyPlugin(Plugin, McpProxyMixin):
+class McpPlugin(Plugin, McpProxyMixin):
     mcp_servers: dict[str, MCPServerTypes] = Field(
         description="Standard configuration for MCP servers", default_factory=dict
     )
