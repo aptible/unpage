@@ -14,6 +14,7 @@ from unpage.config import Config, manager
 from unpage.knowledge import Graph
 from unpage.plugins import PluginManager
 from unpage.plugins.mixins.mcp import McpServerMixin
+from unpage.plugins.mixins.mcp_proxy import McpProxyMixin
 from unpage.telemetry import client as telemetry
 from unpage.utils import print
 
@@ -68,6 +69,9 @@ async def build_mcp_server(context: Context) -> FastMCP:
 
     for mcp_plugin in context.plugins.get_plugins_with_capability(McpServerMixin):
         mcp.mount(mcp_plugin.get_mcp_server(), prefix=mcp_plugin.name)
+
+    for mcp_proxy in context.plugins.get_plugins_with_capability(McpProxyMixin):
+        await mcp.import_server(await mcp_proxy.get_mcp_server_to_import())
 
     return mcp
 

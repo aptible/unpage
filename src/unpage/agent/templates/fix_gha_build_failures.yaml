@@ -56,6 +56,24 @@ config:
               base_branch_name: The name of the target branch for the pull request
               commit_message: A commit message to use for the single commit
               pr_description: A description for the pull request
+    # mcpproxy:
+    #   enabled: true
+    #   settings:
+    #     mcp_servers:
+    #       github:
+    #         command: docker
+    #         args:
+    #           - run
+    #           - -i
+    #           - --rm
+    #           - -e
+    #           - GITHUB_PERSONAL_ACCESS_TOKEN
+    #           - ghcr.io/github/github-mcp-server
+    #           - stdio
+    #           - --read-only
+    #           # - --enable-command-logging
+    #         env:
+    #           GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_PERSONAL_ACCESS_TOKEN}
 
 test_payloads:
   build_failure:

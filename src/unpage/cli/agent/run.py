@@ -23,6 +23,7 @@ async def run(
     *,
     pagerduty_incident: str | None = None,
     debug: bool = False,
+    use_test_payload: str | None = None,
 ) -> None:
     """Run an agent with the provided payload and print the analysis.
 
@@ -38,6 +39,8 @@ async def run(
         PagerDuty incident ID or URL to use instead of payload or stdin
     debug
         Enable debug mode to print the history of the agent
+    use_test_payload
+        Use a predefined test payload defined in your agent yaml file (e.g. "pagerduty_incident" or "build_failure")
     """
     await telemetry.send_event(
         {
@@ -51,16 +54,34 @@ async def run(
     )
     plugin_manager = PluginManager(manager.get_active_profile_config())
     data = ""
+    if (pagerduty_incident and use_test_payload) and (
+        payload is not None or not sys.stdin.isatty()
+    ):
+        print(
+            "[red]Cannot pass --pagerduty-incident or --use-test-payload with --payload or stdin.[/red]"
+        )
+        sys.exit(1)
+
     if pagerduty_incident:
-        if payload is not None or not sys.stdin.isatty():
-            print("[red]Cannot pass --pagerduty-incident with --payload or stdin.[/red]")
-            sys.exit(1)
         incident_id = pagerduty_incident
         if "/" in pagerduty_incident:
             incident_id = [x for x in pagerduty_incident.split("/") if x][-1]
         pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
         incident = await pd.get_incident_by_id(incident_id)
         data = incident.model_dump_json()
+
+    if use_test_payload:
+        agent = load_agent(agent_name)
+        if not agent.test_payloads or use_test_payload not in agent.test_payloads:
+            print(
+                f"[red]Test payload {use_test_payload!r} not found in agent {agent_name!r}.[/red]"
+            )
+            if agent.test_payloads:
+                print(
+                    f"[bold]Available test payloads: {', '.join(agent.test_payloads.keys())}[/bold]"
+                )
+            sys.exit(1)
+        data = agent.test_payloads[use_test_payload]
 
     # Read data from stdin if it's being piped to us.
     if not data and not sys.stdin.isatty():

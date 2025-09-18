@@ -2,6 +2,7 @@ import sys
 
 from rich import print
 
+from unpage.agent.utils import load_agent
 from unpage.cli.mcp.tools._app import tools_app
 from unpage.config import manager
 from unpage.knowledge import Graph
@@ -12,8 +13,16 @@ from unpage.telemetry import prepare_profile_for_telemetry
 
 
 @tools_app.command(name="list")
-async def list_tools() -> None:
-    """List all MCP tools available from enabled plugins."""
+async def list_tools(
+    agent_name: str | None = None,
+) -> None:
+    """List all MCP tools available from enabled plugins.
+
+    Parameters
+    ----------
+    agent_name:
+        Optional agent to load, which will use any configuration defined in that agent
+    """
     await telemetry.send_event(
         {
             "command": "mcp tools list",
@@ -21,6 +30,10 @@ async def list_tools() -> None:
         }
     )
     config = manager.get_active_profile_config()
+    if agent_name:
+        agent = load_agent(agent_name=agent_name)
+        if agent.config and agent.config.plugins:
+            config = config.merge_plugins(agent.config.plugins)
     plugins = PluginManager(config=config)
     context = Context(
         profile=manager.get_active_profile(),

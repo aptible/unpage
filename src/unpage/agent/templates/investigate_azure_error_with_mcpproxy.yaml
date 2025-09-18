@@ -1,0 +1,46 @@
+
+description: >
+  Use this agent to investigate errors with Azure resources and post updates to MS teams using third-party MCP servers
+
+prompt: >
+  - Extract the Azure resource IDs and error details from the incoming alert
+  - Use the Azure MCP tools to fetch detailed information about the affected Azure resources
+  - Determine if a human SRE should investigate further
+  - Use the MS Teams MCP tools to post a status update to the #errors Microsoft Teams channel with:
+    - 1-2 sentences summarizing what happened and the suggested action, use emoji
+    - Summarize what you did, what you found, and why you made your recommendation
+    - Don't assume or make things up; say you don't know if you don't
+
+tools:
+  - "azure_*"
+  - "msteams_post_message"
+
+config:
+  plugins:
+    mcpproxy:
+      enabled: true
+      settings:
+        mcp_servers:
+          azure:
+            url: "https://azure.com/mcp"
+          msteams:
+            url: "https://teams.microsoft.com/l/channel/[TEAMS_CHANNEL_ID]/McpBot?groupId=[TEAM_ID]&tenantId=[TEAMS_APP_TENANT_ID]"
+
+test_payloads:
+  azure_error:
+    payload: >
+      {
+        "incident": {
+          "title": "Azure VM Error - Resource ID: /subscriptions/xxxx/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+          "description": "An error occurred with Azure VM vm1 in resource group rg1. Error code: VMExtensionProvisioningError. Please investigate.",
+          "created_at": "2024-06-01T12:00:00Z",
+          "status": "triggered",
+          "service": {
+            "id": "PABCDEF",
+            "type": "service_reference",
+            "summary": "Azure Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PABCDEF",
+            "html_url": "https://example.pagerduty.com/service-directory/PABCDEF"
+          }
+        }
+      }
