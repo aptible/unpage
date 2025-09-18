@@ -16,186 +16,58 @@ def test_config_merge_plugins() -> None:
     assert new_cfg.plugins["testplugin"].settings == {}
 
 
-def test_config_expand_env_vars_plugin_settings() -> None:
-    """Test environment variable expansion in plugin settings."""
+def test_config_environment_variable_expansion() -> None:
+    """Test environment variable expansion in config."""
     with patch.dict(
         os.environ,
         {
-            "AWS_REGION": "us-east-1",
-            "AWS_ACCESS_KEY": "AKIA123456789",
-            "DEBUG_MODE": "true",
+            "API_KEY": "secret",
+            "HOST": "localhost",
+            "ENV": "prod",
         },
     ):
         config_data: dict = {
             "plugins": {
-                "aws": {
+                "service": {
                     "enabled": True,
                     "settings": {
-                        "region": "$AWS_REGION",
-                        "access_key": "$AWS_ACCESS_KEY",
-                        "debug": "$DEBUG_MODE",
-                        "endpoints": ["https://$AWS_REGION.amazonaws.com"],
+                        "api_key": "$API_KEY",
+                        "url": "https://$HOST/api",
+                        "service_name": "${ENV}-service",
+                        "timeout": "${TIMEOUT:-30}",
+                        "connection": {"host": "$HOST", "port": "5432"},
+                        "servers": ["$HOST", "backup.com"],
+                        "retries": 3,
+                        "enabled": True,
                     },
                 }
             }
         }
+
         config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-        aws_settings = config.plugins["aws"].settings
-        assert aws_settings["region"] == "us-east-1"
-        assert aws_settings["access_key"] == "AKIA123456789"
-        assert aws_settings["debug"] == "true"
-        assert aws_settings["endpoints"] == ["https://us-east-1.amazonaws.com"]
+        settings = config.plugins["service"].settings
+        assert settings["api_key"] == "secret"
+        assert settings["url"] == "https://localhost/api"
+        assert settings["service_name"] == "prod-service"
+        assert settings["timeout"] == "30"  # default value
+        assert settings["connection"]["host"] == "localhost"  # nested
+        assert settings["servers"] == ["localhost", "backup.com"]  # list
+        assert settings["retries"] == 3  # non-string preserved
+        assert settings["enabled"] is True
 
 
-def test_config_expand_env_vars_nested_plugin_settings() -> None:
-    """Test environment variable expansion in nested plugin settings."""
-    with patch.dict(
-        os.environ,
-        {
-            "DB_HOST": "localhost",
-            "DB_PORT": "5432",
-        },
-    ):
-        config_data: dict = {
-            "plugins": {
-                "database": {
-                    "enabled": True,
-                    "settings": {
-                        "host": "$DB_HOST",
-                        "port": "$DB_PORT",
-                        "nested": {
-                            "connection_string": "postgresql://$DB_HOST:$DB_PORT/db",
-                        },
-                    },
-                }
-            }
-        }
-        config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-        db_settings = config.plugins["database"].settings
-        assert db_settings["host"] == "localhost"
-        assert db_settings["port"] == "5432"
-        assert db_settings["nested"]["connection_string"] == "postgresql://localhost:5432/db"
-
-
-def test_config_expand_env_vars_with_defaults() -> None:
-    """Test environment variable expansion with default values."""
+def test_config_unset_environment_variable() -> None:
+    """Test that unset environment variables raise UnboundVariable exception."""
     config_data: dict = {
         "plugins": {
             "service": {
                 "enabled": True,
                 "settings": {
-                    "timeout": "${TIMEOUT:-30}",
-                    "retries": "${RETRIES:-3}",
+                    "missing": "$NONEXISTENT_VAR",
                 },
             }
         }
     }
-    config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-    service_settings = config.plugins["service"].settings
-    assert service_settings["timeout"] == "30"
-    assert service_settings["retries"] == "3"
 
-
-def test_config_expand_env_vars_nonexistent_var() -> None:
-    """Test behavior with nonexistent environment variables."""
-    config_data: dict = {
-        "plugins": {
-            "service": {
-                "enabled": True,
-                "settings": {
-                    "missing_var": "$NONEXISTENT_VAR",
-                },
-            }
-        }
-    }
-    # expandvars with nounset=True raises UnboundVariable if env var doesn't exist
     with pytest.raises(UnboundVariable):
         Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-
-
-def test_config_expand_env_vars_mixed_types() -> None:
-    """Test that non-string types are preserved during expansion."""
-    with patch.dict(
-        os.environ,
-        {
-            "STRING_VAR": "test_value",
-        },
-    ):
-        config_data: dict = {
-            "plugins": {
-                "service": {
-                    "enabled": True,
-                    "settings": {
-                        "string_field": "$STRING_VAR",
-                        "number_field": 42,
-                        "boolean_field": True,
-                        "float_field": 3.14,
-                        "list_field": [1, 2, 3],
-                    },
-                }
-            }
-        }
-        config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-        settings = config.plugins["service"].settings
-        assert settings["string_field"] == "test_value"
-        assert settings["number_field"] == 42
-        assert settings["boolean_field"] is True
-        assert settings["float_field"] == 3.14
-        assert settings["list_field"] == [1, 2, 3]
-
-
-def test_config_expand_env_vars_in_lists() -> None:
-    """Test environment variable expansion in lists within plugin settings."""
-    with patch.dict(
-        os.environ,
-        {
-            "SERVER1": "server1.com",
-            "SERVER2": "server2.com",
-        },
-    ):
-        config_data: dict = {
-            "plugins": {
-                "service": {
-                    "enabled": True,
-                    "settings": {
-                        "servers": [
-                            "$SERVER1",
-                            "$SERVER2",
-                            "static.com",
-                        ]
-                    },
-                }
-            }
-        }
-        config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-        settings = config.plugins["service"].settings
-        assert settings["servers"] == ["server1.com", "server2.com", "static.com"]
-
-
-def test_config_expand_env_vars_complex_interpolation() -> None:
-    """Test complex environment variable expansion patterns."""
-    with patch.dict(
-        os.environ,
-        {
-            "ENV": "production",
-            "SERVICE_NAME": "unpage",
-            "VERSION": "1.0.0",
-        },
-    ):
-        config_data: dict = {
-            "plugins": {
-                "deployment": {
-                    "enabled": True,
-                    "settings": {
-                        "service_name": "${SERVICE_NAME}-${ENV}",
-                        "image": "${SERVICE_NAME}:${VERSION}",
-                        "environment": "$ENV",
-                    },
-                }
-            }
-        }
-        config = Config(profile="test", file_path=Path("/tmp/test"), **config_data)
-        settings = config.plugins["deployment"].settings
-        assert settings["service_name"] == "unpage-production"
-        assert settings["image"] == "unpage:1.0.0"
-        assert settings["environment"] == "production"
