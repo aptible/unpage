@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.33 (2025-09-18)
+
+### Features
+
+- Support bash-like environment variable expansion in config.yaml [SC-34621]
+  ([#176](https://github.com/aptible/unpage/pull/176),
+  [`da3e4a5`](https://github.com/aptible/unpage/commit/da3e4a5f9535d1634e16cc7248e6e76d935ad110))
+
+
 ## v0.1.0-alpha.32 (2025-09-15)
 
 ### Bug Fixes
