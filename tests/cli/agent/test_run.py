@@ -178,7 +178,9 @@ def test_run_payload_and_stdin_conflict(mock_send_event, mock_stdin, unpage):
     stdout, stderr, exit_code = unpage('agent run test-agent "payload arg"')
 
     # Verify error message and exit code
-    assert "Cannot pass a payload argument when piping data to stdin" in stdout
+    assert (
+        "Cannot pass --pagerduty-incident or --use-test-payload with --payload or stdin" in stdout
+    )
     assert stderr == ""
     assert exit_code == 1
 
@@ -200,8 +202,8 @@ def test_run_pagerduty_and_payload_conflict(mock_send_event, mock_stdin, unpage)
     stdout, stderr, exit_code = unpage('agent run test-agent "payload" --pagerduty-incident P123')
 
     # Verify error message and exit code
-    assert "Cannot pass --pagerduty-incident with --payload or stdin" in stdout
     assert stderr == ""
+    assert "Cannot pass --pagerduty-incident with --payload or stdin" in stdout
     assert exit_code == 1
 
 

@@ -54,8 +54,15 @@ async def run(
     )
     plugin_manager = PluginManager(manager.get_active_profile_config())
     data = ""
-    if (pagerduty_incident and use_test_payload) and (
-        payload is not None or not sys.stdin.isatty()
+    if (
+        sum(
+            [
+                bool(pagerduty_incident),
+                bool(use_test_payload),
+                payload is not None or not sys.stdin.isatty(),
+            ]
+        )
+        >= 2
     ):
         print(
             "[red]Cannot pass --pagerduty-incident or --use-test-payload with --payload or stdin.[/red]"
