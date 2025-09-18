@@ -78,22 +78,8 @@ class PluginConfig(BaseModel):
         return hash(self.model_dump_json())
 
 
-class Config(BaseModel):
-    """Configuration model for unpage profiles."""
-
-    plugins: dict[str, PluginConfig] = Field(default_factory=dict)
-    profile: str = Field(default="default", exclude=True)
-    file_path: Path = Field(exclude=True)
-
-    telemetry_enabled: bool = True
-
-    def save(self) -> None:
-        """Save this config to its file path."""
-        if not self.file_path:
-            raise ValueError("Cannot save config: file_path not set")
-
-        with self.file_path.open("w") as f:
-            yaml.dump(self.model_dump(), f, default_flow_style=False)
+class EnvironmentVariablesMixin(BaseModel):
+    """Model to recursively expand environment variables in all fields."""
 
     @model_validator(mode="before")
     @classmethod
@@ -114,7 +100,25 @@ class Config(BaseModel):
 
         return _expand(data)
 
-    def merge_plugins(self, other_plugins: dict[str, PluginConfig] | None) -> Self:
+
+class Config(EnvironmentVariablesMixin, BaseModel):
+    """Configuration model for unpage profiles."""
+
+    plugins: dict[str, PluginConfig] = Field(default_factory=dict)
+    profile: str = Field(default="default", exclude=True)
+    file_path: Path = Field(exclude=True)
+
+    telemetry_enabled: bool = True
+
+    def save(self) -> None:
+        """Save this config to its file path."""
+        if not self.file_path:
+            raise ValueError("Cannot save config: file_path not set")
+
+        with self.file_path.open("w") as f:
+            yaml.dump(self.model_dump(), f, default_flow_style=False)
+
+    def merge_plugins(self, other_plugins: dict[str, PluginConfig]) -> Self:
         """Merge another plugins dict into this config's plugins, returning a new Config instance.
 
         Args:
@@ -123,14 +127,17 @@ class Config(BaseModel):
         Returns:
             Config new instance with merged values
         """
-        if other_plugins is None:
+        if not other_plugins:
             return self
-        new_config = {
-            **{"file_path": self.file_path, "profile": self.profile},
-            **self.model_dump(),
-            **{"plugins": {**self.plugins, **other_plugins}},
-        }
-        return self.__class__(**new_config)
+
+        return self.__class__(
+            **{
+                "file_path": self.file_path,
+                "profile": self.profile,
+                **self.model_dump(),
+                "plugins": {**self.plugins, **other_plugins},
+            }
+        )
 
 
 class ConfigManager:
