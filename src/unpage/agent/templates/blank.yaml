@@ -4,6 +4,12 @@ description: >
 
     - ...
 
+# Optional configuration for periodically running the agent on a schedule. Uses standard cron syntax.
+# The agent will receive no input. Make sure to specify in your prompt how the agent should
+# get any inputs it will need (e.g., via tool calls).
+# schedule:
+#   cron: "0 10 2 * *"  # On the 2nd of every month at 10am
+
 # Instructions for the agent for investigating the alert.
 prompt: >
   ...
