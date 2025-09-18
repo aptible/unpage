@@ -56,7 +56,7 @@ config:
               base_branch_name: The name of the target branch for the pull request
               commit_message: A commit message to use for the single commit
               pr_description: A description for the pull request
-    # mcpproxy:
+    # mcp:
     #   enabled: true
     #   settings:
     #     mcp_servers:
