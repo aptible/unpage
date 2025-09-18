@@ -17,3 +17,28 @@ prompt: >
 #
 tools:
   - "*"
+
+# Customize and override configuration for any plugins the agent uses.
+# config:
+#   plugins:
+#     shell:
+#       enabled: true
+#       settings:
+#         tools:
+#           - handle: grep_syslog
+#             description: Search system log file
+#             command: grep -i {search_term} /var/log/syslog | tail -20
+#             args:
+#               search_term: Phrase to search for in the syslog file
+
+# Provide test payloads that can be used with
+# `unpage agent run --use-test-payload <payload_name>`
+# or with `unpage agent quickstart`.
+# test_payloads:
+#   example_alert:
+#     description: Example alert our Agent will investigate
+#     payload: >
+#       {
+#         "type": "error",
+#         "message": "Error detected in syslog on localhost",
+#       }
