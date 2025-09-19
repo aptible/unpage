@@ -67,6 +67,7 @@
           "plugins/graph",
           "plugins/kubernetes",
           "plugins/llm",
+          "plugins/mcp",
           "plugins/metrics",
           "plugins/networking",
           "plugins/pagerduty",

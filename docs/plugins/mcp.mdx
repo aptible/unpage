@@ -1,5 +1,5 @@
 ---
-title: MCP
+title: Third-party MCP Servers
 ---
 
 The MCP plugin allows you to connect third-party MCP (Model Context Protocol) servers
@@ -28,7 +28,12 @@ Configuration follows the standard MCP server configuration format: each server 
 - `env`: The environment variables to set for the MCP server
 
 ```yaml
+# ~/.unpage/profiles/<profile_name>/config.yaml
+
+# ...
+
 plugins:
+  # ...
   mcp:
     enabled: true
     settings:
@@ -38,27 +43,35 @@ plugins:
           args: ["mcp-server-git", "--repository", "/path/to/git/repo"]
           env:
             GIT_AUTHOR_NAME: "${GIT_USER_NAME:-Unpage}"  # Bash-like environment variable expansion
+
+# ...
 ```
 
 ### For http (i.e., remote MCP servers)
 
-- `transport`: The type of MCP server to connect to (`http`, `streamable-http`, or `sse`)
+- `transport`: The transport type of the MCP server (`http`, `streamable-http`, or `sse`)
 - `url`: The URL to connect to the MCP server
 - `auth`: The authentication to use for the MCP server (either a string representing a Bearer token, or "oauth" to use OAuth authentication)
 - `headers`: The HTTP headers to send to the MCP server
 
 ```yaml
+# ~/.unpage/profiles/<profile_name>/config.yaml
+
+# ...
+
 plugins:
   mcp:
     enabled: true
     settings:
       mcp_servers:
         github:
-          type: "http"
+          transport: "http"
           url: "https://api.githubcopilot.com/mcp/"
           auth: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"
           headers:
             Authorization: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"  # Bash-like environment variable expansion
+
+# ...
 ```
 
 ## Tool Usage
@@ -66,9 +79,9 @@ plugins:
 Once configured, tools from MCP servers become available to your agents automatically.
 Tools are prefixed with the server name to prevent conflicts:
 
-- `git_log` - View git history (from git server)
-- `filesystem_read_file` - Read file contents (from filesystem server)
-- `github_create_issue` - Create GitHub issues (from github server)
+- `mcp_git_log` - View git history (from git server)
+- `mcp_filesystem_read_file` - Read file contents (from filesystem server)
+- `mcp_github_create_issue` - Create GitHub issues (from github server)
 
 ## Example Agent Configuration
 
@@ -79,25 +92,7 @@ description: "Agent for code review and repository operations"
 prompt: "You are a code review expert. Use git and filesystem tools to analyze code changes."
 
 tools:
-  - "git_*"                # All tools from git server
-  - "filesystem_*"         # All tools from filesystem server
-  - "github_create_issue"  # Specific tool from github server
-
-config:
-  plugins:
-    mcp:
-      enabled: true
-      settings:
-        mcp_servers:
-          git:
-            command: "uvx"
-            args: ["mcp-server-git", "--repository", "$PROJECT_ROOT"]
-          filesystem:
-            command: "npx"
-            args: ["-y", "@modelcontextprotocol/server-filesystem", "$PROJECT_ROOT"]
-          github:
-            type: "http"
-            url: "https://api.githubcopilot.com/mcp/"
-            headers:
-              Authorization: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"
+  - "mcp_git_*"                # All tools from git server
+  - "mcp_filesystem_*"         # All tools from filesystem server
+  - "mcp_github_create_issue"  # Specific tool from github server
 ```
