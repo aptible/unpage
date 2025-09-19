@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.34 (2025-09-19)
+
+### Documentation
+
+- Add more comments to blank.yaml [SC-34679] ([#174](https://github.com/aptible/unpage/pull/174),
+  [`b3836e5`](https://github.com/aptible/unpage/commit/b3836e5fa0ec3d0a581660a177651366997b9b48))
+
+### Features
+
+- Support third-party MCP servers [SC-34608] ([#175](https://github.com/aptible/unpage/pull/175),
+  [`c00da5a`](https://github.com/aptible/unpage/commit/c00da5ab7483a8be35c74b806fac6cd42437083a))
+
+
 ## v0.1.0-alpha.33 (2025-09-18)
 
 ### Features
