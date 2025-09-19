@@ -3498,7 +3498,7 @@ requires-dist = [
     { name = "dspy", specifier = ">=3.0.0,<4.0.0" },
     { name = "expandvars", specifier = ">=1.1.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.1" },
-    { name = "fastmcp", specifier = ">=2.10.1" },
+    { name = "fastmcp", specifier = ">=2.12.3" },
     { name = "graphviz", specifier = ">=0.20.3" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "human-readable", specifier = ">=2.0.0" },

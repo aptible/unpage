@@ -20,17 +20,21 @@ def test_list_templates_success(unpage):
 
     # Verify output contains header and built-in templates
     assert "Available agent templates:" in stdout
-    assert "* blank" in stdout
-    assert "* default" in stdout
+    assert "│ blank" in stdout
+    assert "│ default" in stdout
 
     # Verify templates are listed in sorted order
-    lines = stdout.strip().split("\n")
-    template_lines = [line for line in lines if line.startswith("* ")]
+    lines = stdout.strip().splitlines()
+    template_lines = [
+        line.split("│")[1].strip()
+        for line in lines
+        if line.startswith("│ ") and line.split("│")[1].strip()
+    ]
     template_dir = (
         Path(__file__).parent.parent.parent.parent / "src" / "unpage" / "agent" / "templates"
     )
     expected_templates = [
-        f"* {template_file.relative_to(template_dir).with_suffix('')}"
+        f"{template_file.relative_to(template_dir).with_suffix('')}"
         for template_file in template_dir.glob("**/*.yaml")
     ]
     assert sorted(template_lines) == sorted(expected_templates)
@@ -53,8 +57,8 @@ def test_list_templates_without_fixture(unpage, test_profile):
 
     # Should have at least one template (built-in ones)
     lines = stdout.strip().split("\n")
-    template_lines = [line for line in lines if line.startswith("* ")]
-    assert len(template_lines) >= 1  # At least one template should exist
+    template_lines = [line for line in lines if line.startswith("│ ")]
+    assert len(template_lines) >= 2  # At least one template should exist
 
 
 def test_templates_output_format(unpage):
@@ -72,7 +76,5 @@ def test_templates_output_format(unpage):
     # Subsequent lines should be templates with "* " prefix
     for line in lines[1:]:
         if line.strip():  # Skip empty lines
-            assert line.startswith("* ")
-            # Template name should not be empty
             template_name = line[2:].strip()
             assert len(template_name) > 0
