@@ -1,0 +1,103 @@
+---
+title: MCP
+---
+
+The MCP plugin allows you to connect third-party MCP (Model Context Protocol) servers
+to your [Agents](/concepts/agents), enabling them to use tools, resources, and prompts
+from external systems and services.
+
+<AccordionGroup>
+  <Accordion title="Key Features" icon="plug">
+    - **Multiple Server Support**: Connect multiple MCP servers simultaneously
+    - **Automatic Tool Routing**: Tools are automatically prefixed by server name to avoid conflicts
+    - **Standard MCP Protocol**: Compatible with any MCP-compliant server
+    - **Proxy Architecture**: Seamlessly integrates external tools into your agent workflows
+  </Accordion>
+</AccordionGroup>
+
+## Configuration
+
+Configure the MCP plugin by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file.
+
+Configuration follows the standard MCP server configuration format: each server under the `mcp_servers` key is a dictionary with the following keys, dependent on your chosen transport type:
+
+### For stdio (i.e., local MCP servers)
+
+- `command`: The command to run the MCP server
+- `args`: The arguments to pass to the MCP server command
+- `env`: The environment variables to set for the MCP server
+
+```yaml
+plugins:
+  mcp:
+    enabled: true
+    settings:
+      mcp_servers:
+        git:
+          command: "uvx"
+          args: ["mcp-server-git", "--repository", "/path/to/git/repo"]
+          env:
+            GIT_AUTHOR_NAME: "${GIT_USER_NAME:-Unpage}"  # Bash-like environment variable expansion
+```
+
+### For http (i.e., remote MCP servers)
+
+- `transport`: The type of MCP server to connect to (`http`, `streamable-http`, or `sse`)
+- `url`: The URL to connect to the MCP server
+- `auth`: The authentication to use for the MCP server (either a string representing a Bearer token, or "oauth" to use OAuth authentication)
+- `headers`: The HTTP headers to send to the MCP server
+
+```yaml
+plugins:
+  mcp:
+    enabled: true
+    settings:
+      mcp_servers:
+        github:
+          type: "http"
+          url: "https://api.githubcopilot.com/mcp/"
+          auth: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"
+          headers:
+            Authorization: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"  # Bash-like environment variable expansion
+```
+
+## Tool Usage
+
+Once configured, tools from MCP servers become available to your agents automatically.
+Tools are prefixed with the server name to prevent conflicts:
+
+- `git_log` - View git history (from git server)
+- `filesystem_read_file` - Read file contents (from filesystem server)
+- `github_create_issue` - Create GitHub issues (from github server)
+
+## Example Agent Configuration
+
+Use MCP tools in your [Unpage Agent](/concepts/agents) configurations:
+
+```yaml
+description: "Agent for code review and repository operations"
+prompt: "You are a code review expert. Use git and filesystem tools to analyze code changes."
+
+tools:
+  - "git_*"                # All tools from git server
+  - "filesystem_*"         # All tools from filesystem server
+  - "github_create_issue"  # Specific tool from github server
+
+config:
+  plugins:
+    mcp:
+      enabled: true
+      settings:
+        mcp_servers:
+          git:
+            command: "uvx"
+            args: ["mcp-server-git", "--repository", "$PROJECT_ROOT"]
+          filesystem:
+            command: "npx"
+            args: ["-y", "@modelcontextprotocol/server-filesystem", "$PROJECT_ROOT"]
+          github:
+            type: "http"
+            url: "https://api.githubcopilot.com/mcp/"
+            headers:
+              Authorization: "Bearer $GITHUB_PERSONAL_ACCESS_TOKEN"
+```
