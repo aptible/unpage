@@ -73,7 +73,8 @@
           "plugins/papertrail",
           "plugins/solarwinds",
           "plugins/shell",
-          "plugins/customalerts"
+          "plugins/customalerts",
+          "plugins/mcp"
         ]
       },
       {
