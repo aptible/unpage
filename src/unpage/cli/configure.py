@@ -257,18 +257,21 @@ async def _suggest_building_graph(use_uv_run: bool) -> None:
     rich.print("")
     rich.print("> Create the graph by running:")
     rich.print(">")
-    rich.print(f">   {'' if not use_uv_run else 'uv run '}unpage graph build")
+    rich.print(
+        f">   {'' if not use_uv_run else 'uv run '}unpage graph build{f' --profile {manager.get_active_profile()}' if manager.get_active_profile() != 'default' else ''}"
+    )
     rich.print(">")
     rich.print("> This is full usage for `unpage graph build`:")
     rich.print("")
     graph_build_cmd = " ".join([a if a != "configure" else "graph build" for a in sys.argv])
-    rich.print("> $ unpage graph build --help")
+    graph_build_help_cmd = f"{graph_build_cmd} --help"
+    rich.print(f"> $ {graph_build_help_cmd}")
     rich.print("")
-    await (await asyncio.create_subprocess_shell(f"{graph_build_cmd} --help")).wait()
+    await (await asyncio.create_subprocess_shell(graph_build_help_cmd)).wait()
     rich.print("")
     rich.print(">")
     if not await confirm(
-        "Would you like to launch `unpage graph build` now? (this can take 5min or up to an hour, or even more, depending on how large your infra is)"
+        f"Would you like to launch `{graph_build_cmd}` now? (this can take 5min or up to an hour, or even more, depending on how large your infra is)"
     ):
         await _send_event("done_no_graph_build")
         return
@@ -278,7 +281,7 @@ async def _suggest_building_graph(use_uv_run: bool) -> None:
 
 
 def _replace_current_proc_with_unpage_graph_build(graph_build_cmd: str) -> None:
-    rich.print("> Running: unpage graph build")
+    rich.print(f"> Running: {graph_build_cmd}")
     rich.print("")
     cmd = shlex.split(graph_build_cmd)
     os.execvp(cmd[0], cmd)  # noqa: S606 Starting a process without a shell
