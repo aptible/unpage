@@ -114,7 +114,7 @@ class Config(EnvironmentVariablesMixin, BaseModel):
         """Save this config to its file path."""
         if not self.file_path:
             raise ValueError("Cannot save config: file_path not set")
-
+        self.file_path.parent.mkdir(parents=True, exist_ok=True)
         with self.file_path.open("w") as f:
             yaml.dump(self.model_dump(), f, default_flow_style=False)
 
