@@ -1,6 +1,6 @@
 import os
-from typing import Any, cast
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import questionary
 import rich
@@ -57,9 +57,7 @@ class RootlyPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
 
     async def validate_plugin_config(self) -> None:
         if not self._api_key:
-            raise LookupError(
-                "plugins.rootly.settings.api_key (or $ROOTLY_API_KEY) must be set"
-            )
+            raise LookupError("plugins.rootly.settings.api_key (or $ROOTLY_API_KEY) must be set")
         # Test API connectivity
         await self._client.list_incidents({"page[size]": "1"})
 
