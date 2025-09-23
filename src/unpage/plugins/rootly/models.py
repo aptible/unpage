@@ -1,14 +1,13 @@
+from typing import Any
+
 from pydantic import BaseModel
-from typing import Any, Dict
-from collections.abc import AsyncGenerator
-from pydantic import AwareDatetime
 
 
 class RootlyIncident(BaseModel):
     """Represents a Rootly incident."""
 
     id: str
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
     type: str = "incidents"
 
 
