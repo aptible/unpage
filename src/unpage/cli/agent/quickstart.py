@@ -132,8 +132,16 @@ async def _select_template_and_create_agent(e: CommandEvents) -> Agent:
 async def _edit_agent(agent: Agent, e: CommandEvents) -> Agent:
     _panel("Edit your agent")
     await questionary.press_any_key_to_continue("Hit [enter] to open the editor").unsafe_ask_async()
-    await edit_file(get_agent_file(agent.name))
-    await e.send("agent edited", {"agent_name_hash": hash_value(agent.name)})
+    agent_file = get_agent_file(agent.name)
+    orig_hash = hash_value(agent_file.read_text())
+    await edit_file(agent_file)
+    await e.send(
+        "agent edited",
+        {
+            "agent_name_hash": hash_value(agent.name),
+            "agent_file_changed": hash_value(agent_file.read_text()) != orig_hash,
+        },
+    )
     rich.print("")
     rich.print(f"You successfully edited the {agent.name} agent! ✨")
     rich.print("")
