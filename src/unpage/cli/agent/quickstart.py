@@ -2,7 +2,7 @@ import contextlib
 import json
 import sys
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import questionary
 import rich
@@ -24,28 +24,11 @@ from unpage.cli.configure import welcome_to_unpage
 from unpage.config import Config, PluginConfig, PluginSettings, manager
 from unpage.plugins.base import REGISTRY, PluginManager
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
-from unpage.telemetry import UNPAGE_TELEMETRY_DISABLED, hash_value, prepare_profile_for_telemetry
-from unpage.telemetry import client as telemetry
+from unpage.telemetry import UNPAGE_TELEMETRY_DISABLED, CommandEvents, hash_value
 from unpage.utils import confirm, edit_file, select
 
 if TYPE_CHECKING:
     from unpage.plugins.pagerduty.models import PagerDutyIncident
-
-
-class events:
-    step_count: int = 1
-
-    async def send(self, step: str, extra_params: dict[Any, Any] | None = None) -> None:
-        await telemetry.send_event(
-            {
-                "command": "agent quickstart",
-                "step": step,
-                "step_count": self.step_count,
-                **prepare_profile_for_telemetry(manager.get_active_profile()),
-                **(extra_params if extra_params else {}),
-            }
-        )
-        self.step_count += 1
 
 
 def _panel(text: str) -> None:
@@ -56,7 +39,7 @@ def _panel(text: str) -> None:
 @agent_app.command
 async def quickstart() -> None:
     """Get up-and-running with an incident agent in less than 5 minutes!"""
-    e = events()
+    e = CommandEvents("agent quickstart")
     await e.send("start")
     welcome_to_unpage()
     if not await _quickstart_intro():
@@ -97,7 +80,7 @@ This quickstart flow will show you how easily you can build your own custom agen
     return await confirm("That's it! Ready to get started?")
 
 
-async def _select_template_and_create_agent(e: events) -> Agent:
+async def _select_template_and_create_agent(e: CommandEvents) -> Agent:
     _panel("Create your first agent")
     rich.print(
         "First, which agent would you like to try? Choose a template, or make one from scratch. If it's your first time, we recommend starting with a template."
@@ -146,11 +129,19 @@ async def _select_template_and_create_agent(e: events) -> Agent:
     return load_agent(agent_name)
 
 
-async def _edit_agent(agent: Agent, e: events) -> Agent:
+async def _edit_agent(agent: Agent, e: CommandEvents) -> Agent:
     _panel("Edit your agent")
     await questionary.press_any_key_to_continue("Hit [enter] to open the editor").unsafe_ask_async()
-    await edit_file(get_agent_file(agent.name))
-    await e.send("agent edited", {"agent_name_hash": hash_value(agent.name)})
+    agent_file = get_agent_file(agent.name)
+    orig_hash = hash_value(agent_file.read_text())
+    await edit_file(agent_file)
+    await e.send(
+        "agent edited",
+        {
+            "agent_name_hash": hash_value(agent.name),
+            "agent_file_changed": hash_value(agent_file.read_text()) != orig_hash,
+        },
+    )
     rich.print("")
     rich.print(f"You successfully edited the {agent.name} agent! ✨")
     rich.print("")
@@ -183,7 +174,9 @@ async def _plugin_settings_valid(plugin_name: str, plugin_settings: PluginSettin
     return True
 
 
-async def _plugins_to_config_for_agent(agent: Agent, e: events) -> tuple[list[str], list[str]]:
+async def _plugins_to_config_for_agent(
+    agent: Agent, e: CommandEvents
+) -> tuple[list[str], list[str]]:
     _panel("Configure the agent")
     rich.print(
         "Before we test the agent, we need to configure some plugins. Based on the tools this agent has access to, it looks like we'll need API keys for the following:"
@@ -224,7 +217,7 @@ async def _configure_plugins(
     agent: Agent,
     required_plugin_names: list[str],
     required_plugin_names_that_need_config: list[str],
-    e: events,
+    e: CommandEvents,
 ) -> Config:
     existing_plugins: dict[str, PluginConfig] = {}
     try:
@@ -396,7 +389,7 @@ async def _provide_json_directly() -> str | None:
         return payload_text
 
 
-async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: events) -> None:
+async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: CommandEvents) -> None:
     _panel("Test out your new agent!")
     rich.print(f"You're ready to test the new {agent.name} agent!")
     rich.print(

@@ -125,3 +125,26 @@ class TunaClient(httpx.AsyncClient):
 
 
 client = TunaClient()
+
+
+class CommandEvents:
+    command: str
+    base_params: dict[Any, Any] | None = None
+    _step_count: int = 1
+
+    def __init__(self, command: str, base_params: dict[Any, Any] | None = None) -> None:
+        self.command = command
+        self.base_params = base_params
+
+    async def send(self, step: str, extra_params: dict[Any, Any] | None = None) -> None:
+        await client.send_event(
+            {
+                "command": self.command,
+                "step": step,
+                "step_count": self._step_count,
+                **prepare_profile_for_telemetry(manager.get_active_profile()),
+                **(self.base_params if self.base_params else {}),
+                **(extra_params if extra_params else {}),
+            }
+        )
+        self._step_count += 1
