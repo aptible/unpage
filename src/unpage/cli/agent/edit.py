@@ -5,8 +5,7 @@ from rich import print
 from unpage.agent.utils import get_agent_template
 from unpage.cli.agent._app import agent_app
 from unpage.config import manager
-from unpage.telemetry import client as telemetry
-from unpage.telemetry import hash_value, prepare_profile_for_telemetry
+from unpage.telemetry import CommandEvents, hash_value
 from unpage.utils import edit_file
 
 
@@ -26,14 +25,15 @@ async def edit(
     editor
         The editor to use to open the agent file; DAYDREAM_EDITOR and EDITOR environment variables also work
     """
-    await telemetry.send_event(
+    events = CommandEvents(
+        "agent edit",
         {
-            "command": "agent edit",
             "agent_name_sha256": hash_value(agent_name),
-            **prepare_profile_for_telemetry(manager.get_active_profile()),
             "editor": editor,
-        }
+        },
     )
+    await events.send("start")
+
     # Get the config directory for the profile
     config_dir = manager.get_active_profile_directory()
 
@@ -51,9 +51,11 @@ async def edit(
     if not agent_file.exists():
         print(f"Agent '{agent_name}' not found at {agent_file}")
         print(f"Use 'unpage agent create {agent_name}' to create a new agent.")
+        await events.send("done", {"status": "failed - agent not found"})
         sys.exit(1)
 
     # Open the file in the user's editor
+    orig_hash = hash_value(agent_file.read_text())
     try:
         await edit_file(agent_file, editor)
     except ValueError:
@@ -61,4 +63,8 @@ async def edit(
             "[red]No editor specified. Set the $EDITOR environment variable or use --editor option.[/red]"
         )
         print(f"[blue]Please manually open {str(agent_file)!r} in your editor.[/blue]")
+        await events.send("done", {"status": "failed - could not open file"})
         sys.exit(1)
+    await events.send(
+        "done", {"status": "success", "changed": hash_value(agent_file.read_text()) != orig_hash}
+    )
