@@ -39,7 +39,7 @@ def get_agent_template(agent_name: str) -> str:
     return (Path(__file__).parent / "templates" / f"{agent_name}.yaml").read_text()
 
 
-class agentWithDescriptionOnly(BaseModel):
+class AgentWithDescriptionOnly(BaseModel):
     description: str = Field(description="A description of the agent and when it should be used")
 
 
