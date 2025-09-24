@@ -45,7 +45,7 @@ class agentWithDescriptionOnly(BaseModel):
 
 def get_agent_template_description(agent_name: str) -> str:
     text = get_agent_template(agent_name)
-    yml = parse_yaml_raw_as(agentWithDescriptionOnly, text)
+    yml = parse_yaml_raw_as(AgentWithDescriptionOnly, text)
     return yml.description.strip()
 
 
