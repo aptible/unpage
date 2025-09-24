@@ -202,7 +202,7 @@ def test_run_pagerduty_and_payload_conflict(mock_send_event, mock_stdin, unpage)
     # Verify error message and exit code
     assert stderr == ""
     assert (
-        "Cannot pass --pagerduty-incident or --use-test-payload with --payload or stdin" in stdout
+        "Cannot pass --pagerduty-incident, --rootly-incident, or --use-test-payload with" in stdout
     )
     assert exit_code == 1
 

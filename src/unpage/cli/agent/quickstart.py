@@ -24,11 +24,13 @@ from unpage.cli.configure import welcome_to_unpage
 from unpage.config import Config, PluginConfig, PluginSettings, manager
 from unpage.plugins.base import REGISTRY, PluginManager
 from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
+from unpage.plugins.rootly.plugin import RootlyPlugin
 from unpage.telemetry import UNPAGE_TELEMETRY_DISABLED, CommandEvents, hash_value
 from unpage.utils import confirm, edit_file, select
 
 if TYPE_CHECKING:
     from unpage.plugins.pagerduty.models import PagerDutyIncident
+    from unpage.plugins.rootly.models import RootlyIncident
 
 
 def _panel(text: str) -> None:
@@ -341,6 +343,69 @@ async def _select_from_recent_incidents(
     return None
 
 
+async def _provide_rootly_incident_id_or_url(rootly: RootlyPlugin) -> str | None:
+    """Prompt user to enter a Rootly incident ID or URL."""
+    while True:
+        answer = await questionary.text(
+            "Enter Rootly incident ID or URL:",
+        ).unsafe_ask_async()
+
+        if not answer:
+            return None
+
+        incident_id = answer
+        if "/" in answer:
+            incident_id = [x for x in answer.split("/") if x][-1]
+
+        try:
+            incident = await rootly.get_incident_by_id(incident_id)
+            return incident.model_dump_json(indent=2)
+        except Exception as ex:
+            rich.print(f"[red]Failed to retrieve incident with id {incident_id}: {ex}[/red]")
+            if not await confirm("Retry with another ID or URL?"):
+                return None
+
+
+async def _select_from_recent_rootly_incidents(
+    rootly: RootlyPlugin, incidents_to_consider: int = 20
+) -> str | None:
+    incidents: list[RootlyIncident] = []
+    console = Console()
+
+    with console.status("Fetching recent Rootly incidents...", spinner="dots") as status:
+        async for incident_payload in rootly.recent_incident_payloads():
+            incidents.append(incident_payload.incident)
+            if len(incidents) >= incidents_to_consider:
+                break
+        status.update("Done 🎉")
+
+    if not incidents:
+        rich.print("[yellow]No recent Rootly incidents found.[/yellow]")
+        return None
+
+    enable_search = len(incidents) > 10
+    incident_id = await select(
+        "Select a Rootly incident:",
+        choices=[
+            Choice(
+                f"{incident.attributes.get('title', 'Unknown Title')[:60]}... [{incident.attributes.get('status', 'Unknown')}]"
+                if len(incident.attributes.get('title', '')) > 60
+                else f"{incident.attributes.get('title', 'Unknown Title')} [{incident.attributes.get('status', 'Unknown')}]",
+                value=incident.id,
+            )
+            for incident in incidents
+        ],
+        use_search_filter=enable_search,
+        use_jk_keys=not enable_search,
+    )
+
+    for incident in incidents:
+        if incident.id == incident_id:
+            return incident.model_dump_json(indent=2)
+
+    return None
+
+
 async def _use_test_payload_from_agent(agent: Agent) -> str | None:
     """Use a test payload from the agent definition."""
     if not agent.test_payloads:
@@ -402,15 +467,24 @@ async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: Comm
         func: Callable[[], Awaitable[str | None]]
 
     pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
+    rootly = cast("RootlyPlugin", plugin_manager.get_plugin("rootly"))
 
     options = [
         PayloadOption(
-            title="Provide an incident ID or URL",
+            title="Provide a PagerDuty incident ID or URL",
             func=lambda: _provide_incident_id_or_url(pd),
         ),
         PayloadOption(
-            title="Select from a list of 20 most recent incidents",
+            title="Select from a list of 20 most recent PagerDuty incidents",
             func=lambda: _select_from_recent_incidents(pd),
+        ),
+        PayloadOption(
+            title="Provide a Rootly incident ID or URL",
+            func=lambda: _provide_rootly_incident_id_or_url(rootly),
+        ),
+        PayloadOption(
+            title="Select from a list of 20 most recent Rootly incidents",
+            func=lambda: _select_from_recent_rootly_incidents(rootly),
         ),
     ]
 

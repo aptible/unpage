@@ -59,19 +59,25 @@ Learn more about [Creating Agents](/concepts/agents).
 
 ### Running Locally
 You can test your Agents locally on past or current Rootly incidents by
-passing in a Rootly incident webhook payload to `unpage agent run`:
+passing in a Rootly incident ID or URL to `unpage agent run`:
 
 ```bash
-uv run unpage agent run <agent_name> --payload '{"incident": {"id": "01234567-89ab-cdef-0123-456789abcdef", "attributes": {...}, "type": "incidents"}}'
+uv run unpage agent run <agent_name> --rootly-incident 01234567-89ab-cdef-0123-456789abcdef
 ```
 
-Alternatively, you can pass a simple incident ID and construct the payload manually:
+You can also use a full Rootly incident URL:
 
 ```bash
-uv run unpage agent run <agent_name> --payload '{"incident_id": "01234567-89ab-cdef-0123-456789abcdef"}'
+uv run unpage agent run <agent_name> --rootly-incident https://app.rootly.com/incidents/01234567-89ab-cdef-0123-456789abcdef
 ```
 
-Unpage will process the incident data and send it to your Agent. The
+Alternatively, you can use the interactive quickstart to select from recent incidents:
+
+```bash
+uv run unpage agent quickstart
+```
+
+Unpage will fetch the incident automatically and send it to your Agent. The
 Agent thought process, tool calls, and output will be printed to `stdout`.
 
 ### Webhooks
