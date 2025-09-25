@@ -59,14 +59,40 @@ class RootlyClient:
         """Get events for an incident."""
         return await self._request("GET", f"/incidents/{incident_id}/incident_events")
 
-    async def mitigate_incident(self, incident_id: str) -> dict[str, Any]:
+    async def mitigate_incident(self, incident_id: str, mitigation_message: str = "") -> dict[str, Any]:
         """Mitigate an incident."""
-        return await self._request("POST", f"/incidents/{incident_id}/mitigate")
+        data = {
+            "data": {
+                "type": "incidents",
+                "attributes": {
+                    "mitigation_message": mitigation_message
+                }
+            }
+        }
+        return await self._request("PUT", f"/incidents/{incident_id}/mitigate", json_data=data)
 
     async def acknowledge_incident(self, incident_id: str) -> dict[str, Any]:
-        """Acknowledge an incident."""
-        return await self._request("POST", f"/incidents/{incident_id}/acknowledge")
+        """Acknowledge an incident by updating acknowledged_at timestamp."""
+        from datetime import datetime, timezone
 
-    async def resolve_incident(self, incident_id: str) -> dict[str, Any]:
+        data = {
+            "data": {
+                "type": "incidents",
+                "attributes": {
+                    "acknowledged_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        }
+        return await self._request("PUT", f"/incidents/{incident_id}", json_data=data)
+
+    async def resolve_incident(self, incident_id: str, resolution_message: str = "") -> dict[str, Any]:
         """Resolve an incident."""
-        return await self._request("POST", f"/incidents/{incident_id}/resolve")
+        data = {
+            "data": {
+                "type": "incidents",
+                "attributes": {
+                    "resolution_message": resolution_message
+                }
+            }
+        }
+        return await self._request("PUT", f"/incidents/{incident_id}/resolve", json_data=data)

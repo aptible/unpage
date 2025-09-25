@@ -119,12 +119,8 @@ class RootlyPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             incident_id (str): The ID of the Rootly incident to resolve
             resolution_message (str, optional): A message to include with the resolution
         """
-        # Resolve the incident
-        await self._client.resolve_incident(incident_id)
-
-        # If a resolution message was provided, add it as a status update
-        if resolution_message:
-            await self.post_status_update(incident_id, resolution_message)
+        # Resolve the incident with optional resolution message
+        await self._client.resolve_incident(incident_id, resolution_message or "")
 
     @tool()
     async def mitigate_incident(self, incident_id: str) -> None:
