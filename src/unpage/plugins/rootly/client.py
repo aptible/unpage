@@ -57,7 +57,13 @@ class RootlyClient:
 
     async def get_incident_events(self, incident_id: str) -> dict[str, Any]:
         """Get events for an incident."""
-        return await self._request("GET", f"/incidents/{incident_id}/incident_events")
+        return await self._request("GET", f"/incidents/{incident_id}/events")
+
+    async def create_incident_event_new(
+        self, incident_id: str, event_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Create a new event for an incident using the correct endpoint."""
+        return await self._request("POST", f"/incidents/{incident_id}/events", json_data=event_data)
 
     async def mitigate_incident(self, incident_id: str) -> dict[str, Any]:
         """Mitigate an incident."""
@@ -70,3 +76,11 @@ class RootlyClient:
     async def resolve_incident(self, incident_id: str) -> dict[str, Any]:
         """Resolve an incident."""
         return await self._request("POST", f"/incidents/{incident_id}/resolve")
+
+    async def update_incident_event(self, event_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """Update an incident event."""
+        return await self._request("PUT", f"/events/{event_id}", json_data=data)
+
+    async def delete_incident_event(self, event_id: str) -> dict[str, Any]:
+        """Delete an incident event."""
+        return await self._request("DELETE", f"/events/{event_id}")
