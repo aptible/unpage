@@ -57,42 +57,30 @@ class RootlyClient:
 
     async def get_incident_events(self, incident_id: str) -> dict[str, Any]:
         """Get events for an incident."""
-        return await self._request("GET", f"/incidents/{incident_id}/incident_events")
+        return await self._request("GET", f"/incidents/{incident_id}/events")
 
-    async def mitigate_incident(self, incident_id: str, mitigation_message: str = "") -> dict[str, Any]:
+    async def create_incident_event_new(
+        self, incident_id: str, event_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Create a new event for an incident using the correct endpoint."""
+        return await self._request("POST", f"/incidents/{incident_id}/events", json_data=event_data)
+
+    async def mitigate_incident(self, incident_id: str) -> dict[str, Any]:
         """Mitigate an incident."""
-        data = {
-            "data": {
-                "type": "incidents",
-                "attributes": {
-                    "mitigation_message": mitigation_message
-                }
-            }
-        }
-        return await self._request("PUT", f"/incidents/{incident_id}/mitigate", json_data=data)
+        return await self._request("POST", f"/incidents/{incident_id}/mitigate")
 
     async def acknowledge_incident(self, incident_id: str) -> dict[str, Any]:
-        """Acknowledge an incident by updating acknowledged_at timestamp."""
-        from datetime import datetime, timezone
+        """Acknowledge an incident."""
+        return await self._request("POST", f"/incidents/{incident_id}/acknowledge")
 
-        data = {
-            "data": {
-                "type": "incidents",
-                "attributes": {
-                    "acknowledged_at": datetime.now(timezone.utc).isoformat()
-                }
-            }
-        }
-        return await self._request("PUT", f"/incidents/{incident_id}", json_data=data)
-
-    async def resolve_incident(self, incident_id: str, resolution_message: str = "") -> dict[str, Any]:
+    async def resolve_incident(self, incident_id: str) -> dict[str, Any]:
         """Resolve an incident."""
-        data = {
-            "data": {
-                "type": "incidents",
-                "attributes": {
-                    "resolution_message": resolution_message
-                }
-            }
-        }
-        return await self._request("PUT", f"/incidents/{incident_id}/resolve", json_data=data)
+        return await self._request("POST", f"/incidents/{incident_id}/resolve")
+
+    async def update_incident_event(self, event_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """Update an incident event."""
+        return await self._request("PUT", f"/events/{event_id}", json_data=data)
+
+    async def delete_incident_event(self, event_id: str) -> dict[str, Any]:
+        """Delete an incident event."""
+        return await self._request("DELETE", f"/events/{event_id}")
