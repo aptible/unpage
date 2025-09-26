@@ -1,0 +1,55 @@
+---
+title: "Use Unpage MCP with Claude Desktop"
+description: "Setup instructions for configuring Claude Desktop to use the Unpage MCP server"
+---
+
+Claude Desktop can use your configuration to access the configured MCP tools.
+
+## Verify Your Configuration
+
+Verify you can run the unpage mcp server with:
+
+```
+unpage mcp start --disable-http
+```
+
+You may need to modify the `~/.unpage/profiles/default/config.yaml` file if you run into issues. You can stop this process once you see it working with `ctrl+c`.
+
+## Configure Claude Desktop
+
+Add the unpage configuration to the mcpServers section of this file `~/Library/Application\ Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "unpage": {
+      "command": "/Users/YOU/.local/bin/unpage",
+      "args": [
+          "mcp",
+          "start",
+          "--disable-http"
+      ],
+      "env": {
+        "HOME": "/Users/YOU"
+      }
+    }
+  }
+}
+```
+
+**NOTE:** make sure to update the `/Users/YOU` path to match where unpage is install on your system.
+
+## Use Unpage in Claude Desktop
+
+Close Claude Desktop anytime you change the mcpServers configuration to have it reload.
+
+Once Claude Desktop opens, you should see `unpage_` tools under the "Search and Tools" menu. You can click the sliders next to the tool names to enable them. Claude Desktop will ask you if you'd like to enable the tools on first use, too.
+
+## Troubleshooting
+
+The Claude Desktop logs are the best way to investigate issues with the Claude Desktop initializing the Unpage MCP server or any issues with calling tools. The logs are at:
+
+* `~/Library/Logs/Claude/mcp.log`
+* `~/Library/Logs/Claude/mcp-server-unpage.log`
+
+We provide a convenience command for finding these paths on your system with: `unpage mcp client logs claude`.

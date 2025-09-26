@@ -81,7 +81,8 @@
         "group": "How-To Guides",
         "pages": [
           "howto/deployment-guide",
-          "howto/mlflow-tracing"
+          "howto/mlflow-tracing",
+          "howto/use-claude-desktop"
         ]
       },
       {
