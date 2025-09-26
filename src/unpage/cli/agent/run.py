@@ -13,6 +13,7 @@ from unpage.telemetry import hash_value, prepare_profile_for_telemetry
 
 if TYPE_CHECKING:
     from unpage.plugins.pagerduty.plugin import PagerDutyPlugin
+    from unpage.plugins.rootly.plugin import RootlyPlugin
 
 
 @agent_app.command
@@ -22,6 +23,7 @@ async def run(
     /,
     *,
     pagerduty_incident: str | None = None,
+    rootly_incident: str | None = None,
     debug: bool = False,
     use_test_payload: str | None = None,
 ) -> None:
@@ -37,6 +39,8 @@ async def run(
         The alert payload to analyze. Alternatively, you can pipe the payload to stdin.
     pagerduty_incident
         PagerDuty incident ID or URL to use instead of payload or stdin
+    rootly_incident
+        Rootly incident ID or URL to use instead of payload or stdin
     debug
         Enable debug mode to print the history of the agent
     use_test_payload
@@ -50,6 +54,7 @@ async def run(
             "debug": debug,
             "has_payload": payload is not None,
             "has_pagerduty_incident": bool(pagerduty_incident),
+            "has_rootly_incident": bool(rootly_incident),
         }
     )
     plugin_manager = PluginManager(manager.get_active_profile_config())
@@ -58,6 +63,7 @@ async def run(
         sum(
             [
                 bool(pagerduty_incident),
+                bool(rootly_incident),
                 bool(use_test_payload),
                 payload is not None or not sys.stdin.isatty(),
             ]
@@ -65,7 +71,7 @@ async def run(
         >= 2
     ):
         print(
-            "[red]Cannot pass --pagerduty-incident or --use-test-payload with --payload or stdin.[/red]"
+            "[red]Cannot pass --pagerduty-incident, --rootly-incident, or --use-test-payload with --payload or stdin.[/red]"
         )
         sys.exit(1)
 
@@ -75,6 +81,14 @@ async def run(
             incident_id = [x for x in pagerduty_incident.split("/") if x][-1]
         pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
         incident = await pd.get_incident_by_id(incident_id)
+        data = incident.model_dump_json()
+
+    if rootly_incident:
+        incident_id = rootly_incident
+        if "/" in rootly_incident:
+            incident_id = [x for x in rootly_incident.split("/") if x][-1]
+        rootly = cast("RootlyPlugin", plugin_manager.get_plugin("rootly"))
+        incident = await rootly.get_incident_by_id(incident_id)
         data = incident.model_dump_json()
 
     if use_test_payload:
