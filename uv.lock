@@ -2536,14 +2536,14 @@ wheels = [
 
 [[package]]
 name = "pyngrok"
-version = "7.3.0"
+version = "7.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/64/e5646daaa4a84ecb368c09d42753f1c6e1a41b38579a36fda8ffe5716d9f/pyngrok-7.3.0.tar.gz", hash = "sha256:f2240e49b9dec9b27eba00f1444cd3cce7ac45d1bcc493a9b76ee63c2da9882c", size = 44266, upload-time = "2025-08-04T16:08:07.015Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/40/f06cbabac68bf2ff33b499d32373dedc20ebec3da814c26f82281f3c9bec/pyngrok-7.4.0.tar.gz", hash = "sha256:1f786fed8d156b99bffd713096a7ec8c81181f949c8f5c920f6820e92d6b9876", size = 44530, upload-time = "2025-09-23T14:47:42.642Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ac/6b/664772910199399db3706243488eb3a986bd8435583caef9cf8359eecfaa/pyngrok-7.3.0-py3-none-any.whl", hash = "sha256:708c48276d3a887d4263f0f4bc8171e22d66df6cfa74a4857625c83160603166", size = 25394, upload-time = "2025-08-04T16:08:05.368Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/60/00c4570b6de596a87bd05cb828eaf507e6b9ce171ad797e90fe5e8ecbd6e/pyngrok-7.4.0-py3-none-any.whl", hash = "sha256:719ee7bda031c7c3c80e7722aa3103961ac58bfae2167881d57fef28f5c8917a", size = 25434, upload-time = "2025-09-23T14:47:41.229Z" },
 ]
 
 [[package]]
