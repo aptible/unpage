@@ -47,3 +47,7 @@ repos:
         exclude: |
             (?x)^
             pinned_hatchling_backend.py$
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+    - id: codespell

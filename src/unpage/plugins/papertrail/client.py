@@ -26,7 +26,7 @@ class SearchResult(BaseModel):
         min_id: the lowest event ID examined
         max_id: the highest event ID examined
 
-    In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occured during the same second, they should not be used to select a time range for subsequent queries.
+    In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occurred during the same second, they should not be used to select a time range for subsequent queries.
 
     Each search query will return one of three types of result sets. The client can use the type to decide what to do next. The 3 possible types are:
 
@@ -44,9 +44,9 @@ class SearchResult(BaseModel):
     min_id: str
     """the highest event ID examined"""
     max_id: str
-    """In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occured during the same second, they should not be used to select a time range for subsequent queries."""
+    """In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occurred during the same second, they should not be used to select a time range for subsequent queries."""
     min_time_at: AwareDatetime | None = None
-    """In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occured during the same second, they should not be used to select a time range for subsequent queries."""
+    """In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occurred during the same second, they should not be used to select a time range for subsequent queries."""
     max_time_at: AwareDatetime | None = None
     """When searching backward: a full set of matching log messages with reached_beginning set to true. All matching events from the set max_id or max_time back to the beginning of searchable retention were examined."""
     reached_beginning: bool = False
