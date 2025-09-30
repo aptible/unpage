@@ -103,7 +103,7 @@ async def _configure_intro() -> None:
     rich.print(""">
 > This interactive tool will setup Unpage plugins so you'll be ready to:
 >
->   • Build a knowlege graph of your infrastructure
+>   • Build a knowledge graph of your infrastructure
 >   • Use Unpage's MCP server tools to interact with your graph, logs, and metrics
 >   • Write your own agents using everything above!
 > """)
