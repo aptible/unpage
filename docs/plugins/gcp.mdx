@@ -1,0 +1,119 @@
+---
+title: Google Cloud
+---
+
+The [Google Cloud](https://cloud.google.com/) plugin provides access to the following
+resources from Google Cloud Platform:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Compute Engine Instances
+    - Cloud SQL Instances
+    - Cloud Storage Buckets
+    - Persistent Disks
+    - Forwarding Rules (Load Balancers)
+    - Backend Services
+  </Accordion>
+
+  <Accordion title="Metrics" icon="chart-line">
+    **Compute Engine Instances:**
+    - CPU Utilization
+    - Network Received/Sent Bytes
+    - Disk Read/Write Bytes
+
+    **Cloud SQL Instances:**
+    - CPU Utilization
+    - Memory Utilization
+    - Disk Utilization
+    - Network Received/Sent Bytes
+  </Accordion>
+
+  <Accordion title="MCP Tools" icon="wrench">
+    - **get_realtime_instance_status**: Get real-time status information for a Compute Engine instance
+    - **get_realtime_instance_status_by_node**: Get instance status using a knowledge graph node ID
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should have Google Cloud credentials configured through one of the following methods:
+
+- **Application Default Credentials**: Run `gcloud auth application-default login` to set up your credentials
+- **Service Account Key**: Download a service account JSON key file and set `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+- **GCE/GKE**: If running on Google Cloud infrastructure, credentials are automatically available
+
+The plugin follows [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials).
+
+### Required IAM Permissions
+
+The service account or user running Unpage needs the following IAM roles or permissions:
+
+- **Compute Engine**: `compute.instances.list`, `compute.instances.get`, `compute.disks.list`, `compute.zones.list`, `compute.forwardingRules.list`, `compute.backendServices.list`
+- **Cloud SQL**: `cloudsql.instances.list`, `cloudsql.instances.get`
+- **Cloud Storage**: `storage.buckets.list`, `storage.buckets.get`
+- **Cloud Monitoring**: `monitoring.timeSeries.list` (for metrics)
+
+You can grant the **Viewer** role (`roles/viewer`) for read-only access, or create a custom role with the specific permissions above.
+
+
+## Configuration
+
+Configure the Google Cloud plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  gcp:
+    enabled: true
+    # Optional: specify a GCP project and credentials
+    projects:
+      default:
+        project_id: "my-gcp-project-id"
+        # Optional: path to service account key file
+        credentials_path: "/path/to/service-account-key.json"
+```
+
+If no project or credentials are specified, the plugin will use Application Default Credentials and automatically detect your default project.
+
+## Tools
+The Google Cloud plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_realtime_instance_status">
+  Get real-time status information for a Compute Engine instance directly from GCP API.
+
+  **Arguments**
+  <ParamField path="instance_name" type="string" required>
+    The Compute Engine instance name (e.g., "my-instance-1").
+  </ParamField>
+  <ParamField path="zone" type="string" required>
+    The GCP zone where the instance is located (e.g., "us-central1-a").
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing instance status information or an error message if the instance couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "id": "123456789",
+    "name": "my-instance-1",
+    "status": "RUNNING",
+    "zone": "projects/my-project/zones/us-central1-a",
+    "machineType": "projects/my-project/zones/us-central1-a/machineTypes/n1-standard-1",
+    "networkInterfaces": [...]
+  }
+  ```
+</Card>
+<br />
+
+<Card title="get_realtime_instance_status_by_node">
+  Get real-time status information for a Compute Engine instance using a node ID from the knowledge graph.
+
+  **Arguments**
+  <ParamField path="node_id" type="string" required>
+    The node ID from the knowledge graph (e.g., "projects/my-project/zones/us-central1-a/instances/my-instance-1").
+  </ParamField>
+
+  **Returns** `dict | string`: Same as `get_realtime_instance_status` or an error message if the node doesn't exist, isn't a Compute Engine instance, or the instance couldn't be found.
+</Card>

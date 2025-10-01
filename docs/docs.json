@@ -62,6 +62,7 @@
         "pages": [
           "plugins/aptible",
           "plugins/aws",
+          "plugins/gcp",
           "plugins/core",
           "plugins/datadog",
           "plugins/graph",
@@ -71,6 +72,7 @@
           "plugins/networking",
           "plugins/pagerduty",
           "plugins/papertrail",
+          "plugins/rootly",
           "plugins/solarwinds",
           "plugins/shell",
           "plugins/customalerts",
