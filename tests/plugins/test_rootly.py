@@ -34,10 +34,7 @@ async def test_get_incident_details(rootly_plugin, mock_rootly_client):
         "data": {
             "id": incident_id,
             "type": "incidents",
-            "attributes": {
-                "title": "Test Incident",
-                "status": "investigating"
-            }
+            "attributes": {"title": "Test Incident", "status": "investigating"},
         }
     }
 
@@ -58,10 +55,7 @@ async def test_get_alert_details_for_incident(rootly_plugin, mock_rootly_client)
             {
                 "id": "event-1",
                 "type": "incident_events",
-                "attributes": {
-                    "kind": "alert",
-                    "description": "Test alert"
-                }
+                "attributes": {"kind": "alert", "description": "Test alert"},
             }
         ]
     }
@@ -85,7 +79,7 @@ async def test_post_status_update(rootly_plugin, mock_rootly_client):
         "data": {
             "id": "test-event-123",
             "type": "incident_events",
-            "attributes": {"event": f"Status Update: {message}"}
+            "attributes": {"event": f"Status Update: {message}"},
         }
     }
 
@@ -191,15 +185,10 @@ async def test_populate_graph(rootly_plugin, mock_rootly_client):
     incident_data = {
         "id": "incident-123",
         "type": "incidents",
-        "attributes": {
-            "title": "Test Incident",
-            "status": "investigating"
-        }
+        "attributes": {"title": "Test Incident", "status": "investigating"},
     }
 
-    mock_rootly_client.list_incidents.return_value = {
-        "data": [incident_data]
-    }
+    mock_rootly_client.list_incidents.return_value = {"data": [incident_data]}
 
     await rootly_plugin.populate_graph(graph)
 
@@ -226,7 +215,7 @@ async def test_add_incident_event(rootly_plugin, mock_rootly_client):
         "data": {
             "id": "test-event-123",
             "type": "incident_events",
-            "attributes": {"event": event_description}
+            "attributes": {"event": event_description},
         }
     }
 
@@ -377,7 +366,9 @@ async def test_log_communication(rootly_plugin, mock_rootly_client):
         "data": {"id": "test-event-123", "type": "incident_events"}
     }
 
-    result = await rootly_plugin.log_communication(incident_id, communication_type, details, visibility)
+    result = await rootly_plugin.log_communication(
+        incident_id, communication_type, details, visibility
+    )
 
     mock_rootly_client.create_incident_event_new.assert_called_once()
     call_args = mock_rootly_client.create_incident_event_new.call_args
@@ -392,8 +383,14 @@ async def test_get_incident_timeline(rootly_plugin, mock_rootly_client):
     """Test getting incident timeline."""
     incident_id = "test-incident-123"
     mock_events = [
-        {"id": "event-1", "attributes": {"event": "Incident started", "occurred_at": "2023-01-01T12:00:00Z"}},
-        {"id": "event-2", "attributes": {"event": "Investigation began", "occurred_at": "2023-01-01T12:05:00Z"}}
+        {
+            "id": "event-1",
+            "attributes": {"event": "Incident started", "occurred_at": "2023-01-01T12:00:00Z"},
+        },
+        {
+            "id": "event-2",
+            "attributes": {"event": "Investigation began", "occurred_at": "2023-01-01T12:05:00Z"},
+        },
     ]
 
     mock_rootly_client.get_incident_events.return_value = {"data": mock_events}
@@ -416,10 +413,7 @@ async def test_update_incident_event(rootly_plugin, mock_rootly_client):
         "data": {
             "id": event_id,
             "type": "incident_events",
-            "attributes": {
-                "event": updated_description,
-                "visibility": visibility
-            }
+            "attributes": {"event": updated_description, "visibility": visibility},
         }
     }
 
@@ -462,10 +456,7 @@ async def test_delete_incident_event(rootly_plugin, mock_rootly_client):
     event_id = "test-event-123"
 
     mock_rootly_client.delete_incident_event.return_value = {
-        "data": {
-            "id": event_id,
-            "type": "incident_events"
-        }
+        "data": {"id": event_id, "type": "incident_events"}
     }
 
     result = await rootly_plugin.delete_incident_event(event_id)

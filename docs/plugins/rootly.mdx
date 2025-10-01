@@ -17,6 +17,7 @@ take action on incidents happening in your infrastructure.
     - **resolve_incident**: Resolve an incident
     - **mitigate_incident**: Mitigate an incident
     - **acknowledge_incident**: Acknowledge an incident
+    - **add_incident_event**: Add event to the incident timeline
   </Accordion>
 </AccordionGroup>
 
@@ -177,4 +178,22 @@ The Rootly plugin provides the following tools to Agents and MCP Clients:
   </ParamField>
 
   **Returns** `None`
+</Card>
+<br />
+
+<Card title="add_incident_event">
+  Add a timeline event to a Rootly incident for root cause analysis
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+  <ParamField path="event_description" type="string" required>
+    Description of the event/activity
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
 </Card>

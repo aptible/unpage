@@ -389,7 +389,7 @@ async def _select_from_recent_rootly_incidents(
         choices=[
             Choice(
                 f"{incident.attributes.get('title', 'Unknown Title')[:60]}... [{incident.attributes.get('status', 'Unknown')}]"
-                if len(incident.attributes.get('title', '')) > 60
+                if len(incident.attributes.get("title", "")) > 60
                 else f"{incident.attributes.get('title', 'Unknown Title')} [{incident.attributes.get('status', 'Unknown')}]",
                 value=incident.id,
             )
