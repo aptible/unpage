@@ -1,7 +1,11 @@
+import os
 from typing import Any, Literal
 
+import questionary
 from fastmcp.mcp_config import MCPServerTypes, RemoteMCPServer, StdioMCPServer
+from questionary import select
 
+from unpage.config import PluginSettings
 from unpage.plugins.mcp.plugin import McpProxyPlugin
 
 
@@ -13,15 +17,31 @@ class GitHubPlugin(McpProxyPlugin):
     def __init__(
         self,
         *args: Any,
-        github_token: str,
+        github_token: str | None = None,
         mode: Literal["remote", "local"] = "local",
         read_only: bool = True,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.github_token = github_token
-        self.mode = mode
+        self.github_token = github_token or os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+        self.mode = mode or os.getenv("GITHUB_MODE", "remote")
         self.read_only = read_only
+
+        if not self.github_token:
+            raise ValueError("github_token is required")
+
+    async def interactive_configure(self) -> PluginSettings:
+        return {
+            "mode": await select(
+                "The GitHub plugin uses the GitHub MCP Server for some of its features. Do you want to use the local or remote MCP server?",
+                choices=["local", "remote"],
+                default=self.mode,
+            ).unsafe_ask_async(),
+            "github_token": await questionary.password(
+                "Enter your GitHub Personal Access Token",
+                default=self.github_token or "",
+            ).unsafe_ask_async(),
+        }
 
     def get_mcp_server_settings(self) -> MCPServerTypes:
         if self.mode == "local":
@@ -36,9 +56,9 @@ class GitHubPlugin(McpProxyPlugin):
             transport="http",
             url="https://api.githubcopilot.com/mcp/",
             headers={
-                "Authorization": f"Bearer {self.github_token}",
                 "X-MCP-Readonly": "1" if self.read_only else "0",
             },
+            auth=self.github_token or "oauth",
         )
 
     def _get_local_mcp_server_settings(self) -> StdioMCPServer:
