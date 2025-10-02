@@ -14,6 +14,7 @@ class PluginProtocol(Protocol):
     """Protocol for the plugins interface."""
 
     context: "Context"
+    abstract: bool = False
 
     @classproperty
     def name(cls) -> str:  # pyright: ignore[reportRedeclaration]
@@ -33,6 +34,9 @@ class Plugin(PluginProtocol):
         self._settings = settings
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        if cls.abstract:
+            delattr(cls, "abstract")
+            return
         REGISTRY[cls.name] = cls
 
     @classproperty

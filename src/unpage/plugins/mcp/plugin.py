@@ -11,6 +11,7 @@ from unpage.plugins.mixins.mcp import McpServerMixin
 class McpProxyPlugin(Plugin, McpServerMixin):
     """A plugin that proxies MCP requests to a remote MCP server."""
 
+    abstract = True
     prefix_tools: bool = True
 
     def get_mcp_server_settings(self) -> MCPServerTypes:
