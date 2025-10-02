@@ -1,47 +1,40 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from fastmcp import Client, FastMCP
-from fastmcp.client.transports import FastMCPTransport, MCPConfigTransport
 from fastmcp.mcp_config import MCPConfig, MCPServerTypes
-from fastmcp.utilities.mcp_config import mcp_config_to_servers_and_transports
-from pydantic import Field
 
 from unpage.plugins.base import Plugin
+from unpage.plugins.mcp.transport import CompositeMCPTransport
 from unpage.plugins.mixins.mcp import McpServerMixin
 
-if TYPE_CHECKING:
-    from fastmcp.client import ClientTransport
+
+class McpProxyPlugin(Plugin, McpServerMixin):
+    """A plugin that proxies MCP requests to a remote MCP server."""
+
+    prefix_tools: bool = True
+
+    def get_mcp_server_settings(self) -> MCPServerTypes:
+        raise NotImplementedError("get_mcp_server_settings must be implemented by subclasses")
+
+    def get_mcp_config(self) -> MCPConfig:
+        return MCPConfig(mcpServers={self.name: self.get_mcp_server_settings()})
+
+    def get_mcp_server(self) -> FastMCP[Any]:
+        config = self.get_mcp_config()
+        if config.mcpServers:
+            return FastMCP.as_proxy(
+                backend=Client(
+                    transport=CompositeMCPTransport(
+                        config=config,
+                        name_as_prefix=self.prefix_tools,
+                    ),
+                ),
+            )
+        return super().get_mcp_server()
 
 
-class CompositeMCPTransport(MCPConfigTransport):
-    """A transport that composes multiple MCP servers into a single transport.
-
-    This is a slightly-modified version of the MCPConfigTransport, because the
-    original implementation only prefixed tools if there was more than one MCP
-    server configured.
-    """
-
-    def __init__(self, config: MCPConfig | dict, name_as_prefix: bool = True) -> None:
-        self.config = config if isinstance(config, MCPConfig) else MCPConfig.from_dict(config)
-        self._underlying_transports: list[ClientTransport] = []
-
-        if not self.config.mcpServers:
-            raise ValueError("No MCP servers defined in the config")
-
-        name = FastMCP.generate_name("MCPRouter")
-        self._composite_server = FastMCP[Any](name=name)
-
-        for name, server, transport in mcp_config_to_servers_and_transports(self.config):
-            self._underlying_transports.append(transport)
-            self._composite_server.mount(server, prefix=name if name_as_prefix else None)
-
-        self.transport = FastMCPTransport(mcp=self._composite_server)
-
-
-class McpPlugin(Plugin, McpServerMixin):
-    mcp_servers: dict[str, MCPServerTypes] = Field(
-        description="Standard configuration for MCP servers", default_factory=dict
-    )
+class McpPlugin(McpProxyPlugin):
+    mcp_servers: dict[str, MCPServerTypes]
 
     def __init__(
         self,
@@ -52,17 +45,5 @@ class McpPlugin(Plugin, McpServerMixin):
         super().__init__(*args, **kwargs)
         self.mcp_servers = mcp_servers or {}
 
-    def get_mcp_server(self) -> FastMCP[Any]:
-        if not self.mcp_servers:
-            return FastMCP[Any](self.name)
-
-        return FastMCP.as_proxy(
-            backend=Client(
-                transport=CompositeMCPTransport(
-                    config=MCPConfig(
-                        mcpServers=self.mcp_servers,
-                    )
-                )
-            ),
-            name="Unpage Proxy MCP Servers",
-        )
+    def get_mcp_config(self) -> MCPConfig:
+        return MCPConfig(mcpServers=self.mcp_servers)
