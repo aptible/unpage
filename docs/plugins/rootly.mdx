@@ -198,3 +198,141 @@ The Rootly plugin provides the following tools to Agents and MCP Clients:
 
   **Returns** `dict`: The created event data
 </Card>
+<br />
+
+<Card title="list_recent_incidents">
+  List recent Rootly incidents
+
+  **Arguments**
+  <ParamField path="limit" type="int">
+    Maximum number of incidents to return (default: 10)
+  </ParamField>
+
+  **Returns** `list[dict]`: List of recent incidents with their details
+</Card>
+<br />
+
+<Card title="log_investigation_finding">
+  Log an investigation finding for root cause analysis
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="finding" type="string" required>
+    The investigation finding or discovery
+  </ParamField>
+  <ParamField path="source" type="string">
+    Source of the finding (e.g., 'logs', 'metrics', 'database')
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_action_taken">
+  Log an action taken during incident response
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="action" type="string" required>
+    The action that was taken
+  </ParamField>
+  <ParamField path="outcome" type="string">
+    The result or outcome of the action
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_escalation">
+  Log an incident escalation
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="escalated_to" type="string" required>
+    Who or what team the incident was escalated to
+  </ParamField>
+  <ParamField path="reason" type="string">
+    Reason for the escalation
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_communication">
+  Log a communication event (e.g., customer notification, internal update)
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="communication_type" type="string" required>
+    Type of communication (e.g., "Customer Notification", "Team Update")
+  </ParamField>
+  <ParamField path="details" type="string" required>
+    Details of the communication
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "external" for customer-facing, "internal" for team-only (default: "external")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="get_incident_timeline">
+  Get the complete timeline of events for an incident
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+
+  **Returns** `list`: List of all events/timeline entries for the incident
+</Card>
+<br />
+
+<Card title="update_incident_event">
+  Update an existing incident event
+
+  **Arguments**
+  <ParamField path="event_id" type="string" required>
+    The ID of the event to update
+  </ParamField>
+  <ParamField path="event_description" type="string" required>
+    Updated description of the event
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The updated event data
+</Card>
+<br />
+
+<Card title="delete_incident_event">
+  Delete an incident event
+
+  **Arguments**
+  <ParamField path="event_id" type="string" required>
+    The ID of the event to delete
+  </ParamField>
+
+  **Returns** `dict`: Response from the deletion request
+</Card>
