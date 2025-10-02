@@ -16,12 +16,14 @@ class PluginProtocol(Protocol):
     context: "Context"
 
     @classproperty
-    def name(cls) -> str:
+    def name(cls) -> str:  # pyright: ignore[reportRedeclaration]
         """Converts a SomePlugin class to a "some" string, which is the key used in the configuration file.
 
         For example, AwsPlugin becomes "aws".
         """
         return cast("type[PluginProtocol]", cls).__name__.removesuffix("Plugin").lower()
+
+    name: str
 
 
 class Plugin(PluginProtocol):
