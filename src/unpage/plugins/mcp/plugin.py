@@ -13,6 +13,7 @@ class McpProxyPlugin(Plugin, McpServerMixin):
 
     abstract = True
     prefix_tools: bool = True
+    default_enabled: bool = False
 
     def get_mcp_server_settings(self) -> MCPServerTypes:
         raise NotImplementedError("get_mcp_server_settings must be implemented by subclasses")

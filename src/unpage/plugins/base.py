@@ -15,6 +15,7 @@ class PluginProtocol(Protocol):
 
     context: "Context"
     abstract: bool = False
+    default_enabled: bool = True
 
     @classproperty
     def name(cls) -> str:  # pyright: ignore[reportRedeclaration]
