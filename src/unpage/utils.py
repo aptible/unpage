@@ -304,9 +304,9 @@ class classproperty[T]:  # noqa: N801
     def __get__(self, instance: object, cls: type | None = None) -> T:
         return self.fget(cls if cls else instance.__class__)
 
-    def getter(self, method: Callable[[Any], T]) -> "T":
+    def getter(self, method: Callable[[Any], T]) -> "classproperty[T]":
         self.fget = method
-        return cast("T", self)
+        return self
 
 
 def as_completed[T](tg: TaskGroup, aws: Iterable[Awaitable[T]]) -> Iterable[Awaitable[T]]:
