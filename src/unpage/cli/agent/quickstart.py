@@ -274,6 +274,7 @@ async def _configure_plugins(
             },
         },
     )
+    cfg.save()
     rich.print("")
     return cfg
 

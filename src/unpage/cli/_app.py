@@ -1,3 +1,4 @@
+import sys
 from typing import Annotated
 
 import rich
@@ -34,7 +35,7 @@ def _app_launcher(
 ) -> None:
     # Let the user know when they're overriding the active profile.
     if profile != manager.get_active_profile():
-        rich.print(f"[blue]Active profile: {profile}[/blue]")
+        rich.print(f"[blue]Active profile: {profile}[/blue]", file=sys.stderr)
 
     with manager.active_profile(profile):
         app(tokens)
