@@ -18,15 +18,14 @@ class AzureLoadBalancer(AzureNode, HasMetrics):
             # Add frontend IP configurations as identifiers
             frontend_ip_configs = self.raw_data.get("frontend_ip_configurations", [])
             for frontend_config in frontend_ip_configs:
+                # Only add actual IP addresses as identifiers, not resource references
                 # Private IP
                 private_ip = frontend_config.get("private_ip_address")
                 if private_ip:
                     identifiers.append(private_ip)
 
-                # Public IP reference (would need separate call to resolve)
-                public_ip_ref = frontend_config.get("public_ip_address", {})
-                if public_ip_ref and "id" in public_ip_ref:
-                    identifiers.append(public_ip_ref["id"])
+                # Note: Public IP references should NOT be identifiers,
+                # they should only be in reference_identifiers to create edges
 
         return identifiers
 
@@ -38,12 +37,23 @@ class AzureLoadBalancer(AzureNode, HasMetrics):
         ]
 
         if self.raw_data:
-            # Add backend address pool references
+            # Add backend address pool member references (VM instances)
             backend_pools = self.raw_data.get("backend_address_pools", [])
             for pool in backend_pools:
-                pool_id = pool.get("id")
-                if pool_id:
-                    references.append((pool_id, "has_backend_pool"))
+                # Reference to actual VM instances in the pool
+                for backend_ip_config in pool.get("backend_ip_configurations", []):
+                    if backend_ip_config.get("id"):
+                        # Extract VM scale set instance ID from the network interface reference
+                        config_id = backend_ip_config["id"]
+                        if (
+                            "/virtualMachineScaleSets/" in config_id
+                            and "/virtualMachines/" in config_id
+                        ):
+                            # Get the VM instance ID
+                            parts = config_id.split("/virtualMachines/")
+                            if len(parts) > 1:
+                                vm_instance_id = "/virtualMachines/".join(parts[0:2])
+                                references.append((vm_instance_id, "load_balances"))
 
             # Add public IP references
             frontend_ip_configs = self.raw_data.get("frontend_ip_configurations", [])

@@ -46,6 +46,7 @@ dependencies = [
     "dspy>=3.0.0,<4.0.0",
     "rich-gradient>=0.3.4",
     "expandvars>=1.1.2",
+    "azure-mgmt-containerservice>=39.1.0",
 ]
 
 [tool.hatch.metadata]

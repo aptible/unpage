@@ -351,3 +351,293 @@ class AzureApplicationGateway:
             provisioning_state=getattr(obj, "provisioning_state", None),
             raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
         )
+
+
+@dataclass
+class AzureVmScaleSet:
+    """Type-safe representation of an Azure VM Scale Set."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    sku: dict[str, Any] | None = None
+    capacity: int = 0
+    provisioning_state: str | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureVmScaleSet | None":
+        """Create from Azure SDK VM Scale Set object."""
+        vmss_id = getattr(obj, "id", None)
+        vmss_name = getattr(obj, "name", None)
+
+        if not vmss_id:
+            return None
+
+        sku = getattr(obj, "sku", None)
+        sku_dict = None
+        capacity = 0
+        if sku:
+            sku_dict = {
+                "name": getattr(sku, "name", None),
+                "tier": getattr(sku, "tier", None),
+                "capacity": getattr(sku, "capacity", 0),
+            }
+            capacity = sku_dict.get("capacity", 0)
+
+        return cls(
+            id=vmss_id,
+            name=vmss_name or vmss_id.split("/")[-1] if "/" in vmss_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            sku=sku_dict,
+            capacity=capacity,
+            provisioning_state=getattr(obj, "provisioning_state", None),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureVmScaleSetInstance:
+    """Type-safe representation of an Azure VM Scale Set Instance."""
+
+    id: str
+    name: str
+    instance_id: str | None = None
+    type: str | None = None
+    location: str | None = None
+    vm_id: str | None = None
+    latest_model_applied: bool = False
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureVmScaleSetInstance | None":
+        """Create from Azure SDK VM Scale Set Instance object."""
+        instance_id = getattr(obj, "id", None)
+        instance_name = getattr(obj, "name", None)
+
+        if not instance_id:
+            return None
+
+        return cls(
+            id=instance_id,
+            name=instance_name or instance_id.split("/")[-1] if "/" in instance_id else "unknown",
+            instance_id=getattr(obj, "instance_id", None),
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            vm_id=getattr(obj, "vm_id", None),
+            latest_model_applied=getattr(obj, "latest_model_applied", False),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzurePublicIpAddress:
+    """Type-safe representation of an Azure Public IP Address."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    ip_address: str | None = None
+    allocation_method: str | None = None
+    sku: dict[str, Any] | None = None
+    dns_settings: dict[str, Any] | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzurePublicIpAddress | None":
+        """Create from Azure SDK Public IP Address object."""
+        ip_id = getattr(obj, "id", None)
+        ip_name = getattr(obj, "name", None)
+
+        if not ip_id:
+            return None
+
+        sku = getattr(obj, "sku", None)
+        sku_dict = None
+        if sku:
+            sku_dict = {
+                "name": getattr(sku, "name", None),
+                "tier": getattr(sku, "tier", None),
+            }
+
+        dns_settings = getattr(obj, "dns_settings", None)
+        dns_dict = None
+        if dns_settings:
+            dns_dict = {
+                "domain_name_label": getattr(dns_settings, "domain_name_label", None),
+                "fqdn": getattr(dns_settings, "fqdn", None),
+            }
+
+        return cls(
+            id=ip_id,
+            name=ip_name or ip_id.split("/")[-1] if "/" in ip_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            ip_address=getattr(obj, "ip_address", None),
+            allocation_method=getattr(obj, "public_ip_allocation_method", None),
+            sku=sku_dict,
+            dns_settings=dns_dict,
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureVirtualNetwork:
+    """Type-safe representation of an Azure Virtual Network."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    address_space: list[str] | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureVirtualNetwork | None":
+        """Create from Azure SDK Virtual Network object."""
+        vnet_id = getattr(obj, "id", None)
+        vnet_name = getattr(obj, "name", None)
+
+        if not vnet_id:
+            return None
+
+        address_space = getattr(obj, "address_space", None)
+        address_prefixes = None
+        if address_space:
+            address_prefixes = getattr(address_space, "address_prefixes", None)
+
+        return cls(
+            id=vnet_id,
+            name=vnet_name or vnet_id.split("/")[-1] if "/" in vnet_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            address_space=address_prefixes,
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureSubnet:
+    """Type-safe representation of an Azure Subnet."""
+
+    id: str
+    name: str
+    address_prefix: str | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureSubnet | None":
+        """Create from Azure SDK Subnet object."""
+        subnet_id = getattr(obj, "id", None)
+        subnet_name = getattr(obj, "name", None)
+
+        if not subnet_id:
+            return None
+
+        return cls(
+            id=subnet_id,
+            name=subnet_name or subnet_id.split("/")[-1] if "/" in subnet_id else "unknown",
+            address_prefix=getattr(obj, "address_prefix", None),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureNetworkSecurityGroup:
+    """Type-safe representation of an Azure Network Security Group."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureNetworkSecurityGroup | None":
+        """Create from Azure SDK Network Security Group object."""
+        nsg_id = getattr(obj, "id", None)
+        nsg_name = getattr(obj, "name", None)
+
+        if not nsg_id:
+            return None
+
+        return cls(
+            id=nsg_id,
+            name=nsg_name or nsg_id.split("/")[-1] if "/" in nsg_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureNetworkInterface:
+    """Type-safe representation of an Azure Network Interface."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    mac_address: str | None = None
+    primary: bool = False
+    provisioning_state: str | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureNetworkInterface | None":
+        """Create from Azure SDK Network Interface object."""
+        nic_id = getattr(obj, "id", None)
+        nic_name = getattr(obj, "name", None)
+
+        if not nic_id:
+            return None
+
+        return cls(
+            id=nic_id,
+            name=nic_name or nic_id.split("/")[-1] if "/" in nic_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            mac_address=getattr(obj, "mac_address", None),
+            primary=getattr(obj, "primary", False),
+            provisioning_state=getattr(obj, "provisioning_state", None),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )
+
+
+@dataclass
+class AzureAksCluster:
+    """Type-safe representation of an Azure AKS Managed Cluster."""
+
+    id: str
+    name: str
+    type: str | None = None
+    location: str | None = None
+    kubernetes_version: str | None = None
+    fqdn: str | None = None
+    provisioning_state: str | None = None
+    power_state: dict[str, Any] | None = None
+    raw_data: dict[str, Any] | None = None
+
+    @classmethod
+    def from_sdk_object(cls, obj: object) -> "AzureAksCluster | None":
+        """Create from Azure SDK Managed Cluster object."""
+        cluster_id = getattr(obj, "id", None)
+        cluster_name = getattr(obj, "name", None)
+
+        if not cluster_id:
+            return None
+
+        return cls(
+            id=cluster_id,
+            name=cluster_name or cluster_id.split("/")[-1] if "/" in cluster_id else "unknown",
+            type=getattr(obj, "type", None),
+            location=getattr(obj, "location", None),
+            kubernetes_version=getattr(obj, "kubernetes_version", None),
+            fqdn=getattr(obj, "fqdn", None),
+            provisioning_state=getattr(obj, "provisioning_state", None),
+            power_state=getattr(obj, "power_state", None),
+            raw_data=obj.as_dict() if hasattr(obj, "as_dict") and callable(obj.as_dict) else None,  # type: ignore[attr-defined]
+        )

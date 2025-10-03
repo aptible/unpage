@@ -4,6 +4,7 @@ from typing import Any
 import rich
 from azure.core.credentials import TokenCredential
 from azure.mgmt.compute import ComputeManagementClient
+from azure.mgmt.containerservice import ContainerServiceClient as ContainerServiceManagementClient
 from azure.mgmt.cosmosdb import CosmosDBManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.rdbms.mysql import MySQLManagementClient
@@ -16,16 +17,25 @@ from pydantic_core import to_jsonable_python
 from unpage.config import PluginSettings
 from unpage.knowledge import Graph
 from unpage.plugins import Plugin
+from unpage.plugins.azure.nodes.azure_aks_cluster import AzureAksCluster
 from unpage.plugins.azure.nodes.azure_app_gateway import AzureAppGateway
 from unpage.plugins.azure.nodes.azure_cosmos_db import AzureCosmosDb
 from unpage.plugins.azure.nodes.azure_load_balancer import AzureLoadBalancer
 from unpage.plugins.azure.nodes.azure_managed_disk import AzureManagedDisk
 from unpage.plugins.azure.nodes.azure_mysql_database import AzureMySqlDatabase
+from unpage.plugins.azure.nodes.azure_network_interface import AzureNetworkInterface
+from unpage.plugins.azure.nodes.azure_network_security_group import AzureNetworkSecurityGroup
 from unpage.plugins.azure.nodes.azure_postgresql_database import AzurePostgreSqlDatabase
+from unpage.plugins.azure.nodes.azure_public_ip import AzurePublicIpAddress
 from unpage.plugins.azure.nodes.azure_sql_database import AzureSqlDatabase
 from unpage.plugins.azure.nodes.azure_storage_account import AzureStorageAccount
+from unpage.plugins.azure.nodes.azure_virtual_network import AzureSubnet, AzureVirtualNetwork
 from unpage.plugins.azure.nodes.azure_vm_instance import AzureVmInstance
+from unpage.plugins.azure.nodes.azure_vm_scale_set import AzureVmScaleSet, AzureVmScaleSetInstance
 from unpage.plugins.azure.nodes.base import DEFAULT_AZURE_SUBSCRIPTION_NAME, AzureSubscription
+from unpage.plugins.azure.types import (
+    AzureAksCluster as AzureAksClusterData,
+)
 from unpage.plugins.azure.types import (
     AzureApplicationGateway as AzureApplicationGatewayData,
 )
@@ -42,7 +52,28 @@ from unpage.plugins.azure.types import (
     AzureManagedDisk as AzureManagedDiskData,
 )
 from unpage.plugins.azure.types import (
+    AzureNetworkInterface as AzureNetworkInterfaceData,
+)
+from unpage.plugins.azure.types import (
+    AzureNetworkSecurityGroup as AzureNetworkSecurityGroupData,
+)
+from unpage.plugins.azure.types import (
+    AzurePublicIpAddress as AzurePublicIpAddressData,
+)
+from unpage.plugins.azure.types import (
     AzureStorageAccount as AzureStorageAccountData,
+)
+from unpage.plugins.azure.types import (
+    AzureSubnet as AzureSubnetData,
+)
+from unpage.plugins.azure.types import (
+    AzureVirtualNetwork as AzureVirtualNetworkData,
+)
+from unpage.plugins.azure.types import (
+    AzureVmScaleSet as AzureVmScaleSetData,
+)
+from unpage.plugins.azure.types import (
+    AzureVmScaleSetInstance as AzureVmScaleSetInstanceData,
 )
 from unpage.plugins.azure.utils import (
     get_default_credential,
@@ -238,6 +269,7 @@ class AzurePlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         # Populate all resource types in parallel
         async with asyncio.TaskGroup() as tg:
             tg.create_task(self.populate_vm_instances(graph, credential, subscription))
+            tg.create_task(self.populate_vm_scale_sets(graph, credential, subscription))
             tg.create_task(self.populate_sql_databases(graph, credential, subscription))
             tg.create_task(self.populate_postgresql_databases(graph, credential, subscription))
             tg.create_task(self.populate_mysql_databases(graph, credential, subscription))
@@ -246,6 +278,11 @@ class AzurePlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             tg.create_task(self.populate_application_gateways(graph, credential, subscription))
             tg.create_task(self.populate_managed_disks(graph, credential, subscription))
             tg.create_task(self.populate_storage_accounts(graph, credential, subscription))
+            tg.create_task(self.populate_public_ips(graph, credential, subscription))
+            tg.create_task(self.populate_virtual_networks(graph, credential, subscription))
+            tg.create_task(self.populate_network_security_groups(graph, credential, subscription))
+            tg.create_task(self.populate_network_interfaces(graph, credential, subscription))
+            tg.create_task(self.populate_aks_clusters(graph, credential, subscription))
 
     async def populate_vm_instances(
         self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
@@ -550,6 +587,237 @@ class AzurePlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
                     storage_count += 1
 
         print(f"Initialized {storage_count} Azure Storage Accounts")
+
+    async def populate_vm_scale_sets(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure VM Scale Sets")
+        vmss_count = 0
+        instance_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "VM Scale Set population")
+
+        async with handle_azure_errors("Compute", "populate VM Scale Sets"):
+            client = ComputeManagementClient(credential, subscription_id)
+
+            # Get all VM Scale Sets
+            scale_sets = await asyncio.to_thread(client.virtual_machine_scale_sets.list_all)
+
+            for vmss_obj in scale_sets:
+                vmss_data = AzureVmScaleSetData.from_sdk_object(vmss_obj)
+                if vmss_data:
+                    await graph.add_node(
+                        AzureVmScaleSet(
+                            node_id=vmss_data.id,
+                            raw_data=vmss_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    vmss_count += 1
+
+                    # Get instances for each scale set
+                    resource_group = vmss_data.id.split("/")[4] if "/" in vmss_data.id else None
+                    if resource_group:
+                        try:
+                            instances = await asyncio.to_thread(
+                                client.virtual_machine_scale_set_vms.list,
+                                resource_group_name=resource_group,
+                                virtual_machine_scale_set_name=vmss_data.name,
+                            )
+
+                            for instance_obj in instances:
+                                instance_data = AzureVmScaleSetInstanceData.from_sdk_object(
+                                    instance_obj
+                                )
+                                if instance_data:
+                                    await graph.add_node(
+                                        AzureVmScaleSetInstance(
+                                            node_id=instance_data.id,
+                                            raw_data=instance_data.raw_data or {},
+                                            _graph=graph,
+                                            azure_subscription=subscription,
+                                            credential=credential,
+                                        )
+                                    )
+                                    instance_count += 1
+                        except Exception as e:
+                            print(f"Error getting instances for {vmss_data.name}: {e}")
+
+        print(f"Initialized {vmss_count} Azure VM Scale Sets and {instance_count} instances")
+
+    async def populate_public_ips(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure Public IP Addresses")
+        ip_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "Public IP population")
+
+        async with handle_azure_errors("Network", "populate Public IP Addresses"):
+            client = NetworkManagementClient(credential, subscription_id)
+
+            public_ips = await asyncio.to_thread(client.public_ip_addresses.list_all)
+
+            for ip_obj in public_ips:
+                ip_data = AzurePublicIpAddressData.from_sdk_object(ip_obj)
+                if ip_data:
+                    await graph.add_node(
+                        AzurePublicIpAddress(
+                            node_id=ip_data.id,
+                            raw_data=ip_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    ip_count += 1
+
+        print(f"Initialized {ip_count} Azure Public IP Addresses")
+
+    async def populate_virtual_networks(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure Virtual Networks and Subnets")
+        vnet_count = 0
+        subnet_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "Virtual Network population")
+
+        async with handle_azure_errors("Network", "populate Virtual Networks"):
+            client = NetworkManagementClient(credential, subscription_id)
+
+            vnets = await asyncio.to_thread(client.virtual_networks.list_all)
+
+            for vnet_obj in vnets:
+                vnet_data = AzureVirtualNetworkData.from_sdk_object(vnet_obj)
+                if vnet_data:
+                    await graph.add_node(
+                        AzureVirtualNetwork(
+                            node_id=vnet_data.id,
+                            raw_data=vnet_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    vnet_count += 1
+
+                    # Get subnets for each VNet
+                    resource_group = vnet_data.id.split("/")[4] if "/" in vnet_data.id else None
+                    if resource_group:
+                        try:
+                            subnets = await asyncio.to_thread(
+                                client.subnets.list,
+                                resource_group_name=resource_group,
+                                virtual_network_name=vnet_data.name,
+                            )
+
+                            for subnet_obj in subnets:
+                                subnet_data = AzureSubnetData.from_sdk_object(subnet_obj)
+                                if subnet_data:
+                                    await graph.add_node(
+                                        AzureSubnet(
+                                            node_id=subnet_data.id,
+                                            raw_data=subnet_data.raw_data or {},
+                                            _graph=graph,
+                                            azure_subscription=subscription,
+                                            credential=credential,
+                                        )
+                                    )
+                                    subnet_count += 1
+                        except Exception as e:
+                            print(f"Error getting subnets for {vnet_data.name}: {e}")
+
+        print(f"Initialized {vnet_count} Azure Virtual Networks and {subnet_count} Subnets")
+
+    async def populate_network_security_groups(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure Network Security Groups")
+        nsg_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "NSG population")
+
+        async with handle_azure_errors("Network", "populate Network Security Groups"):
+            client = NetworkManagementClient(credential, subscription_id)
+
+            nsgs = await asyncio.to_thread(client.network_security_groups.list_all)
+
+            for nsg_obj in nsgs:
+                nsg_data = AzureNetworkSecurityGroupData.from_sdk_object(nsg_obj)
+                if nsg_data:
+                    await graph.add_node(
+                        AzureNetworkSecurityGroup(
+                            node_id=nsg_data.id,
+                            raw_data=nsg_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    nsg_count += 1
+
+        print(f"Initialized {nsg_count} Azure Network Security Groups")
+
+    async def populate_network_interfaces(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure Network Interfaces")
+        nic_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "Network Interface population")
+
+        async with handle_azure_errors("Network", "populate Network Interfaces"):
+            client = NetworkManagementClient(credential, subscription_id)
+
+            nics = await asyncio.to_thread(client.network_interfaces.list_all)
+
+            for nic_obj in nics:
+                nic_data = AzureNetworkInterfaceData.from_sdk_object(nic_obj)
+                if nic_data:
+                    await graph.add_node(
+                        AzureNetworkInterface(
+                            node_id=nic_data.id,
+                            raw_data=nic_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    nic_count += 1
+
+        print(f"Initialized {nic_count} Azure Network Interfaces")
+
+    async def populate_aks_clusters(
+        self, graph: Graph, credential: TokenCredential, subscription: AzureSubscription
+    ) -> None:
+        print("Populating Azure AKS Clusters")
+        cluster_count = 0
+
+        subscription_id = self._validate_subscription(subscription, "AKS Cluster population")
+
+        async with handle_azure_errors("ContainerService", "populate AKS Clusters"):
+            client = ContainerServiceManagementClient(credential, subscription_id)
+
+            clusters = await asyncio.to_thread(client.managed_clusters.list)
+
+            for cluster_obj in clusters:
+                cluster_data = AzureAksClusterData.from_sdk_object(cluster_obj)
+                if cluster_data:
+                    await graph.add_node(
+                        AzureAksCluster(
+                            node_id=cluster_data.id,
+                            raw_data=cluster_data.raw_data or {},
+                            _graph=graph,
+                            azure_subscription=subscription,
+                            credential=credential,
+                        )
+                    )
+                    cluster_count += 1
+
+        print(f"Initialized {cluster_count} Azure AKS Clusters")
 
     @tool()
     async def get_realtime_vm_status(self, vm_name: str, resource_group: str) -> dict | str:

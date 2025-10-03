@@ -75,15 +75,27 @@ async def list_accessible_subscriptions(credential: TokenCredential) -> list[dic
         # Use asyncio.to_thread to make the sync call async
         subscription_list = await asyncio.to_thread(client.subscriptions.list)
 
-        return [
-            {
-                "subscription_id": subscription.subscription_id,
-                "display_name": subscription.display_name,
-                "state": subscription.state.value if subscription.state else "Unknown",
-                "tenant_id": getattr(subscription, "tenant_id", None),
-            }
-            for subscription in subscription_list
-        ]
+        subscriptions = []
+        for subscription in subscription_list:
+            # Handle state which might be an enum or a string depending on Azure SDK version
+            state = "Unknown"
+            if subscription.state:
+                state = (
+                    subscription.state.value
+                    if hasattr(subscription.state, "value")
+                    else str(subscription.state)
+                )
+
+            subscriptions.append(
+                {
+                    "subscription_id": subscription.subscription_id,
+                    "display_name": subscription.display_name,
+                    "state": state,
+                    "tenant_id": getattr(subscription, "tenant_id", None),
+                }
+            )
+
+        return subscriptions
 
     except (ClientAuthenticationError, ServiceRequestError) as e:
         raise AzureAccessError(f"Failed to list Azure subscriptions: {e!s}") from e
