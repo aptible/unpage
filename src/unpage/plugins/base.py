@@ -14,14 +14,18 @@ class PluginProtocol(Protocol):
     """Protocol for the plugins interface."""
 
     context: "Context"
+    abstract: bool = False
+    default_enabled: bool = True
 
     @classproperty
-    def name(cls) -> str:
+    def name(cls) -> str:  # pyright: ignore[reportRedeclaration]
         """Converts a SomePlugin class to a "some" string, which is the key used in the configuration file.
 
         For example, AwsPlugin becomes "aws".
         """
         return cast("type[PluginProtocol]", cls).__name__.removesuffix("Plugin").lower()
+
+    name: str
 
 
 class Plugin(PluginProtocol):
@@ -31,6 +35,9 @@ class Plugin(PluginProtocol):
         self._settings = settings
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        if cls.abstract:
+            delattr(cls, "abstract")
+            return
         REGISTRY[cls.name] = cls
 
     @classproperty

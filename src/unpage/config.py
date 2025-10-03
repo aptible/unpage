@@ -179,8 +179,12 @@ class ConfigManager:
             file_path=self.profiles_dir / profile / "config.yaml",
             **{
                 "plugins": {
-                    p: PluginConfig(enabled=True, settings=plugin_cls.default_plugin_settings)
+                    p: PluginConfig(
+                        enabled=plugin_cls.default_enabled,
+                        settings=plugin_cls.default_plugin_settings,
+                    )
                     for p, plugin_cls in REGISTRY.items()
+                    if plugin_cls.default_enabled
                 },
                 **overrides,
             },

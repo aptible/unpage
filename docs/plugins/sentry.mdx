@@ -1,0 +1,143 @@
+---
+title: Sentry
+---
+
+The Sentry plugin integrates with [Sentry](https://sentry.io) by wrapping the official
+[Sentry MCP server](https://github.com/getsentry/sentry-mcp), giving your
+[Agents](/concepts/agents) access to Sentry issues, events, projects, and performance data.
+
+<AccordionGroup>
+  <Accordion title="MCP Tools" icon="wrench">
+    The Sentry plugin provides access to all tools from the official Sentry MCP server,
+    including:
+    - Search and retrieve issues
+    - Query events and error details
+    - Access project information
+    - Retrieve stack traces and error context
+    - Performance monitoring data
+    - And more...
+
+    For a complete list of available tools, see the [Sentry MCP server documentation](https://github.com/getsentry/sentry-mcp#features).
+  </Accordion>
+</AccordionGroup>
+
+## Prerequisites
+
+### For Remote Mode (Recommended)
+
+No additional setup is required - the plugin will use Sentry's hosted MCP server with OAuth authentication.
+
+### For Local Mode
+
+You'll need:
+
+- **Node.js and npm/npx**: Required to run the Sentry MCP server via npx
+- **Sentry API Token**: An authentication token with appropriate permissions
+
+#### Creating a Sentry API Token
+
+<Steps>
+  <Step title="Navigate to Sentry Settings">
+    Go to your Sentry organization settings: `https://sentry.io/settings/[your-org]/auth-tokens/`
+  </Step>
+  <Step title="Create New Token">
+    Click "Create New Token" and grant the following scopes based on your needs:
+    - `project:read` - Read project information
+    - `event:read` - Read error events
+    - `org:read` - Read organization data
+  </Step>
+  <Step title="Save the Token">
+    Copy the generated token - you'll need it for configuration.
+  </Step>
+</Steps>
+
+## Configuration
+
+Configure the Sentry plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+### Remote Mode (Recommended)
+
+```yaml
+plugins:
+  # ...
+  sentry:
+    enabled: true
+    settings:
+      mode: "remote"
+```
+
+With remote mode, authentication is handled via OAuth when you first connect to the Sentry MCP server.
+
+### Local Mode
+
+```yaml
+plugins:
+  # ...
+  sentry:
+    enabled: true
+    settings:
+      mode: "local"
+      sentry_token: "your-sentry-api-token"
+```
+
+Alternatively, you can set the Sentry token as an environment variable:
+
+```bash
+export SENTRY_TOKEN="your-sentry-api-token"
+```
+
+The plugin will automatically use the environment variable if no token is specified in the configuration file.
+
+### Configuration Options
+
+<ParamField path="mode" type="string" default="remote">
+  The mode to run the Sentry MCP server in:
+  - `remote`: Connect to Sentry's hosted MCP server at `https://mcp.sentry.dev/mcp` (recommended)
+  - `local`: Run the Sentry MCP server locally using npx (`@sentry/mcp-server`)
+</ParamField>
+
+<ParamField path="sentry_token" type="string">
+  Your Sentry API token. Required only when `mode` is `local`. Can also be set via
+  the `SENTRY_TOKEN` environment variable.
+</ParamField>
+
+## Tool Usage
+
+Once configured, all tools from the Sentry MCP server become available to your agents,
+prefixed with `sentry_`:
+
+```yaml
+# Example agent configuration
+description: "Agent for Sentry error monitoring"
+prompt: "You help investigate and resolve Sentry errors."
+
+tools:
+  - "sentry_*"  # All Sentry tools
+```
+
+Common tool patterns include:
+- `sentry_search_issues` - Search for issues in Sentry
+- `sentry_get_issue` - Get detailed information about a specific issue
+- `sentry_get_events` - Retrieve events for an issue
+- `sentry_list_projects` - List available projects
+- And many more...
+
+For a complete list of available tools and their parameters, refer to the
+[Sentry MCP server documentation](https://github.com/getsentry/sentry-mcp#features).
+
+## Developing Agents
+
+Your agents can leverage Sentry tools to automatically investigate errors, correlate
+issues with infrastructure changes, analyze stack traces, and provide debugging insights.
+Combine Sentry tools with other Unpage features like the [Knowledge Graph](/concepts/knowledge-graph),
+[Metrics](/plugins/metrics), or [Logs](/plugins/datadog) for comprehensive incident response.
+
+Learn more about [Creating Agents](/concepts/agents).
+
+### Example Use Cases
+
+- **Automated Error Triage**: Agents can automatically categorize and prioritize Sentry issues based on frequency, severity, and impact
+- **Root Cause Analysis**: Combine Sentry error data with infrastructure metrics and logs to identify the root cause of issues
+- **Alert Correlation**: Link Sentry issues to related infrastructure events in your knowledge graph
+- **Performance Monitoring**: Track application performance metrics and identify bottlenecks
