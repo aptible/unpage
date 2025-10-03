@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.37 (2025-10-03)
+
+### Features
+
+- Add Rootly plugin with complete incident management functionality [SC-34729]
+  ([#188](https://github.com/aptible/unpage/pull/188),
+  [`fd713dd`](https://github.com/aptible/unpage/commit/fd713ddcef891e70280520fe93b7e5cc70c2131c))
+
+
 ## v0.1.0-alpha.36 (2025-10-03)
 
 ### Bug Fixes
