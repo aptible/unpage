@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.36 (2025-10-03)
+
+### Bug Fixes
+
+- Some bugs with --profile [SC-34956] ([#207](https://github.com/aptible/unpage/pull/207),
+  [`d5c03c8`](https://github.com/aptible/unpage/commit/d5c03c8b051cd087f93b1f40cb5ed1183dab5b13))
+
+### Documentation
+
+- Claude desktop setup [SC-34726] ([#192](https://github.com/aptible/unpage/pull/192),
+  [`8412c21`](https://github.com/aptible/unpage/commit/8412c21fc3ca37de0504c56a0f4c92d184eb8778))
+
+
 ## v0.1.0-alpha.35 (2025-09-24)
 
 ### Documentation
