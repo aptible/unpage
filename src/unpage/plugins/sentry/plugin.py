@@ -10,7 +10,7 @@ from unpage.plugins.mcp.plugin import McpProxyPlugin
 
 
 class SentryPlugin(McpProxyPlugin):
-    """GitHub plugin."""
+    """Sentry plugin."""
 
     name = "sentry"
 
