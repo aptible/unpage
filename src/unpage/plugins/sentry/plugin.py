@@ -49,6 +49,14 @@ class SentryPlugin(McpProxyPlugin):
             "sentry_token": sentry_token,
         }
 
+    async def validate_plugin_config(self) -> None:
+        """Validate the plugin config."""
+        try:
+            await super().validate_plugin_config()
+            await self.call_tool("sentry_whoami")
+        except Exception as ex:
+            raise ValueError(f"Error validating {self.name!r}: {ex}") from ex
+
     def get_mcp_server_settings(self) -> MCPServerTypes:
         if self.mode == "local":
             return self._get_local_mcp_server_settings()

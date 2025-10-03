@@ -7,7 +7,9 @@ import shlex
 import shutil
 import subprocess
 import sys
-from collections.abc import Awaitable, Callable, Iterable, Sequence
+from collections.abc import Awaitable, Callable, Generator, Iterable, Sequence
+from contextlib import contextmanager, nullcontext, redirect_stderr, redirect_stdout
+from io import TextIOWrapper
 from pathlib import Path
 from re import Pattern
 from types import ModuleType
@@ -552,3 +554,15 @@ def _get_default_editor() -> str | None:
         return pico
     if emacs := shutil.which("emacs"):
         return emacs
+
+
+@contextmanager
+def suppress_output(
+    stdout: bool = True, stderr: bool = True
+) -> Generator[tuple[TextIOWrapper | None, TextIOWrapper | None], None, None]:
+    with (
+        Path(os.devnull).open("w") as devnull,
+        redirect_stdout(devnull) if stdout else nullcontext() as out,
+        redirect_stderr(devnull) if stderr else nullcontext() as err,
+    ):
+        yield (out, err)
