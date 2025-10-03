@@ -88,6 +88,11 @@ class AzureNode(Node):
             self.resource_name,  # Resource name
         ]
 
+        # Add lowercase version of resource ID for case-insensitive matching
+        # This helps with cross-platform linking where case may vary
+        if self.resource_id:
+            identifiers.append(self.resource_id.lower())
+
         # Add location-specific identifier if available
         if self.location and self.resource_name:
             identifiers.append(f"{self.resource_name}.{self.location}")

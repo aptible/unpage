@@ -1,0 +1,227 @@
+---
+title: Azure
+---
+
+The [Azure](https://azure.microsoft.com/) plugin provides access to the following
+resources from Microsoft Azure:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - VM Instances
+    - VM Scale Sets and Instances
+    - SQL Databases
+    - PostgreSQL Databases
+    - MySQL Databases
+    - Cosmos DB Accounts
+    - Load Balancers
+    - Application Gateways
+    - Storage Accounts
+    - Managed Disks
+    - Virtual Networks and Subnets
+    - Network Security Groups
+    - Network Interfaces
+    - Public IP Addresses
+    - AKS Clusters <!-- codespell:ignore AKS -->
+  </Accordion>
+
+  <Accordion title="Metrics" icon="chart-line">
+    **VM Instances:**
+    - Percentage CPU
+    - Network In/Out
+    - Disk Read/Write Bytes
+    - Disk Read/Write Operations/Sec
+    - Available Memory Bytes
+    - CPU Credits Remaining/Consumed
+
+    **VM Scale Sets:**
+    - Percentage CPU
+    - Network In/Out Total
+    - Disk Read/Write Bytes
+    - Disk Read/Write Operations/Sec
+    - CPU Credits Remaining/Consumed
+
+    **SQL Databases:**
+    - CPU Percent
+    - Physical Data Read Percent
+    - Log Write Percent
+    - DTU Consumption Percent
+    - Storage Percent
+    - Connection Successful/Failed
+    - Blocked by Firewall
+    - Deadlocks
+    - Workers/Sessions Percent
+
+    **PostgreSQL Databases:**
+    - CPU Percent
+    - Memory Percent
+    - IO Consumption Percent
+    - Storage Percent/Used/Limit
+    - Active Connections
+    - Connections Failed
+    - Network Bytes Ingress/Egress
+    - Max Lag Across Replicas
+    - Backup Storage Used
+
+    **MySQL Databases:**
+    - CPU Percent
+    - Memory Percent
+    - IO Consumption Percent
+    - Storage Percent/Used/Limit
+    - Active Connections
+    - Connections Failed
+    - Seconds Behind Master (replicas)
+    - Network Bytes Ingress/Egress
+    - Backup Storage Used
+
+    **Cosmos DB Accounts:**
+    - Total Request Units
+    - Total Requests
+    - Autoscale Max Throughput
+    - Provisioned Throughput
+    - Available Storage
+    - Data/Index Usage
+    - Document Count/Quota
+    - Replication Latency
+    - Service Availability
+
+    **Load Balancers:**
+    - VIP/DIP Availability
+    - Byte Count
+    - Packet Count
+    - SYN Count
+    - SNAT Connection Count
+    - Allocated/Used SNAT Ports
+
+    **Application Gateways:**
+    - Throughput
+    - Healthy/Unhealthy Host Count
+    - Response Status (2xx/3xx/4xx/5xx)
+    - Backend Response Status
+    - Backend Connect/Request/Response Time
+    - Current Connections
+    - Failed Requests
+    - Total Requests
+    - Current Capacity Units
+
+    **Storage Accounts:**
+    - Used Capacity
+    - Transactions
+    - Ingress/Egress
+    - Success Server/E2E Latency
+    - Availability
+    - Blob Capacity/Count
+    - File Capacity/Count/Share Count
+
+    **AKS Clusters:**  <!-- codespell:ignore AKS -->
+    - Node CPU Usage Percentage
+    - Node Memory Working Set Percentage
+    - Node Disk Usage Percentage
+    - Node Network In/Out Bytes
+    - Kube Pod Status Ready/Phase
+    - Cluster Autoscaler Metrics
+    - Unneeded Nodes Count
+    - Unschedulable Pods Count
+  </Accordion>
+
+  <Accordion title="MCP Tools" icon="wrench">
+    - **get_realtime_vm_status**: Get real-time status information for an Azure VM instance
+    - **get_sql_database_status**: Get status information for an Azure SQL database
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should have Azure credentials configured through one of the following methods:
+
+- **Azure CLI**: Use `az login` to authenticate with the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- **Service Principal**: Set environment variables `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_TENANT_ID`
+- **Managed Identity**: If running on Azure infrastructure (VMs, App Service, etc.)
+- **Visual Studio Code**: If you have the Azure Account extension installed and authenticated
+- **Azure PowerShell**: If you have authenticated using Azure PowerShell
+
+The plugin follows the [standard Azure credential provider chain](https://docs.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential).
+
+
+## Configuration
+
+Configure the Azure plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  azure:
+    enabled: true
+    # Optional: specify subscription details
+    subscriptions:
+      default:
+        subscription_id: "your-subscription-id"
+        tenant_id: "your-tenant-id"  # Optional
+```
+
+If no subscription is specified, the plugin will use the default subscription from your Azure credentials.
+
+## Tools
+The Azure plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_realtime_vm_status">
+  Get real-time status information for an Azure VM instance directly from Azure API.
+
+  **Arguments**
+  <ParamField path="vm_name" type="string" required>
+    The Azure VM name.
+  </ParamField>
+  <ParamField path="resource_group" type="string" required>
+    The Azure resource group name containing the VM.
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing VM status information or an error message if the VM couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "name": "my-vm",
+    "power_state": "VM running",
+    "provisioning_state": "Succeeded",
+    "statuses": [
+      {
+        "code": "PowerState/running",
+        "display_status": "VM running",
+        "time": "2024-01-15T10:30:00Z"
+      }
+    ]
+  }
+  ```
+</Card>
+<br />
+
+<Card title="get_sql_database_status">
+  Get status information for an Azure SQL database.
+
+  **Arguments**
+  <ParamField path="database_name" type="string" required>
+    The Azure SQL database name.
+  </ParamField>
+  <ParamField path="server_name" type="string" required>
+    The Azure SQL server name hosting the database.
+  </ParamField>
+  <ParamField path="resource_group" type="string" required>
+    The Azure resource group name containing the SQL server.
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing database status and configuration details or an error message if the database couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "name": "my-database",
+    "status": "Online",
+    "edition": "Standard",
+    "service_objective": "S1",
+    "max_size_bytes": 268435456000,
+    "collation": "SQL_Latin1_General_CP1_CI_AS",
+    "creation_date": "2024-01-10T08:00:00Z"
+  }
+  ```
+</Card>
