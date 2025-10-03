@@ -134,7 +134,7 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         truncated = False
         content_length = 0
 
-        class timeoutTracker:
+        class TimeoutTracker:
             timed_out: bool = False
             start_time: AwareDatetime = datetime.now(UTC)
 
@@ -142,7 +142,7 @@ class DatadogPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
                 self.timed_out = (datetime.now(UTC) - self.start_time) > timedelta(seconds=10)
                 return not self.timed_out
 
-        tt = timeoutTracker()
+        tt = TimeoutTracker()
         async for log in self._client.search_logs(
             query=query if ":" in query else f"*:*{query}*",
             min_time=min_time,

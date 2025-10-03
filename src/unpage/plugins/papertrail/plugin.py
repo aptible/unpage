@@ -83,7 +83,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
         truncated = False
         content_length = 0
 
-        class timeoutTracker:
+        class TimeoutTracker:
             timed_out: bool = False
             start_time: AwareDatetime = datetime.now(UTC)
             time_out: timedelta = timedelta(seconds=timeout_seconds)
@@ -92,7 +92,7 @@ class PapertrailPlugin(Plugin, McpServerMixin):
                 self.timed_out = (datetime.now(UTC) - self.start_time) > self.time_out
                 return not self.timed_out
 
-        tt = timeoutTracker()
+        tt = TimeoutTracker()
         async for log in self._client.search(
             query=query,
             min_time=min_time,

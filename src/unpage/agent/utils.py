@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from pydantic import BaseModel, Field
 from pydantic_yaml import parse_yaml_file_as, parse_yaml_raw_as
 
 from unpage.agent.analysis import Agent
@@ -38,9 +39,13 @@ def get_agent_template(agent_name: str) -> str:
     return (Path(__file__).parent / "templates" / f"{agent_name}.yaml").read_text()
 
 
+class AgentWithDescriptionOnly(BaseModel):
+    description: str = Field(description="A description of the agent and when it should be used")
+
+
 def get_agent_template_description(agent_name: str) -> str:
     text = get_agent_template(agent_name)
-    yml = parse_yaml_raw_as(Agent, text)
+    yml = parse_yaml_raw_as(AgentWithDescriptionOnly, text)
     return yml.description.strip()
 
 

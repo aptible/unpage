@@ -1,0 +1,39 @@
+description: "Agent for code review and repository operations"
+prompt: "You are a code review expert. Use git and filesystem tools to analyze code changes in the /Users/YOU/src/aptible/unpage repo."
+
+tools:
+  - "core_*"
+  - "mcp_github_*"
+  - "mcp_git_*"
+  - "mcp_filesystem_*"
+
+config:
+  plugins:
+    mcp:
+      enabled: true
+      settings:
+        mcp_servers:
+          github:
+            transport: "http"
+            url: "https://api.githubcopilot.com/mcp/"
+            auth: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+          git:
+            command: "uvx"
+            args: ["mcp-server-git", "--repository", "/Users/YOU/src/aptible/unpage"]
+            env:
+              GIT_AUTHOR_NAME: "${GIT_USER_NAME:-Unpage}"  # Bash-like environment variable expansion
+          filesystem:
+            command: "bunx"
+            args: ["-y", "@modelcontextprotocol/server-filesystem", "/Users/YOU/src/aptible/unpage"]
+
+test_payloads:
+  github_pull_request_webhook:
+    payload: >
+      [
+        {
+          "url": "https://api.github.com/repos/aptible/unpage/pulls/175",
+          "number": 175,
+          "state": "open",
+          "truncated_payload": true
+        }
+      ]

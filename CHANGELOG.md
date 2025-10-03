@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.35 (2025-09-24)
+
+### Documentation
+
+- Add basic docs for MCP server configuration [SC-34608]
+  ([#178](https://github.com/aptible/unpage/pull/178),
+  [`c0dc077`](https://github.com/aptible/unpage/commit/c0dc077098f8e9378f08c7540dbdec878f7cd6ec))
+
+### Features
+
+- Add new 3p mcp template example [SC-34731] ([#190](https://github.com/aptible/unpage/pull/190),
+  [`46dc5b0`](https://github.com/aptible/unpage/commit/46dc5b0718f6d61c997c5198560ee529ec49c736))
+
+
 ## v0.1.0-alpha.34 (2025-09-19)
 
 ### Documentation

@@ -94,7 +94,7 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
         truncated = False
         content_length = 0
 
-        class timeoutTracker:
+        class TimeoutTracker:
             timed_out: bool = False
             start_time: AwareDatetime = datetime.now(UTC)
             time_out: timedelta = timedelta(seconds=timeout_seconds)
@@ -106,7 +106,7 @@ class SolarWindsPlugin(Plugin, McpServerMixin):
         if self._client is None:
             return "SolarWinds client not initialized. Please check your token and datacenter configuration."
 
-        tt = timeoutTracker()
+        tt = TimeoutTracker()
         async for log in self._client.search(
             query=query,
             min_time=min_time,

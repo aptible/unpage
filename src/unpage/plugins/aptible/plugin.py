@@ -84,7 +84,7 @@ class AptiblePlugin(Plugin, KnowledgeGraphMixin):
             if "current_configuration" not in node.raw_data["_links"]:
                 return
 
-            # If the app has no services, it wont have a configuration, so skip it.
+            # If the app has no services, it won't have a configuration, so skip it.
             if not node.raw_data["_embedded"]["services"]:
                 return
 

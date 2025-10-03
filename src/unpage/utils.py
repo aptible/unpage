@@ -290,7 +290,7 @@ def import_submodules(
             import_submodules(full_name)
 
 
-class classproperty[T]:
+class classproperty[T]:  # noqa: N801
     """
     Decorator that converts a method with a single cls argument into a property
     that can be accessed directly from the class.
@@ -389,11 +389,12 @@ def camel_to_snake(s: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
+# Define a constant for redacted content
+REDACTED = "REDACTED"
+
+
 def strip_secrets(data: dict[str, Any]) -> dict[str, Any]:
     """Strip secrets from a dictionary."""
-
-    # Define a constant for redacted content
-    REDACTED = "REDACTED"
 
     def _visit(_path: tuple[str, ...], key: str, value: Any) -> bool | tuple[str, Any]:  # noqa: ANN401
         if key in ("passphrase", "connection_url"):

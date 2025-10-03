@@ -17,8 +17,8 @@ class SolarWindsLogEvent(BaseModel):
 class ResultPageInfo(BaseModel):
     """Pagination links"""
 
-    prevPage: str | None = None
-    nextPage: str | None = None
+    prevPage: str | None = None  # noqa: N815
+    nextPage: str | None = None  # noqa: N815
 
 
 class SearchResult(BaseModel):
@@ -27,7 +27,7 @@ class SearchResult(BaseModel):
     logs: list[SolarWindsLogEvent]
     """An array of hashes of log events (one hash per event)"""
 
-    pageInfo: ResultPageInfo
+    pageInfo: ResultPageInfo  # noqa: N815
 
 
 class SolarWindsClient(httpx.AsyncClient):
