@@ -62,6 +62,7 @@
         "pages": [
           "plugins/aptible",
           "plugins/aws",
+          "plugins/azure",
           "plugins/core",
           "plugins/datadog",
           "plugins/graph",

@@ -17,14 +17,20 @@ class KubernetesPod(KubernetesBaseNode):
         ]
 
     async def get_reference_identifiers(self) -> list[str | None | tuple[str | None, str]]:
-        return [
+        references = [
             *await super().get_reference_identifiers(),
             (self.raw_data.get("spec", {}).get("nodeName"), "is_on_node"),
             (self.raw_data.get("spec", {}).get("serviceAccount"), "has_service_account"),
-            (
-                KubernetesNode(
-                    node_id=self.raw_data.get("spec", {}).get("nodeName"), _graph=Graph()
-                ).nid,
-                "running_on",
-            ),
         ]
+
+        # Only add the running_on reference if nodeName exists
+        node_name = self.raw_data.get("spec", {}).get("nodeName")
+        if node_name:
+            references.append(
+                (
+                    KubernetesNode(node_id=node_name, _graph=Graph()).nid,
+                    "running_on",
+                )
+            )
+
+        return references
