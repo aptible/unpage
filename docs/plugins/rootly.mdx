@@ -1,0 +1,345 @@
+---
+title: Rootly
+---
+
+Our Rootly integration allows [Agents](/concepts/agents) to learn about, filter, and
+take action on incidents happening in your infrastructure.
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Rootly Incidents
+  </Accordion>
+
+  <Accordion title="MCP Tools" icon="wrench">
+    - **list_recent_incidents**: List recent Rootly incidents
+    - **get_incident_details**: Retrieve incident details by ID
+    - **get_alert_details_for_incident**: Get alert details for an incident
+    - **post_status_update**: Post a status update to an incident
+    - **resolve_incident**: Resolve an incident
+    - **mitigate_incident**: Mitigate an incident
+    - **acknowledge_incident**: Acknowledge an incident
+    - **add_incident_event**: Add event to the incident timeline
+    - **log_investigation_finding**: Log an investigation finding for root cause analysis
+    - **log_action_taken**: Log an action taken during incident response
+    - **log_escalation**: Log an incident escalation
+    - **log_communication**: Log a communication event
+    - **get_incident_timeline**: Get the complete timeline of events for an incident
+    - **update_incident_event**: Update an existing incident event
+    - **delete_incident_event**: Delete an incident event```
+  </Accordion>
+</AccordionGroup>
+
+## Prerequisites
+
+To configure the Rootly integration you'll need to generate a Rootly API key.
+
+<Steps>
+  <Step title="Open your Rootly Organization Settings">
+    In the Rootly UI, navigate to your organization settings.
+  </Step>
+  <Step title="Generate API Token">
+    Go to "Organization Settings > API Keys" and create a new token with the necessary permissions for incident management.
+  </Step>
+</Steps>
+
+
+## Configuration
+Configure the Rootly plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  rootly:
+    enabled: true
+    settings:
+      api_key: <your api key> # required
+```
+
+Alternatively, you can set the `ROOTLY_API_KEY` environment variable.
+
+
+## Developing Agents
+Your Agents can react to Rootly incidents by adding context from your
+[Knowledge Graph](/concepts/knowledge-graph), pulling [Metrics](/plugins/metrics),
+or running custom [Shell Commands](/plugins/shell).
+
+Learn more about [Creating Agents](/concepts/agents).
+
+### Running Locally
+You can test your Agents locally on past or current Rootly incidents by
+passing in a Rootly incident ID or URL to `unpage agent run`:
+
+```bash
+uv run unpage agent run <agent_name> --rootly-incident 01234567-89ab-cdef-0123-456789abcdef
+```
+
+You can also use a full Rootly incident URL:
+
+```bash
+uv run unpage agent run <agent_name> --rootly-incident https://app.rootly.com/incidents/01234567-89ab-cdef-0123-456789abcdef
+```
+
+Alternatively, you can use the interactive quickstart to select from recent incidents:
+
+```bash
+uv run unpage agent quickstart
+```
+
+Unpage will fetch the incident automatically and send it to your Agent. The
+Agent thought process, tool calls, and output will be printed to `stdout`.
+
+### Webhooks
+Agent workflows can run automatically by configuring Rootly to send webhooks
+to your [Unpage Server](/commands/agent#subcommand%3A-serve).
+
+Configure your Rootly webhooks to send incident events to your Unpage Server
+endpoint at `/webhook` (like `https://unpage.yourdomain.com/webhook`).
+
+During development you can tunnel to your local Unpage instance using ngrok by
+running `uv run unpage agent serve --tunnel` (see [Unpage Server](/commands/agent#subcommand%3A-serve)
+for details).
+
+Unpage will now receive webhooks from Rootly and send them to the
+[Router](/concepts/router), which will decide which [Agent](/concepts/agents) workflow to run.
+
+<Info>
+For production deployments with Rootly integration, see our [Deployment Guide](/howto/deployment-guide) for complete setup instructions including Docker configuration and GitHub Actions CI/CD.
+</Info>
+
+
+## Tools
+The Rootly plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_incident_details">
+  Get a Rootly incident by ID, including all incident details.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+
+  **Returns** `dict`: The incident JSON payload, including all incident details.
+</Card>
+<br />
+
+<Card title="get_alert_details_for_incident">
+  Get the details of the alert(s) for a Rootly incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+
+  **Returns** `list[dict]`: The list of alert details (incident events).
+</Card>
+<br />
+
+<Card title="post_status_update">
+  Post a status update to a Rootly incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+  <ParamField path="message" type="string" required>
+    The status update message to post.
+  </ParamField>
+
+  **Returns** `None`
+</Card>
+<br />
+
+<Card title="resolve_incident">
+  Resolve a Rootly incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+  <ParamField path="resolution_message" type="string">
+    An optional message to include with the resolution.
+  </ParamField>
+
+  **Returns** `None`
+</Card>
+<br />
+
+<Card title="mitigate_incident">
+  Mitigate a Rootly incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+
+  **Returns** `None`
+</Card>
+<br />
+
+<Card title="acknowledge_incident">
+  Acknowledge a Rootly incident.
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+
+  **Returns** `None`
+</Card>
+<br />
+
+<Card title="add_incident_event">
+  Add a timeline event to a Rootly incident for root cause analysis
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The ID of the Rootly incident. Typically a UUID string. For example "01234567-89ab-cdef-0123-456789abcdef".
+  </ParamField>
+  <ParamField path="event_description" type="string" required>
+    Description of the event/activity
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="list_recent_incidents">
+  List recent Rootly incidents
+
+  **Arguments**
+  <ParamField path="limit" type="int">
+    Maximum number of incidents to return (default: 10)
+  </ParamField>
+
+  **Returns** `list[dict]`: List of recent incidents with their details
+</Card>
+<br />
+
+<Card title="log_investigation_finding">
+  Log an investigation finding for root cause analysis
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="finding" type="string" required>
+    The investigation finding or discovery
+  </ParamField>
+  <ParamField path="source" type="string">
+    Source of the finding (e.g., 'logs', 'metrics', 'database')
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_action_taken">
+  Log an action taken during incident response
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="action" type="string" required>
+    The action that was taken
+  </ParamField>
+  <ParamField path="outcome" type="string">
+    The result or outcome of the action
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_escalation">
+  Log an incident escalation
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="escalated_to" type="string" required>
+    Who or what team the incident was escalated to
+  </ParamField>
+  <ParamField path="reason" type="string">
+    Reason for the escalation
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="log_communication">
+  Log a communication event (e.g., customer notification, internal update)
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+  <ParamField path="communication_type" type="string" required>
+    Type of communication (e.g., "Customer Notification", "Team Update")
+  </ParamField>
+  <ParamField path="details" type="string" required>
+    Details of the communication
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "external" for customer-facing, "internal" for team-only (default: "external")
+  </ParamField>
+
+  **Returns** `dict`: The created event data
+</Card>
+<br />
+
+<Card title="get_incident_timeline">
+  Get the complete timeline of events for an incident
+
+  **Arguments**
+  <ParamField path="incident_id" type="string" required>
+    The Rootly ID of the incident
+  </ParamField>
+
+  **Returns** `list`: List of all events/timeline entries for the incident
+</Card>
+<br />
+
+<Card title="update_incident_event">
+  Update an existing incident event
+
+  **Arguments**
+  <ParamField path="event_id" type="string" required>
+    The ID of the event to update
+  </ParamField>
+  <ParamField path="event_description" type="string" required>
+    Updated description of the event
+  </ParamField>
+  <ParamField path="visibility" type="string">
+    Event visibility - "internal" or "external" (default: "internal")
+  </ParamField>
+
+  **Returns** `dict`: The updated event data
+</Card>
+<br />
+
+<Card title="delete_incident_event">
+  Delete an incident event
+
+  **Arguments**
+  <ParamField path="event_id" type="string" required>
+    The ID of the event to delete
+  </ParamField>
+
+  **Returns** `dict`: Response from the deletion request
+</Card>
