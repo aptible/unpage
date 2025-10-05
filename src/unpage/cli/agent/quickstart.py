@@ -467,27 +467,35 @@ async def _demo_an_incident(agent: Agent, plugin_manager: PluginManager, e: Comm
         title: str
         func: Callable[[], Awaitable[str | None]]
 
-    pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
-    rootly = cast("RootlyPlugin", plugin_manager.get_plugin("rootly"))
-
-    options = [
-        PayloadOption(
-            title="Provide a PagerDuty incident ID or URL",
-            func=lambda: _provide_incident_id_or_url(pd),
-        ),
-        PayloadOption(
-            title="Select from a list of 20 most recent PagerDuty incidents",
-            func=lambda: _select_from_recent_incidents(pd),
-        ),
-        PayloadOption(
-            title="Provide a Rootly incident ID or URL",
-            func=lambda: _provide_rootly_incident_id_or_url(rootly),
-        ),
-        PayloadOption(
-            title="Select from a list of 20 most recent Rootly incidents",
-            func=lambda: _select_from_recent_rootly_incidents(rootly),
-        ),
-    ]
+    options = []
+    if plugin_manager.config_has_plugin("pagerduty"):
+        pd = cast("PagerDutyPlugin", plugin_manager.get_plugin("pagerduty"))
+        options.extend(
+            [
+                PayloadOption(
+                    title="Provide a PagerDuty incident ID or URL",
+                    func=lambda: _provide_incident_id_or_url(pd),
+                ),
+                PayloadOption(
+                    title="Select from a list of 20 most recent PagerDuty incidents",
+                    func=lambda: _select_from_recent_incidents(pd),
+                ),
+            ]
+        )
+    if plugin_manager.config_has_plugin("rootly"):
+        rootly = cast("RootlyPlugin", plugin_manager.get_plugin("rootly"))
+        options.extend(
+            [
+                PayloadOption(
+                    title="Provide a Rootly incident ID or URL",
+                    func=lambda: _provide_rootly_incident_id_or_url(rootly),
+                ),
+                PayloadOption(
+                    title="Select from a list of 20 most recent Rootly incidents",
+                    func=lambda: _select_from_recent_rootly_incidents(rootly),
+                ),
+            ]
+        )
 
     if agent.test_payloads:
         options.insert(

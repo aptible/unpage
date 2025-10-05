@@ -75,6 +75,9 @@ class PluginManager:
         """Return the plugin class for a given name."""
         return REGISTRY[name]
 
+    def config_has_plugin(self, name: str) -> bool:
+        return name in self._config.plugins
+
     def get_plugin(self, name: str, config: PluginConfig | None = None) -> Plugin:
         """Return the configured plugin for a given name."""
         config = config or self._config.plugins[name]
