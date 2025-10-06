@@ -1,0 +1,121 @@
+---
+title: GitHub
+---
+
+The GitHub plugin integrates with [GitHub](https://github.com) by wrapping the official
+[GitHub MCP server](https://github.com/github/github-mcp-server), giving your
+[Agents](/concepts/agents) access to GitHub repositories, issues, pull requests, and more.
+
+<AccordionGroup>
+  <Accordion title="MCP Tools" icon="wrench">
+    The GitHub plugin provides access to all tools from the official GitHub MCP server,
+    including:
+    - Repository operations (clone, read files, search)
+    - Issue management (create, update, search, comment)
+    - Pull request operations (create, review, merge)
+    - Branch and commit operations
+    - And more...
+
+    For a complete list of available tools, see the [GitHub MCP server documentation](https://github.com/github/github-mcp-server#features).
+  </Accordion>
+</AccordionGroup>
+
+## Prerequisites
+
+You'll need:
+
+- **GitHub Personal Access Token**: A token with appropriate permissions for the operations you want to perform
+- **Docker** (for local mode only): Docker must be installed and running if you choose to run the MCP server locally
+
+### Creating a GitHub Personal Access Token
+
+<Steps>
+  <Step title="Navigate to GitHub Settings">
+    Go to [GitHub Settings > Developer Settings > Personal Access Tokens](https://github.com/settings/tokens)
+  </Step>
+  <Step title="Generate New Token">
+    Click "Generate new token" (classic) or "Generate new token (fine-grained)" depending on your needs.
+
+    For classic tokens, grant the following scopes based on your needs:
+    - `repo` - Full control of private repositories
+    - `read:org` - Read org and team membership
+    - `user` - Read user profile data
+  </Step>
+  <Step title="Save the Token">
+    Copy the generated token - you'll need it for configuration.
+  </Step>
+</Steps>
+
+## Configuration
+
+Configure the GitHub plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  github:
+    enabled: true
+    settings:
+      github_token: "your-github-personal-access-token"
+      mode: "remote"  # or "local"
+      read_only: true  # optional, defaults to true
+```
+
+Alternatively, you can set the GitHub token as an environment variable:
+
+```bash
+export GITHUB_PERSONAL_ACCESS_TOKEN="your-github-personal-access-token"
+```
+
+The plugin will automatically use the environment variable if no token is specified in the configuration file.
+
+### Configuration Options
+
+<ParamField path="github_token" type="string" required>
+  Your GitHub Personal Access Token. Can also be set via the `GITHUB_PERSONAL_ACCESS_TOKEN` environment variable.
+</ParamField>
+
+<ParamField path="mode" type="string" default="remote">
+  The mode to run the GitHub MCP server in:
+  - `remote`: Connect to GitHub's hosted MCP server at `https://api.githubcopilot.com/mcp/`
+  - `local`: Run the GitHub MCP server locally using Docker (`ghcr.io/github/github-mcp-server`)
+</ParamField>
+
+<ParamField path="read_only" type="boolean" default="true">
+  Whether to enable read-only mode. When `true`, agents can only read data from GitHub
+  but cannot make modifications (create issues, merge PRs, etc.).
+</ParamField>
+
+## Tool Usage
+
+Once configured, all tools from the GitHub MCP server become available to your agents,
+prefixed with `github_`:
+
+```yaml
+# Example agent configuration
+description: "Agent for GitHub operations"
+prompt: "You help manage GitHub repositories, issues, and pull requests."
+
+tools:
+  - "github_*"  # All GitHub tools
+```
+
+Common tool patterns include:
+- `github_search_repositories` - Search for repositories
+- `github_create_issue` - Create a new issue
+- `github_create_pull_request` - Create a pull request
+- `github_get_file_contents` - Read file contents from a repository
+- And many more...
+
+For a complete list of available tools and their parameters, refer to the
+[GitHub MCP server documentation](https://github.com/github/github-mcp-server#features).
+
+## Developing Agents
+
+Your agents can leverage GitHub tools to automate repository operations, manage issues
+and pull requests, analyze code, and more. Combine GitHub tools with other Unpage
+features like the [Knowledge Graph](/concepts/knowledge-graph), [Metrics](/plugins/metrics),
+or [Shell Commands](/plugins/shell) for powerful automation workflows.
+
+Learn more about [Creating Agents](/concepts/agents).
