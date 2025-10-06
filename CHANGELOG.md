@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.38 (2025-10-06)
+
+### Features
+
+- GitHub and Sentry plugins ([#206](https://github.com/aptible/unpage/pull/206),
+  [`7a8f98c`](https://github.com/aptible/unpage/commit/7a8f98c21e60701bf2492079b34231b5cc7aa9e4))
+
+
 ## v0.1.0-alpha.37 (2025-10-03)
 
 ### Features
