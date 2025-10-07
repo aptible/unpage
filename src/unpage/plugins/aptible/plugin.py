@@ -41,7 +41,7 @@ class AptiblePlugin(Plugin, KnowledgeGraphMixin):
         edge_count = 0
         seen_nodes = defaultdict(set)
 
-        async with self.client.concurrent_paginator("/edges") as (
+        async with self.client.concurrent_paginator("/edges?per_page=1000") as (
             edges,
             total_count,
         ):
