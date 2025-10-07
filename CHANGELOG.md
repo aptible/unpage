@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.40 (2025-10-07)
+
+### Bug Fixes
+
+- Adjust the Aptible plugin pagination for edges
+  ([#219](https://github.com/aptible/unpage/pull/219),
+  [`871b7a9`](https://github.com/aptible/unpage/commit/871b7a97930f20bba99317a833ea5b4a828cfdc5))
+
+
 ## v0.1.0-alpha.39 (2025-10-06)
 
 ### Bug Fixes
