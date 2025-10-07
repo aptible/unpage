@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import anyio
 import httpx
@@ -143,7 +144,21 @@ class AptibleClient(httpx.AsyncClient):
                     yield item
 
             # Fetch all subsequent pages in parallel
-            pages = (self.get(f"{url}?page={p}") for p in range(1, total_pages + 1))
+            parsed_url = urlparse(url)
+            pages = (
+                self.get(
+                    parsed_url._replace(
+                        query=urlencode(
+                            {
+                                **parse_qs(parsed_url.query),
+                                "page": p,
+                            },
+                            doseq=True,
+                        )
+                    ).geturl()
+                )
+                for p in range(1, total_pages + 1)
+            )
             try:
                 async with anyio.create_task_group() as tg:
                     for page in as_completed(tg, pages):
