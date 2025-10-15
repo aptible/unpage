@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.41 (2025-10-15)
+
+### Bug Fixes
+
+- Support $ref in mcp tool parameters [SC-35057]
+  ([#225](https://github.com/aptible/unpage/pull/225),
+  [`bb85746`](https://github.com/aptible/unpage/commit/bb857464c36256c206b4e8a516c1af7a07ccbaf7))
+
+
 ## v0.1.0-alpha.40 (2025-10-07)
 
 ### Bug Fixes
