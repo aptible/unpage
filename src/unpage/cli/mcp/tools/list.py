@@ -51,9 +51,28 @@ async def list_tools(
 
     for key, tool in tools.items():
         cmd = [key]
+        if "properties" not in tool.parameters:
+            continue
+        definitions = {
+            k.lower(): f"{v['type']}({'|'.join(v['enum'])})"
+            for k, v in tool.parameters.get("definitions", {}).items()
+        }
         for arg, arg_data in tool.parameters["properties"].items():
             arg_type = arg_data.get("type", "unknown")
             if "anyOf" in arg_data:
-                arg_type = "|".join(t["type"] for t in arg_data["anyOf"])
+                arg_type = "|".join(
+                    filter(
+                        None,
+                        (
+                            definitions.get(
+                                t.get("$ref").lower().replace("#/definitions/", ""),
+                                "",
+                            )
+                            if "$ref" in t
+                            else t.get("type") or ""
+                            for t in arg_data["anyOf"]
+                        ),
+                    )
+                )
             cmd.append(f"<{arg}:{arg_type}>")
         print(" ".join(cmd))
