@@ -142,6 +142,98 @@ You should have Azure credentials configured through one of the following method
 
 The plugin follows the [standard Azure credential provider chain](https://docs.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential).
 
+### Required Permissions
+
+The Azure plugin requires read-only access to various Azure resources. Below is the recommended Azure RBAC (Role-Based Access Control) configuration.
+
+#### Option 1: Use Built-in Reader Role (Recommended for Getting Started)
+
+The simplest approach is to assign the built-in **Reader** role at the subscription level:
+
+```bash
+# Get your subscription ID
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+# Assign Reader role to your service principal or managed identity
+az role assignment create \
+  --assignee <your-service-principal-id-or-user> \
+  --role "Reader" \
+  --scope "/subscriptions/$SUBSCRIPTION_ID"
+```
+
+This provides read access to all resources in the subscription, which is sufficient for the plugin to build the knowledge graph and retrieve metrics.
+
+#### Option 2: Custom Role with Minimal Permissions (Recommended for Production)
+
+For production environments, create a custom role with only the permissions needed by Unpage:
+
+```json
+{
+  "Name": "Unpage Reader",
+  "Description": "Minimal read-only permissions for Unpage infrastructure knowledge graph",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/instanceView/read",
+    "Microsoft.Compute/virtualMachineScaleSets/read",
+    "Microsoft.Compute/virtualMachineScaleSets/virtualMachines/read",
+    "Microsoft.Compute/virtualMachineScaleSets/virtualMachines/instanceView/read",
+    "Microsoft.Compute/disks/read",
+    "Microsoft.Sql/servers/read",
+    "Microsoft.Sql/servers/databases/read",
+    "Microsoft.DBforPostgreSQL/servers/read",
+    "Microsoft.DBforPostgreSQL/servers/databases/read",
+    "Microsoft.DBforMySQL/servers/read",
+    "Microsoft.DBforMySQL/servers/databases/read",
+    "Microsoft.DocumentDB/databaseAccounts/read",
+    "Microsoft.Network/loadBalancers/read",
+    "Microsoft.Network/applicationGateways/read",
+    "Microsoft.Network/virtualNetworks/read",
+    "Microsoft.Network/virtualNetworks/subnets/read",
+    "Microsoft.Network/networkSecurityGroups/read",
+    "Microsoft.Network/networkInterfaces/read",
+    "Microsoft.Network/publicIPAddresses/read",
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.ContainerService/managedClusters/read",
+    "Microsoft.Insights/metrics/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read"
+  ],
+  "NotActions": [],
+  "AssignableScopes": [
+    "/subscriptions/<your-subscription-id>"
+  ]
+}
+```
+
+To create and assign this custom role:
+
+```bash
+# Save the JSON above to a file named unpage-reader-role.json
+# Update <your-subscription-id> with your actual subscription ID
+
+# Create the custom role
+az role definition create --role-definition unpage-reader-role.json
+
+# Assign the custom role
+az role assignment create \
+  --assignee <your-service-principal-id-or-user> \
+  --role "Unpage Reader" \
+  --scope "/subscriptions/$SUBSCRIPTION_ID"
+```
+
+#### Permissions Breakdown
+
+The custom role includes permissions for:
+
+- **Compute**: Read access to VMs, VM Scale Sets, and managed disks
+- **Databases**: Read access to SQL, PostgreSQL, MySQL, and Cosmos DB resources
+- **Networking**: Read access to load balancers, application gateways, virtual networks, subnets, NSGs, network interfaces, and public IPs
+- **Storage**: Read access to storage accounts
+- **AKS**: Read access to managed Kubernetes clusters
+- **Monitoring**: Read access to Azure Monitor metrics for all resources
+- **Resource Groups**: List and read resource groups in the subscription
+
+These permissions are read-only and follow the principle of least privilege.
+
 
 ## Configuration
 
