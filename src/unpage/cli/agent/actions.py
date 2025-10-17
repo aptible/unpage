@@ -22,7 +22,7 @@ async def create_agent(agent_name: str, overwrite: bool, template: str) -> Path:
 
     # Create the agents directory if it doesn't exist
     agents_dir = config_dir / "agents"
-    agents_dir.mkdir(exist_ok=True)
+    agents_dir.mkdir(exist_ok=True, parents=True)
 
     # Create the agent file path
     agent_file = agents_dir / f"{agent_name}.yaml"

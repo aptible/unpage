@@ -9,9 +9,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Install uv package manager (if needed)
 brew install uv  # On macOS
-
-# Install development dependencies
-uv pip install --dev
 ```
 
 ### Building and Running
@@ -70,6 +67,21 @@ uv run unpage mlflow serve
 
 # Run an agent with tracing enabled
 env MLFLOW_TRACKING_URI=http://127.0.0.1:5566 uv run unpage agent run [agent-name]
+```
+
+### Adding and removing dependencies
+
+We use native `uv` and its `uv.lock` for dependency management.
+
+```bash
+# Add a dependency
+uv add <dep>
+
+# Add a dev only dependency
+uv add --dev <dep>
+
+# Remove a dependency
+uv remove <dep>
 ```
 
 ## Architecture Overview
@@ -137,7 +149,7 @@ User-facing documentation lives under docs/ and is built and published using Min
 
 ### Project context
 - Format: MDX files with YAML frontmatter
-- Mintlify hosts our documentation, and their MDX format is a superset of markdown with components like Cards and Accordians
+- Mintlify hosts our documentation, and their MDX format is a superset of markdown with components like Cards and Accordions
 - Config: docs.json for navigation, theme, settings
 - Components: Mintlify components
 

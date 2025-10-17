@@ -67,7 +67,7 @@ async def build_mcp_server(context: Context) -> FastMCP:
         plugin.context = context
 
     for mcp_plugin in context.plugins.get_plugins_with_capability(McpServerMixin):
-        mcp.mount(mcp_plugin.get_mcp_server(), prefix=mcp_plugin.name)
+        mcp_plugin.register_all(mcp, prefix=mcp_plugin.name)
 
     return mcp
 

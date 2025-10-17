@@ -1,14 +1,24 @@
 [project]
 name = "unpage"
-version = "0.1.0-alpha.37"
+version = "0.1.0-alpha.42"
 description = "An agent framework for production engineering"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=14.1.0",
     "anyio>=4.9.0",
+    "azure-identity>=1.15.0",
+    "azure-mgmt-compute>=29.0.0",
+    "azure-mgmt-cosmosdb>=8.0.0",
+    "azure-mgmt-monitor>=5.0.0",
+    "azure-mgmt-network>=23.0.0",
+    "azure-mgmt-rdbms>=10.0.0",
+    "azure-mgmt-resource>=22.0.0",
+    "azure-mgmt-sql>=3.0.1",
+    "azure-mgmt-storage>=20.0.0",
+    "azure-mgmt-subscription>=3.0.0",
     "dnspython>=2.7.0",
-    "fastmcp>=2.12.3",
+    "fastmcp>=2.12.4",
     "graphviz>=0.20.3",
     "httpx>=0.28.1",
     "networkx>=3.4.2",
@@ -36,6 +46,7 @@ dependencies = [
     "dspy>=3.0.0,<4.0.0",
     "rich-gradient>=0.3.4",
     "expandvars>=1.1.2",
+    "azure-mgmt-containerservice>=39.1.0",
     "google-auth>=2.40.3",
     "google-auth-httplib2>=0.2.0",
     "google-cloud-monitoring>=2.27.2",
@@ -173,5 +184,9 @@ exclude_commit_patterns = [
     '''style(?:\([^)]*?\))?: .+''',
     '''test(?:\([^)]*?\))?: .+''',
     '''build\((?!deps\): .+)''',
-    '''Initial [Cc]ommit.*''',
+    '''Initial [Cc]ommit.*''', # codespell:ignore ommit
 ]
+
+[tool.codespell]
+check-filenames = true
+ignore-words-list = "aks"
