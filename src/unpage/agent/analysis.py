@@ -26,6 +26,12 @@ class AgentTestPayload(BaseModel):
     payload: str = Field(description="The test payload to use")
 
 
+class AgentSchedule(BaseModel):
+    cron: str = Field(
+        description="Cron expression for scheduling the agent (e.g., '0 10 2 * *' for 10am on the 2nd of every month)"
+    )
+
+
 class Agent(BaseModel):
     name: str = Field(description="The name of the agent", default="")
     description: str = Field(description="A description of the agent and when it should be used")
@@ -37,6 +43,10 @@ class Agent(BaseModel):
     )
     test_payloads: dict[str, AgentTestPayload] | None = Field(
         description="Test payloads for testing the agent",
+        default=None,
+    )
+    schedule: AgentSchedule | None = Field(
+        description="Optional schedule configuration for periodic agent runs",
         default=None,
     )
 

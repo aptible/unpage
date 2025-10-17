@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=14.1.0",
     "anyio>=4.9.0",
+    "apscheduler>=3.11.0",
     "dnspython>=2.7.0",
     "fastmcp>=2.12.4",
     "graphviz>=0.20.3",
