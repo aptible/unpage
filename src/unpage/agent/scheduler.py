@@ -100,6 +100,69 @@ class AgentScheduler:
         # Remove from tracking when done
         task.add_done_callback(self.running_tasks.discard)
 
+    def _parse_cron_expression(self, cron_expr: str) -> CronTrigger:
+        """Parse a cron expression into a CronTrigger.
+
+        Supports:
+        - Standard 5-field cron: minute hour day month day_of_week
+        - Extended 6-field cron: second minute hour day month day_of_week
+        - Cron aliases: @hourly, @daily, @weekly, @monthly, @yearly, @annually
+
+        Parameters
+        ----------
+        cron_expr
+            The cron expression to parse
+
+        Returns
+        -------
+        CronTrigger
+            The configured CronTrigger instance
+
+        Raises
+        ------
+        ValueError
+            If the cron expression is invalid
+        """
+        cron_expr = cron_expr.strip()
+
+        # Handle cron aliases
+        cron_aliases = {
+            "@hourly": "0 * * * *",
+            "@daily": "0 0 * * *",
+            "@weekly": "0 0 * * 0",
+            "@monthly": "0 0 1 * *",
+            "@yearly": "0 0 1 1 *",
+            "@annually": "0 0 1 1 *",
+        }
+
+        if cron_expr.lower() in cron_aliases:
+            cron_expr = cron_aliases[cron_expr.lower()]
+
+        # Split the expression to count fields
+        fields = cron_expr.split()
+
+        if len(fields) == 5:
+            # Standard 5-field cron: minute hour day month day_of_week
+            return CronTrigger.from_crontab(cron_expr, timezone=UTC)
+        elif len(fields) == 6:
+            # Extended 6-field cron: second minute hour day month day_of_week
+            second, minute, hour, day, month, day_of_week = fields
+            return CronTrigger(
+                second=second,
+                minute=minute,
+                hour=hour,
+                day=day,
+                month=month,
+                day_of_week=day_of_week,
+                timezone=UTC,
+            )
+        else:
+            raise ValueError(
+                f"Invalid cron expression: {cron_expr!r}. "
+                f"Expected 5 or 6 fields, got {len(fields)}. "
+                f"Supported formats: '* * * * *' (5 fields) or '* * * * * *' (6 fields with seconds)"
+            )
+
     def setup_jobs(self) -> None:
         """Set up scheduled jobs for all agents with schedules."""
         for agent_name, agent in self.scheduled_agents.items():
@@ -107,7 +170,7 @@ class AgentScheduler:
                 continue
 
             try:
-                trigger = CronTrigger.from_crontab(agent.schedule.cron, timezone=UTC)
+                trigger = self._parse_cron_expression(agent.schedule.cron)
                 self.scheduler.add_job(
                     self.run_scheduled_agent,
                     trigger=trigger,

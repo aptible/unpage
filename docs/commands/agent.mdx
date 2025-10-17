@@ -170,7 +170,9 @@ Scheduled agents run with no input payload, so make sure your agent prompt speci
 
 ### Cron Expression Format
 
-The cron expression uses the standard 5-field format:
+Unpage supports multiple cron formats for maximum flexibility:
+
+#### Standard 5-field format (minute precision)
 
 ```
 ┌───────────── minute (0 - 59)
@@ -182,19 +184,67 @@ The cron expression uses the standard 5-field format:
 * * * * *
 ```
 
+#### Extended 6-field format (second precision)
+
+```
+┌───────────── second (0 - 59)
+│ ┌───────────── minute (0 - 59)
+│ │ ┌───────────── hour (0 - 23)
+│ │ │ ┌───────────── day of month (1 - 31)
+│ │ │ │ ┌───────────── month (1 - 12)
+│ │ │ │ │ ┌───────────── day of week (0 - 6) (Sunday to Saturday)
+│ │ │ │ │ │
+* * * * * *
+```
+
+#### Cron Aliases
+
+For convenience, you can use these aliases instead of full cron expressions:
+
+- `@hourly` - Run every hour (equivalent to `0 * * * *`)
+- `@daily` - Run daily at midnight (equivalent to `0 0 * * *`)
+- `@weekly` - Run weekly on Sunday at midnight (equivalent to `0 0 * * 0`)
+- `@monthly` - Run monthly on the 1st at midnight (equivalent to `0 0 1 * *`)
+- `@yearly` or `@annually` - Run yearly on January 1st at midnight (equivalent to `0 0 1 1 *`)
+
 ### Examples
 
 ```shell
 # Start the scheduler (runs all agents with schedules)
 unpage agent schedule
+```
 
-# Common cron patterns:
-# "0 * * * *"      - Every hour at minute 0
-# "0 0 * * *"      - Daily at midnight
-# "0 0 * * 0"      - Weekly on Sunday at midnight
-# "0 0 1 * *"      - Monthly on the 1st at midnight
-# "0 9 * * 1-5"    - Weekdays at 9 AM
-# "*/15 * * * *"   - Every 15 minutes
+#### Standard 5-field patterns (minute precision)
+
+```yaml
+schedule:
+  cron: "0 * * * *"       # Every hour at minute 0
+  cron: "*/15 * * * *"    # Every 15 minutes
+  cron: "0 0 * * *"       # Daily at midnight
+  cron: "0 0 * * 0"       # Weekly on Sunday at midnight
+  cron: "0 0 1 * *"       # Monthly on the 1st at midnight
+  cron: "0 9 * * 1-5"     # Weekdays at 9 AM
+  cron: "*/1 * * * *"     # Every minute
+```
+
+#### Extended 6-field patterns (second precision)
+
+```yaml
+schedule:
+  cron: "*/2 * * * * *"   # Every 2 seconds
+  cron: "*/10 * * * * *"  # Every 10 seconds
+  cron: "0 */30 * * * *"  # Every 30 seconds (at 0, 30 seconds of each minute)
+  cron: "*/5 */1 * * * *" # Every 5 seconds of every minute
+```
+
+#### Using aliases
+
+```yaml
+schedule:
+  cron: "@hourly"   # Every hour
+  cron: "@daily"    # Daily at midnight
+  cron: "@weekly"   # Weekly on Sunday at midnight
+  cron: "@monthly"  # Monthly on the 1st at midnight
 ```
 
 ### Scheduler Functionality

@@ -1,8 +1,13 @@
 description: Generate monthly cost optimization reports for AWS infrastructure
 
 # Schedule the agent to run automatically on a cron schedule
+# Supported formats:
+# - Standard 5-field: minute hour day month day_of_week (e.g., "0 9 1 * *")
+# - Extended 6-field: second minute hour day month day_of_week (e.g., "*/30 * * * * *")
+# - Aliases: @hourly, @daily, @weekly, @monthly, @yearly
 schedule:
   cron: "0 9 1 * *"  # 9:00 AM on the 1st of every month (UTC)
+  # cron: "@monthly"  # Alternative: use a convenient alias
 
 # Instructions for the agent
 prompt: >

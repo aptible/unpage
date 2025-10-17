@@ -28,7 +28,12 @@ class AgentTestPayload(BaseModel):
 
 class AgentSchedule(BaseModel):
     cron: str = Field(
-        description="Cron expression for scheduling the agent (e.g., '0 10 2 * *' for 10am on the 2nd of every month)"
+        description=(
+            "Cron expression for scheduling the agent. Supports:\n"
+            "- Standard 5-field: minute hour day month day_of_week (e.g., '0 10 2 * *')\n"
+            "- Extended 6-field: second minute hour day month day_of_week (e.g., '*/2 * * * * *' for every 2 seconds)\n"
+            "- Aliases: @hourly, @daily, @weekly, @monthly, @yearly, @annually"
+        )
     )
 
 

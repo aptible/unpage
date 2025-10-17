@@ -102,22 +102,37 @@ remember what each agent does when reviewing your list of agents.
 
 ### Schedule: When the agent runs
 
-The `schedule` section defines when the agent runs automatically using cron syntax:
+The `schedule` section defines when the agent runs automatically. Unpage supports multiple cron formats:
 
+**Standard 5-field format** (minute precision):
 ```yaml
 schedule:
   cron: "0 9 1 * *"  # 9:00 AM on the 1st of every month
 ```
 
-The cron format is: `minute hour day month day_of_week`
+**Extended 6-field format** (second precision):
+```yaml
+schedule:
+  cron: "*/30 * * * * *"  # Every 30 seconds
+```
+
+**Convenient aliases**:
+```yaml
+schedule:
+  cron: "@monthly"  # Same as "0 0 1 * *"
+  cron: "@weekly"   # Same as "0 0 * * 0"
+  cron: "@daily"    # Same as "0 0 * * *"
+  cron: "@hourly"   # Same as "0 * * * *"
+```
 
 Common patterns:
 - `"0 9 1 * *"` - Monthly on the 1st at 9 AM
 - `"0 9 * * 1"` - Weekly on Mondays at 9 AM
 - `"0 0 * * *"` - Daily at midnight
 - `"0 */6 * * *"` - Every 6 hours
+- `"*/2 * * * * *"` - Every 2 seconds (6-field format)
 
-All schedules use UTC timezone.
+All schedules use UTC timezone. See the [schedule command documentation](/commands/agent#subcommand-schedule) for more details.
 
 ### Prompt: What the agent should do
 

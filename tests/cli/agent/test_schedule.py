@@ -187,6 +187,135 @@ tools:
         assert len(jobs) == 0
 
 
+def test_parse_cron_expression_5_field() -> None:
+    """Test parsing standard 5-field cron expressions."""
+    scheduler = AgentScheduler()
+
+    # Test standard 5-field format
+    trigger = scheduler._parse_cron_expression("0 10 2 * *")
+    assert trigger is not None
+
+    # Test with wildcards
+    trigger = scheduler._parse_cron_expression("*/15 * * * *")
+    assert trigger is not None
+
+    # Test with ranges
+    trigger = scheduler._parse_cron_expression("0 9 * * 1-5")
+    assert trigger is not None
+
+
+def test_parse_cron_expression_6_field() -> None:
+    """Test parsing extended 6-field cron expressions (with seconds)."""
+    scheduler = AgentScheduler()
+
+    # Test 6-field format with seconds
+    trigger = scheduler._parse_cron_expression("*/2 * * * * *")
+    assert trigger is not None
+
+    # Test every 30 seconds
+    trigger = scheduler._parse_cron_expression("*/30 * * * * *")
+    assert trigger is not None
+
+    # Test specific second values
+    trigger = scheduler._parse_cron_expression("0 */1 * * * *")
+    assert trigger is not None
+
+
+def test_parse_cron_expression_aliases() -> None:
+    """Test parsing cron aliases."""
+    scheduler = AgentScheduler()
+
+    # Test all supported aliases
+    aliases = ["@hourly", "@daily", "@weekly", "@monthly", "@yearly", "@annually"]
+
+    for alias in aliases:
+        trigger = scheduler._parse_cron_expression(alias)
+        assert trigger is not None, f"Failed to parse alias: {alias}"
+
+    # Test case insensitivity
+    trigger = scheduler._parse_cron_expression("@HOURLY")
+    assert trigger is not None
+
+    trigger = scheduler._parse_cron_expression("@Daily")
+    assert trigger is not None
+
+
+def test_parse_cron_expression_invalid() -> None:
+    """Test that invalid cron expressions raise errors."""
+    scheduler = AgentScheduler()
+
+    # Test invalid field count (not 5 or 6)
+    with pytest.raises(ValueError, match="Invalid cron expression"):
+        scheduler._parse_cron_expression("0 10 2")  # Only 3 fields
+
+    with pytest.raises(ValueError, match="Invalid cron expression"):
+        scheduler._parse_cron_expression("0 10 2 * * * *")  # 7 fields
+
+    # Test completely invalid expression
+    with pytest.raises(ValueError):
+        scheduler._parse_cron_expression("not a cron expression")
+
+
+@pytest.mark.asyncio
+async def test_scheduler_with_6_field_cron(tmp_path: Path) -> None:
+    """Test that the scheduler works with 6-field cron expressions."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+
+    six_field_yaml = """
+description: Test agent with 6-field cron
+schedule:
+  cron: "*/2 * * * * *"
+prompt: Test prompt
+tools:
+  - "core_*"
+"""
+    (agents_dir / "six-field-agent.yaml").write_text(six_field_yaml)
+
+    with (
+        patch("unpage.agent.utils.manager.get_active_profile_directory", return_value=tmp_path),
+        patch("unpage.agent.utils.manager.get_active_profile", return_value="test"),
+    ):
+        scheduler = AgentScheduler()
+        scheduler.load_scheduled_agents()
+        scheduler.setup_jobs()
+
+        # Job should be created successfully
+        jobs = scheduler.scheduler.get_jobs()
+        assert len(jobs) == 1
+        assert jobs[0].id == "six-field-agent"
+
+
+@pytest.mark.asyncio
+async def test_scheduler_with_cron_alias(tmp_path: Path) -> None:
+    """Test that the scheduler works with cron aliases."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+
+    alias_yaml = """
+description: Test agent with cron alias
+schedule:
+  cron: "@hourly"
+prompt: Test prompt
+tools:
+  - "core_*"
+"""
+    (agents_dir / "alias-agent.yaml").write_text(alias_yaml)
+
+    with (
+        patch("unpage.agent.utils.manager.get_active_profile_directory", return_value=tmp_path),
+        patch("unpage.agent.utils.manager.get_active_profile", return_value="test"),
+    ):
+        scheduler = AgentScheduler()
+        scheduler.load_scheduled_agents()
+        scheduler.setup_jobs()
+
+        # Job should be created successfully
+        jobs = scheduler.scheduler.get_jobs()
+        assert len(jobs) == 1
+        assert jobs[0].id == "alias-agent"
+
+
 @pytest.mark.asyncio
 async def test_scheduler_cancels_running_tasks_on_shutdown(
     tmp_path: Path, scheduled_agent_yaml: str
