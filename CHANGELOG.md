@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.42 (2025-10-17)
+
+### Features
+
+- Azure plugin [SC-34609] ([#189](https://github.com/aptible/unpage/pull/189),
+  [`f349871`](https://github.com/aptible/unpage/commit/f349871b0ee51d43ba0c0cf6bbee6323dff81325))
+
+
 ## v0.1.0-alpha.41 (2025-10-15)
 
 ### Bug Fixes
