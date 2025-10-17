@@ -1,6 +1,6 @@
 [project]
 name = "unpage"
-version = "0.1.0-alpha.37"
+version = "0.1.0-alpha.41"
 description = "An agent framework for production engineering"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -18,7 +18,7 @@ dependencies = [
     "azure-mgmt-storage>=20.0.0",
     "azure-mgmt-subscription>=3.0.0",
     "dnspython>=2.7.0",
-    "fastmcp>=2.12.3",
+    "fastmcp>=2.12.4",
     "graphviz>=0.20.3",
     "httpx>=0.28.1",
     "networkx>=3.4.2",
@@ -179,7 +179,7 @@ exclude_commit_patterns = [
     '''style(?:\([^)]*?\))?: .+''',
     '''test(?:\([^)]*?\))?: .+''',
     '''build\((?!deps\): .+)''',
-    '''Initial [Cc]ommit.*''',  # codespell:ignore
+    '''Initial [Cc]ommit.*''', # codespell:ignore ommit
 ]
 
 [tool.codespell]

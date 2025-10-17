@@ -42,7 +42,7 @@ async def test_create_agent_success(mock_get_template, mock_get_dir, mock_confir
         mock_get_template.assert_called_once_with("default")
 
         # Verify directory creation
-        mock_mkdir.assert_called_once_with(exist_ok=True)
+        mock_mkdir.assert_called_once_with(exist_ok=True, parents=True)
 
         # Verify file was written
         mock_write.assert_called_once_with("# Test agent template\nname: test", encoding="utf-8")
