@@ -1,0 +1,71 @@
+# https://docs.unpage.ai/examples/slack_notifications
+description: Enrich monitoring alerts and post to Slack
+
+prompt: >
+  You are responding to a monitoring alert. Your job is to:
+
+  1. Parse the alert payload to extract:
+     - Alert severity/priority
+     - Affected service or resource
+     - Alert description and any error messages
+     - Timestamp
+
+  2. Gather additional context:
+     - If the alert mentions specific infrastructure (EC2 instances, databases, etc.),
+       use the knowledge graph to find related resources
+     - Check recent metrics if available
+     - Look for similar recent incidents
+
+  3. Format a clear Slack message that includes:
+     - Alert title and severity (use emojis: 🔴 critical, 🟡 warning, 🟢 info)
+     - Affected service/resource with links when available
+     - Summary of the issue
+     - Key metrics or context you gathered
+     - Suggested next steps or runbook links if applicable
+
+  4. Post the formatted message to the #incidents Slack channel using slack_post_to_incidents
+
+tools:
+  - "slack_post_to_incidents"
+  - "graph_*"
+  - "datadog_*"
+
+config:
+  # https://docs.unpage.ai/plugins/slack
+  plugins:
+    slack:
+      enabled: true
+      settings:
+        channels:
+          - name: incidents
+            description: Post incident updates and alerts
+            webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+
+test_payloads:
+  high_cpu_alert:
+    description: "A sample high CPU alert for testing"
+    payload: >
+      {
+        "alert_name": "High CPU Usage",
+        "severity": "critical",
+        "service": "web-api",
+        "description": "CPU usage exceeded 90% for 5 minutes",
+        "timestamp": "2025-01-15T10:30:00Z",
+        "instance_id": "i-1234567890abcdef0",
+        "current_value": "94.2%",
+        "threshold": "90%"
+      }
+
+  memory_warning:
+    description: "A sample memory warning alert for testing"
+    payload: >
+      {
+        "alert_name": "High Memory Usage",
+        "severity": "warning",
+        "service": "database-primary",
+        "description": "Memory usage exceeded 80%",
+        "timestamp": "2025-01-15T10:35:00Z",
+        "instance_id": "i-9876543210fedcba0",
+        "current_value": "82.5%",
+        "threshold": "80%"
+      }
