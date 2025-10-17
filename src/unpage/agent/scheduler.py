@@ -21,6 +21,10 @@ class AgentScheduler:
         self.scheduler = AsyncIOScheduler(timezone=UTC)
         self.scheduled_agents: dict[str, Agent] = {}
         self.shutdown_event = asyncio.Event()
+        self.running_tasks: set[asyncio.Task] = set()
+        self._event_loop: asyncio.AbstractEventLoop | None = None
+        self._shutdown_count = 0
+        self._force_shutdown = asyncio.Event()
 
     def load_scheduled_agents(self) -> None:
         """Load all agents that have a schedule configured."""
@@ -44,8 +48,8 @@ class AgentScheduler:
                 "[yellow]No agents with schedules found. Add a 'schedule' section to your agent YAML files.[/yellow]"
             )
 
-    async def run_scheduled_agent(self, agent_name: str) -> None:
-        """Run a scheduled agent.
+    async def _run_agent_task(self, agent_name: str) -> None:
+        """Internal task wrapper that tracks running tasks.
 
         Parameters
         ----------
@@ -66,8 +70,35 @@ class AgentScheduler:
             result = await analysis_agent.acall(payload="", agent=agent)
             print(f"\n[green]Agent {agent_name!r} completed successfully[/green]")
             print(f"Result:\n{result}")
+        except asyncio.CancelledError:
+            print(f"[yellow]Agent {agent_name!r} was cancelled during shutdown[/yellow]")
+            raise
         except Exception as ex:
             print(f"[red]Agent {agent_name!r} failed:[/red] {ex}")
+
+    def run_scheduled_agent(self, agent_name: str) -> None:
+        """Run a scheduled agent (called by APScheduler).
+
+        This wraps the async task and tracks it for cancellation during shutdown.
+
+        Parameters
+        ----------
+        agent_name
+            The name of the agent to run
+        """
+        # Use the stored event loop
+        if self._event_loop is None:
+            print(f"[red]Error: Event loop not initialized for agent {agent_name!r}[/red]")
+            return
+
+        # Create async task in the main event loop
+        task = self._event_loop.create_task(self._run_agent_task(agent_name))
+
+        # Track the task
+        self.running_tasks.add(task)
+
+        # Remove from tracking when done
+        task.add_done_callback(self.running_tasks.discard)
 
     def setup_jobs(self) -> None:
         """Set up scheduled jobs for all agents with schedules."""
@@ -101,8 +132,18 @@ class AgentScheduler:
         frame
             The current stack frame
         """
-        print(f"\n[yellow]Received signal {signum}, shutting down...[/yellow]")
-        self.shutdown_event.set()
+        self._shutdown_count += 1
+
+        if self._shutdown_count == 1:
+            print(f"\n[yellow]Received signal {signum}, shutting down gracefully...[/yellow]")
+            print("[yellow]Waiting up to 10 seconds for running agents to complete...[/yellow]")
+            print("[dim]Press Ctrl+C again to force immediate shutdown[/dim]")
+            self.shutdown_event.set()
+        else:
+            print(f"\n[red]Received signal {signum} again, forcing immediate shutdown![/red]")
+            self._force_shutdown.set()
+            # Force exit
+            sys.exit(1)
 
     async def start(self) -> None:
         """Start the scheduler and run indefinitely."""
@@ -128,12 +169,67 @@ class AgentScheduler:
         print("\n[bold green]Scheduler started successfully[/bold green]")
         print("Press Ctrl+C to stop\n")
 
+        # Start the scheduler with the current event loop
         self.scheduler.start()
+
+        # Store the event loop for job execution
+        self._event_loop = asyncio.get_running_loop()
 
         try:
             # Wait for shutdown signal
             await self.shutdown_event.wait()
         finally:
             print("[yellow]Shutting down scheduler...[/yellow]")
-            self.scheduler.shutdown(wait=True)
+
+            # Shutdown scheduler immediately (don't wait for jobs)
+            self.scheduler.shutdown(wait=False)
+
+            # Cancel all running agent tasks
+            if self.running_tasks:
+                task_count = len(self.running_tasks)
+                print(f"[yellow]Cancelling {task_count} running agent task(s)...[/yellow]")
+
+                for task in self.running_tasks:
+                    task.cancel()
+
+                # Wait for tasks with timeout and progress
+                if self.running_tasks:
+                    timeout = 10.0
+                    start_time = asyncio.get_event_loop().time()
+
+                    # Create a task to wait for all running tasks
+                    gather_task = asyncio.gather(*self.running_tasks, return_exceptions=True)
+
+                    # Progress bar loop
+                    while not gather_task.done():
+                        elapsed = asyncio.get_event_loop().time() - start_time
+                        remaining = max(0, timeout - elapsed)
+
+                        if remaining <= 0 or self._force_shutdown.is_set():
+                            # Timeout or forced shutdown
+                            if not self._force_shutdown.is_set():
+                                print("\n[red]Timeout reached, forcing shutdown[/red]")
+                            gather_task.cancel()
+                            break
+
+                        # Show progress bar
+                        progress = elapsed / timeout
+                        bar_width = 40
+                        filled = int(bar_width * progress)
+                        bar = "█" * filled + "░" * (bar_width - filled)
+                        print(
+                            f"\r[yellow]Waiting: [{bar}] {remaining:.1f}s remaining[/yellow]",
+                            end="",
+                            flush=True,
+                        )
+
+                        # Short sleep to not spam the console
+                        try:
+                            await asyncio.wait_for(asyncio.shield(gather_task), timeout=0.1)
+                            break  # Tasks completed
+                        except TimeoutError:
+                            continue  # Keep waiting and updating progress
+
+                    print()  # New line after progress bar
+
             print("[green]Scheduler stopped[/green]")

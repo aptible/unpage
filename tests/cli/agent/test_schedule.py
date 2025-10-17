@@ -1,5 +1,6 @@
 """Tests for the agent schedule CLI command."""
 
+import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -118,8 +119,15 @@ async def test_run_scheduled_agent(tmp_path: Path, scheduled_agent_yaml: str) ->
         scheduler = AgentScheduler()
         scheduler.load_scheduled_agents()
 
-        # Run the scheduled agent
-        await scheduler.run_scheduled_agent("test-agent")
+        # Set the event loop (normally done in start())
+        scheduler._event_loop = asyncio.get_running_loop()
+
+        # Run the scheduled agent (synchronous wrapper)
+        scheduler.run_scheduled_agent("test-agent")
+
+        # Wait for the task to complete
+        if scheduler.running_tasks:
+            await asyncio.gather(*scheduler.running_tasks)
 
         # Verify that the analysis agent was called with an empty payload
         mock_instance.acall.assert_called_once()
@@ -177,3 +185,53 @@ tools:
         # No jobs should be created due to invalid cron
         jobs = scheduler.scheduler.get_jobs()
         assert len(jobs) == 0
+
+
+@pytest.mark.asyncio
+async def test_scheduler_cancels_running_tasks_on_shutdown(
+    tmp_path: Path, scheduled_agent_yaml: str
+) -> None:
+    """Test that running tasks are cancelled during shutdown."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "test-agent.yaml").write_text(scheduled_agent_yaml)
+
+    with (
+        patch("unpage.agent.utils.manager.get_active_profile_directory", return_value=tmp_path),
+        patch("unpage.agent.utils.manager.get_active_profile", return_value="test"),
+        patch("unpage.agent.scheduler.AnalysisAgent") as mock_analysis_agent,
+    ):
+        # Mock a long-running agent that we can cancel
+        mock_instance = AsyncMock()
+
+        async def long_running_task(*args, **kwargs):
+            await asyncio.sleep(10)  # Simulate long task
+            return "Should not complete"
+
+        mock_instance.acall = AsyncMock(side_effect=long_running_task)
+        mock_analysis_agent.return_value = mock_instance
+
+        scheduler = AgentScheduler()
+        scheduler.load_scheduled_agents()
+
+        # Set the event loop (normally done in start())
+        scheduler._event_loop = asyncio.get_running_loop()
+
+        # Start a task
+        scheduler.run_scheduled_agent("test-agent")
+
+        # Give it a moment to start
+        await asyncio.sleep(0.1)
+
+        # Verify task is running
+        assert len(scheduler.running_tasks) == 1
+
+        # Simulate shutdown by cancelling tasks
+        for task in scheduler.running_tasks:
+            task.cancel()
+
+        # Wait for cancellation
+        await asyncio.gather(*scheduler.running_tasks, return_exceptions=True)
+
+        # Task should be cancelled
+        assert all(task.cancelled() or task.done() for task in scheduler.running_tasks)
