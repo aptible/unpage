@@ -154,10 +154,11 @@ plugins:
   azure:
     enabled: true
     # Optional: specify subscription details
-    subscriptions:
-      default:
-        subscription_id: "your-subscription-id"
-        tenant_id: "your-tenant-id"  # Optional
+    settings:
+      subscriptions:
+        default:
+          subscription_id: "your-subscription-id"
+          tenant_id: "your-tenant-id"  # Optional
 ```
 
 If no subscription is specified, the plugin will use the default subscription from your Azure credentials.
