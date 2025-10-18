@@ -117,7 +117,7 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             "> The GCP plugin will add resources from Google Cloud Platform to your knowledge graph"
         )
         rich.print(
-            "> You can configure multiple GCP projects and choose from different authentication methods"
+            "> You can select a GCP project and choose from different authentication methods"
         )
         rich.print("")
 
@@ -129,14 +129,15 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         if "adc" in available_auth_methods:
             auth_choices.append(
                 Choice(
-                    "adc", "Application Default Credentials (recommended for cloud environments)"
+                    "Application Default Credentials (recommended for cloud environments)",
+                    value="adc",
                 )
             )
         if "gcloud" in available_auth_methods:
             auth_choices.append(
-                Choice("gcloud", "gcloud CLI credentials (recommended for local development)")
+                Choice("gcloud CLI credentials (recommended for local development)", value="gcloud")
             )
-        auth_choices.append(Choice("service_account", "Service account key file"))
+        auth_choices.append(Choice("Service account key file", value="service_account"))
 
         selected_auth_method = "adc"  # default
         if auth_choices and await confirm(
@@ -184,32 +185,39 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         if selected_auth_method == "gcloud":
             default_project_id = get_gcloud_default_project()
 
-        # Select projects
+        # Select project (single project only)
         selected_projects = []
         if available_projects:
             if await confirm(
-                f"Found {len(available_projects)} projects. Would you like to select projects to include?",
+                f"Found {len(available_projects)} projects. Would you like to select a project?",
                 default=True,
             ):
-                # Allow multi-select
-                from unpage.utils import checkbox
-
+                # Build choices with default selection
                 project_choices = [
                     Choice(
-                        p["projectId"],
                         f"{p['name']} ({p['projectId']})",
-                        checked=(p["projectId"] == default_project_id),
+                        value=p["projectId"],
                     )
                     for p in available_projects
                 ]
 
-                selected_project_ids = await checkbox(
-                    "Select the GCP projects to include (use space to select/deselect):",
+                # Find default choice
+                default_choice = None
+                if default_project_id:
+                    for choice in project_choices:
+                        if choice.value == default_project_id:
+                            default_choice = choice
+                            break
+
+                selected_project_id = await select(
+                    "Select a GCP project:",
                     choices=project_choices,
+                    default=default_choice or (project_choices[0] if project_choices else None),
                 )
 
+                # Find the selected project
                 selected_projects = [
-                    p for p in available_projects if p["projectId"] in selected_project_ids
+                    p for p in available_projects if p["projectId"] == selected_project_id
                 ]
         else:
             # Manual project entry
@@ -227,20 +235,9 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
                         }
                     ]
 
-        # Ask about region filtering
-        region_filter = None
-        if selected_projects and await confirm(
-            "Would you like to limit scanning to specific regions? (default: all regions)",
-            default=False,
-        ):
-            regions_input = await questionary.text(
-                "Enter comma-separated region names (e.g., us-central1,us-east1):",
-                default="",
-            ).unsafe_ask_async()
-            if regions_input:
-                region_filter = [r.strip() for r in regions_input.split(",") if r.strip()]
-
         # Build the settings
+        # Note: Region filtering is not exposed in interactive config
+        # Users can manually edit config.yaml to restrict regions if needed
         projects_config = {}
         for project in selected_projects:
             project_id = project["projectId"]
@@ -249,12 +246,24 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
                 project_id=project_id,
                 auth_method=selected_auth_method,
                 service_account_key_path=service_account_key_path,
-                regions=region_filter,
+                regions=None,  # Scan all regions by default
             )
 
-        # If no projects selected, create a default one
+        # If no projects selected, create a default one with the default project ID if available
         if not projects_config:
+            # Try to get the default project ID
+            fallback_project_id = default_project_id
+            if not fallback_project_id and selected_auth_method == "adc":
+                # For ADC, try to get quota_project_id from credentials
+                try:
+                    if hasattr(credentials, "quota_project_id") and credentials.quota_project_id:
+                        fallback_project_id = credentials.quota_project_id
+                except Exception:  # noqa: S110
+                    pass
+
             projects_config[DEFAULT_GCP_PROJECT_NAME] = GcpProject(
+                name=DEFAULT_GCP_PROJECT_NAME,
+                project_id=fallback_project_id,
                 auth_method=selected_auth_method,
                 service_account_key_path=service_account_key_path,
             )
@@ -653,7 +662,7 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
 
         async with swallow_gcp_api_errors("cloudfunctions", None):
             async for function in paginate_gcp_api(
-                v2_url, project.credentials, items_key="functions"
+                v2_url, project.credentials, items_key="functions", page_size_param="pageSize"
             ):
                 await graph.add_node(
                     GcpCloudFunction(
@@ -672,7 +681,7 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
 
         async with swallow_gcp_api_errors("cloudfunctions", None):
             async for function in paginate_gcp_api(
-                v1_url, project.credentials, items_key="functions"
+                v1_url, project.credentials, items_key="functions", page_size_param="pageSize"
             ):
                 # Skip if we already have this function from v2
                 function_name = function["name"].split("/")[-1]
@@ -707,7 +716,9 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         url = f"https://run.googleapis.com/v2/projects/{project_id}/locations/-/services"
 
         async with swallow_gcp_api_errors("run", None):
-            async for service in paginate_gcp_api(url, project.credentials, items_key="services"):
+            async for service in paginate_gcp_api(
+                url, project.credentials, items_key="services", page_size_param="pageSize"
+            ):
                 await graph.add_node(
                     GcpCloudRunService(
                         node_id=f"gcp:run:service:{service['name'].split('/')[-1]}",

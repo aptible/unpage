@@ -202,8 +202,18 @@ async def paginate_gcp_api(
     params: dict | None = None,
     items_key: str = "items",
     max_results_per_page: int = 100,
+    page_size_param: str = "maxResults",
 ) -> AsyncIterator[dict]:
-    """Paginate through GCP API results."""
+    """Paginate through GCP API results.
+
+    Args:
+        url: The API endpoint URL
+        credentials: GCP credentials
+        params: Additional query parameters
+        items_key: The key in the response containing the items list
+        max_results_per_page: Maximum results per page
+        page_size_param: The parameter name for page size (e.g., "maxResults" or "pageSize")
+    """
 
     # Get access token
     if not credentials.valid:
@@ -216,7 +226,7 @@ async def paginate_gcp_api(
     if params is None:
         params = {}
 
-    params["maxResults"] = max_results_per_page
+    params[page_size_param] = max_results_per_page
     page_token = None
 
     async with aiohttp.ClientSession() as session:

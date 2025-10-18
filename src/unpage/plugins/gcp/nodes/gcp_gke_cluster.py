@@ -214,6 +214,14 @@ class GcpGkeNodePool(GcpNode, HasMetrics):
         if cluster_name:
             refs.append((cluster_name, "belongs_to_cluster"))
 
+        # Reference to kubernetes nodes that belong to this pool
+        # Kubernetes nodes extract their pool name as an identifier
+        # e.g., "gk3-online-boutique-pool-1-xxx" extracts "pool-1"
+        # e.g., "gk3-online-boutique-nap-15nmc7v2-xxx" extracts "nap-15nmc7v2"
+        pool_name = self.raw_data.get("name")
+        if pool_name:
+            refs.append((pool_name, "contains_nodes"))
+
         return refs
 
     async def list_available_metrics(self) -> list[str]:

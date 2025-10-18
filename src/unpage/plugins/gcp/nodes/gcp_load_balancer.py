@@ -1,5 +1,6 @@
 """Google Cloud Load Balancer nodes."""
 
+import json
 from typing import TYPE_CHECKING
 
 from unpage.knowledge import HasMetrics
@@ -223,6 +224,20 @@ class GcpTargetPool(GcpNode):
             if health_check:
                 check_id = health_check.split("/")[-1]
                 refs.append((check_id, "uses_health_check"))
+
+        # Parse Kubernetes service reference from description
+        # GKE creates target pools with descriptions like:
+        # {"kubernetes.io/service-name":"namespace/service-name"}  # noqa: ERA001
+        description = self.raw_data.get("description", "")
+        if description and "kubernetes.io/service-name" in description:
+            try:
+                desc_data = json.loads(description)
+                k8s_service = desc_data.get("kubernetes.io/service-name")
+                if k8s_service:
+                    # Format: "namespace/service-name"  # noqa: ERA001
+                    refs.append((k8s_service, "load_balances_service"))
+            except (json.JSONDecodeError, KeyError):
+                pass
 
         return refs
 
