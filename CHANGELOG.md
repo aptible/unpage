@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.43 (2025-10-17)
+
+### Features
+
+- Plugin for posting updates to a Slack channel [SC-34358]
+  ([#220](https://github.com/aptible/unpage/pull/220),
+  [`ba4e3c6`](https://github.com/aptible/unpage/commit/ba4e3c6a611ec8ed8a5b4eaf453b851769365ca8))
+
+
 ## v0.1.0-alpha.42 (2025-10-17)
 
 ### Features
