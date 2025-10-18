@@ -43,7 +43,8 @@ repos:
     hooks:
       # Check for type errors.
       - id: pyright
-        entry: uv run --active pyright
+        entry: uv run --active pyright --project=pyproject.toml
+        pass_filenames: false
         exclude: |
             (?x)^
             pinned_hatchling_backend.py$
