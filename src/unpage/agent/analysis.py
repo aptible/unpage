@@ -98,8 +98,8 @@ class SelectAgent(dspy.Signature):
 
 
 class Analyze(dspy.Signature):
-    payload: str = dspy.InputField(description="The alert payload to triage")
-    analysis: str = dspy.OutputField(description="The triage analysis of the alert payload")
+    payload: str = dspy.InputField(description="The task input, if provided")
+    analysis: str = dspy.OutputField(description="The task output")
 
 
 class AnalysisAgent(dspy.Module):

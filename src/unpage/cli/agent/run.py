@@ -114,13 +114,6 @@ async def run(
         # Otherwise, use the payload argument.
         data = payload
 
-    if not data:
-        print("[red]No payload provided.[/red]")
-        print(
-            "[bold]Pass an alert payload as an argument or pipe the payload data to stdin.[/bold]"
-        )
-        sys.exit(1)
-
     # Get the config directory and load the specific agent
     try:
         agent = load_agent(agent_name)
@@ -129,10 +122,17 @@ async def run(
         print(f"[bold]Use 'unpage agent create {agent_name!r}' to create a new agent.[/bold]")
         sys.exit(1)
 
+    if not data and not agent.schedule:
+        print("[red]No payload provided.[/red]")
+        print(
+            "[bold]Pass an alert payload as an argument or pipe the payload data to stdin.[/bold]"
+        )
+        sys.exit(1)
+
     # Run the analysis with the specific agent
     analysis_agent = AnalysisAgent()
     try:
-        result = await analysis_agent.acall(payload=data, agent=agent)
+        result = await analysis_agent.acall(payload=data or "", agent=agent)
         print(result)
     except Exception as ex:
         print(f"[red]Analysis failed:[/red] {ex}")
