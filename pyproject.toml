@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aioboto3>=14.1.0",
     "anyio>=4.9.0",
+    "apscheduler>=3.11.0",
     "azure-identity>=1.15.0",
     "azure-mgmt-compute>=29.0.0",
     "azure-mgmt-cosmosdb>=8.0.0",

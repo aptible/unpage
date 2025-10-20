@@ -22,6 +22,7 @@ unpage agent [OPTIONS] COMMAND [ARGS]...
 | `quickstart` | Get up-and-running with an incident agent in \<5min! |
 | `route` | Determine which agent will be used to analyze the given payload |
 | `run` | Run an agent with the provided payload and print the analysis |
+| `schedule` | Start the agent scheduler to run agents on a periodic schedule |
 | `serve` | Run the Unpage Agent server to automatically process incoming alerts |
 | `templates` | List the available agent templates |
 
@@ -126,6 +127,136 @@ unpage agent run my-agent @path/to/payload.json
 unpage agent run my-agent '{"alert": "Disk usage exceeds 80%"}'
 ```
 
+
+## Subcommand: schedule
+
+Starts the agent scheduler daemon, which runs agents on a periodic schedule according to their cron expressions. This enables "background chores" like cost optimization reports, security audits, and other maintenance tasks that should run automatically on a schedule.
+
+### Usage
+
+```shell
+unpage agent schedule [OPTIONS]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--profile TEXT` | Use profiles to manage multiple configurations [env var: UNPAGE_PROFILE] [default: default] |
+| `-h, --help` | Show help message and exit |
+
+### Configuring Scheduled Agents
+
+To schedule an agent, add a `schedule` section to your agent YAML file with a cron expression:
+
+```yaml
+description: Run monthly cost optimization checks
+
+schedule:
+  cron: "0 10 2 * *"  # At 10:00 AM on the 2nd day of every month
+
+prompt: >
+  Analyze infrastructure costs and identify optimization opportunities.
+  Use available tools to get cost data and generate recommendations.
+
+tools:
+  - "aws_*"
+  - "graph_*"
+```
+
+<Note>
+Scheduled agents run with no input payload, so make sure your agent prompt specifies how to get any required inputs (e.g., via tool calls).
+</Note>
+
+### Cron Expression Format
+
+Unpage supports multiple cron formats for maximum flexibility:
+
+#### Standard 5-field format (minute precision)
+
+```
+┌───────────── minute (0 - 59)
+│ ┌───────────── hour (0 - 23)
+│ │ ┌───────────── day of month (1 - 31)
+│ │ │ ┌───────────── month (1 - 12)
+│ │ │ │ ┌───────────── day of week (0 - 6) (Sunday to Saturday)
+│ │ │ │ │
+* * * * *
+```
+
+#### Extended 6-field format (second precision)
+
+```
+┌───────────── second (0 - 59)
+│ ┌───────────── minute (0 - 59)
+│ │ ┌───────────── hour (0 - 23)
+│ │ │ ┌───────────── day of month (1 - 31)
+│ │ │ │ ┌───────────── month (1 - 12)
+│ │ │ │ │ ┌───────────── day of week (0 - 6) (Sunday to Saturday)
+│ │ │ │ │ │
+* * * * * *
+```
+
+#### Cron Aliases
+
+For convenience, you can use these aliases instead of full cron expressions:
+
+- `@hourly` - Run every hour (equivalent to `0 * * * *`)
+- `@daily` - Run daily at midnight (equivalent to `0 0 * * *`)
+- `@weekly` - Run weekly on Sunday at midnight (equivalent to `0 0 * * 0`)
+- `@monthly` - Run monthly on the 1st at midnight (equivalent to `0 0 1 * *`)
+- `@yearly` or `@annually` - Run yearly on January 1st at midnight (equivalent to `0 0 1 1 *`)
+
+### Examples
+
+```shell
+# Start the scheduler (runs all agents with schedules)
+unpage agent schedule
+```
+
+#### Standard 5-field patterns (minute precision)
+
+```yaml
+schedule:
+  cron: "0 * * * *"       # Every hour at minute 0
+  cron: "*/15 * * * *"    # Every 15 minutes
+  cron: "0 0 * * *"       # Daily at midnight
+  cron: "0 0 * * 0"       # Weekly on Sunday at midnight
+  cron: "0 0 1 * *"       # Monthly on the 1st at midnight
+  cron: "0 9 * * 1-5"     # Weekdays at 9 AM
+  cron: "*/1 * * * *"     # Every minute
+```
+
+#### Extended 6-field patterns (second precision)
+
+```yaml
+schedule:
+  cron: "*/2 * * * * *"   # Every 2 seconds
+  cron: "*/10 * * * * *"  # Every 10 seconds
+  cron: "0 */30 * * * *"  # Every 30 seconds (at 0, 30 seconds of each minute)
+  cron: "*/5 */1 * * * *" # Every 5 seconds of every minute
+```
+
+#### Using aliases
+
+```yaml
+schedule:
+  cron: "@hourly"   # Every hour
+  cron: "@daily"    # Daily at midnight
+  cron: "@weekly"   # Weekly on Sunday at midnight
+  cron: "@monthly"  # Monthly on the 1st at midnight
+```
+
+### Scheduler Functionality
+
+When running, the scheduler:
+
+1. Loads all agents from your profile that have a `schedule` configuration
+2. Sets up cron jobs for each scheduled agent
+3. Runs agents automatically according to their schedules
+4. Logs the output of each agent run
+
+Press Ctrl+C to stop the scheduler.
 
 ## Subcommand: serve
 

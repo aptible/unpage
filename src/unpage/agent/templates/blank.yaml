@@ -4,6 +4,20 @@ description: >
 
     - ...
 
+# Optional configuration for periodically running the agent on a schedule.
+# The agent will receive no input. Make sure to specify in your prompt how the agent should
+# get any inputs it will need (e.g., via tool calls).
+#
+# Supported formats:
+# - Standard 5-field: minute hour day month day_of_week (e.g., "0 10 2 * *")
+# - Extended 6-field: second minute hour day month day_of_week (e.g., "*/30 * * * * *")
+# - Aliases: @hourly, @daily, @weekly, @monthly, @yearly
+#
+# schedule:
+#   cron: "0 10 2 * *"      # Monthly on the 2nd at 10am
+#   cron: "*/30 * * * * *"  # Every 30 seconds
+#   cron: "@daily"          # Daily at midnight
+
 # Instructions for the agent for investigating the alert.
 prompt: >
   ...
