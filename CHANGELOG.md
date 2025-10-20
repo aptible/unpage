@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.44 (2025-10-20)
+
+### Features
+
+- Agents can run on a schedule [SC-34625] ([#173](https://github.com/aptible/unpage/pull/173),
+  [`571fd72`](https://github.com/aptible/unpage/commit/571fd7299f53cc9b3aa63717934b5c145cc262d8))
+
+
 ## v0.1.0-alpha.43 (2025-10-17)
 
 ### Features
