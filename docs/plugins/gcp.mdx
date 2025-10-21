@@ -1,0 +1,276 @@
+---
+title: GCP
+---
+
+The [Google Cloud Platform](https://cloud.google.com/) plugin provides access to the following
+resources from GCP:
+
+<AccordionGroup>
+  <Accordion title="Knowledge Graph nodes" icon="diagram-project">
+    - Compute Engine Instances
+    - Persistent Disks
+    - Cloud SQL Instances
+    - Cloud Storage Buckets
+    - Load Balancers (URL Maps)
+    - Backend Services
+    - Target Pools
+    - GKE Clusters and Node Pools
+    - Cloud Functions (v1 and v2)
+    - Cloud Run Services
+  </Accordion>
+
+  <Accordion title="Metrics" icon="chart-line">
+    **Compute Engine Instances:**
+    - CPU Utilization
+    - CPU Usage Time
+    - Disk Read/Write Bytes
+    - Disk Read/Write Operations
+    - Network Received/Sent Bytes
+    - Network Received/Sent Packets
+    - Memory Balloon RAM Used/Size
+
+    **Cloud SQL Instances:**
+    - CPU Utilization
+    - CPU Usage Time
+    - Disk Bytes Used/Quota
+    - Disk Read/Write Operations
+    - Memory Utilization/Usage/Quota
+    - Network Connections
+    - Network Received/Sent Bytes
+    - Replication Replica Lag
+    - Database Uptime
+  </Accordion>
+
+  <Accordion title="MCP Tools" icon="wrench">
+    - **get_realtime_compute_instance_status**: Get real-time status information for a Compute Engine instance
+    - **get_cloud_sql_instance_status**: Get status information for a Cloud SQL database instance
+  </Accordion>
+</AccordionGroup>
+
+
+## Prerequisites
+
+You should have GCP credentials configured through one of the following methods:
+
+- **gcloud CLI**: Use `gcloud auth login` to authenticate with the [gcloud CLI](https://cloud.google.com/sdk/gcloud) (recommended for local development)
+- **Application Default Credentials (ADC)**: Recommended for cloud environments, set up using `gcloud auth application-default login`
+- **Service Account Key File**: Create and download a service account key file from the GCP Console
+
+The plugin follows the [standard GCP credential provider chain](https://cloud.google.com/docs/authentication/application-default-credentials).
+
+### Required Permissions
+
+The GCP plugin requires read-only access to various GCP resources. Below is the recommended IAM (Identity and Access Management) configuration.
+
+#### Option 1: Use Built-in Viewer Role (Recommended for Getting Started)
+
+The simplest approach is to assign the built-in **Viewer** role at the project level:
+
+```bash
+# Get your project ID
+PROJECT_ID=$(gcloud config get-value project)
+
+# Assign Viewer role to your service account or user
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:YOUR-SERVICE-ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/viewer
+```
+
+This provides read access to all resources in the project, which is sufficient for the plugin to build the knowledge graph and retrieve metrics.
+
+#### Option 2: Custom Role with Minimal Permissions (Recommended for Production)
+
+For production environments, create a custom role with only the permissions needed by Unpage:
+
+```yaml
+title: "Unpage Reader"
+description: "Minimal read-only permissions for Unpage infrastructure knowledge graph"
+stage: "GA"
+includedPermissions:
+  # Compute Engine
+  - compute.instances.get
+  - compute.instances.list
+  - compute.disks.get
+  - compute.disks.list
+  - compute.regions.list
+  - compute.zones.list
+  - compute.urlMaps.get
+  - compute.urlMaps.list
+  - compute.backendServices.get
+  - compute.backendServices.list
+  - compute.targetPools.get
+  - compute.targetPools.list
+
+  # Cloud SQL
+  - cloudsql.instances.get
+  - cloudsql.instances.list
+
+  # Cloud Storage
+  - storage.buckets.get
+  - storage.buckets.list
+
+  # GKE
+  - container.clusters.get
+  - container.clusters.list
+
+  # Cloud Functions
+  - cloudfunctions.functions.get
+  - cloudfunctions.functions.list
+
+  # Cloud Run
+  - run.services.get
+  - run.services.list
+
+  # Cloud Monitoring (for metrics)
+  - monitoring.timeSeries.list
+
+  # Cloud Logging (for logs)
+  - logging.logEntries.list
+
+  # Resource Manager
+  - resourcemanager.projects.get
+```
+
+To create and assign this custom role:
+
+```bash
+# Save the YAML above to a file named unpage-reader-role.yaml
+
+# Create the custom role
+gcloud iam roles create unpageReader \
+  --project=$PROJECT_ID \
+  --file=unpage-reader-role.yaml
+
+# Assign the custom role
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:YOUR-SERVICE-ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=projects/$PROJECT_ID/roles/unpageReader
+```
+
+#### Permissions Breakdown
+
+The custom role includes permissions for:
+
+- **Compute Engine**: Read access to VM instances, persistent disks, and load balancing resources
+- **Cloud SQL**: Read access to database instances
+- **Cloud Storage**: Read access to storage buckets
+- **GKE**: Read access to Kubernetes clusters
+- **Cloud Functions**: Read access to serverless functions
+- **Cloud Run**: Read access to containerized services
+- **Cloud Monitoring**: Read access to metrics for all resources
+- **Cloud Logging**: Read access to logs for all resources
+- **Resource Manager**: List and read project information
+
+These permissions are read-only and follow the principle of least privilege.
+
+
+## Configuration
+
+Configure the GCP plugin by running `uv run unpage configure` or by editing
+the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  gcp:
+    enabled: true
+    # Optional: specify project details
+    settings:
+      projects:
+        my-project:
+          name: "My GCP Project"
+          project_id: "my-project-id"
+          auth_method: "gcloud"  # Options: "gcloud", "adc", "service_account"
+          # Optional: path to service account key file (required if auth_method is "service_account")
+          # service_account_key_path: "/path/to/service-account-key.json"
+          # Optional: restrict to specific regions (defaults to all regions)
+          # regions:
+          #   - "us-central1"
+          #   - "us-east1"
+```
+
+If no project is specified, the plugin will use the default project from your gcloud configuration.
+
+### Authentication Methods
+
+- **`gcloud`**: Uses credentials from the gcloud CLI (recommended for local development)
+- **`adc`**: Uses Application Default Credentials (recommended for cloud environments)
+- **`service_account`**: Uses a service account key file (requires `service_account_key_path`)
+
+## Tools
+
+The GCP plugin provides the following tools to Agents and MCP Clients:
+
+<Card title="get_realtime_compute_instance_status">
+  Get real-time status information for a Compute Engine instance directly from GCP API.
+
+  **Arguments**
+  <ParamField path="instance_name" type="string" required>
+    The Compute Engine instance name.
+  </ParamField>
+  <ParamField path="zone" type="string" required>
+    The GCP zone where the instance is located (e.g., "us-central1-a").
+  </ParamField>
+  <ParamField path="project_id" type="string">
+    The GCP project ID. If not provided, uses the default project from configuration.
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing instance status information or an error message if the instance couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "name": "my-instance",
+    "status": "RUNNING",
+    "machineType": "e2-medium",
+    "zone": "us-central1-a",
+    "cpuPlatform": "Intel Broadwell",
+    "networkInterfaces": [
+      {
+        "networkIP": "10.128.0.2",
+        "accessConfigs": [
+          {
+            "natIP": "34.123.45.67"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+</Card>
+<br />
+
+<Card title="get_cloud_sql_instance_status">
+  Get status information for a Cloud SQL database instance.
+
+  **Arguments**
+  <ParamField path="instance_name" type="string" required>
+    The Cloud SQL instance name.
+  </ParamField>
+  <ParamField path="project_id" type="string">
+    The GCP project ID. If not provided, uses the default project from configuration.
+  </ParamField>
+
+  **Returns** `dict | string`: A dictionary containing database instance status and configuration details or an error message if the instance couldn't be found.
+
+  Example response:
+  ```json
+  {
+    "name": "my-database",
+    "state": "RUNNABLE",
+    "databaseVersion": "POSTGRES_14",
+    "region": "us-central1",
+    "settings": {
+      "tier": "db-f1-micro",
+      "dataDiskSizeGb": 10,
+      "availabilityType": "ZONAL"
+    },
+    "ipAddresses": [
+      {
+        "type": "PRIMARY",
+        "ipAddress": "10.1.2.3"
+      }
+    ]
+  }
+  ```
+</Card>

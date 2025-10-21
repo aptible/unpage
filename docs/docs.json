@@ -63,6 +63,7 @@
           "plugins/aptible",
           "plugins/aws",
           "plugins/azure",
+          "plugins/gcp",
           "plugins/core",
           "plugins/datadog",
           "plugins/github",
