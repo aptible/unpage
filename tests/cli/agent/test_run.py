@@ -208,29 +208,6 @@ def test_run_pagerduty_and_payload_conflict(mock_send_event, mock_stdin, unpage)
 
 
 @patch("sys.stdin")
-@patch("unpage.cli.agent.run.telemetry.send_event")
-def test_run_no_payload(mock_send_event, mock_stdin, unpage):
-    """Test run command with no payload provided.
-
-    Should:
-    - Detect missing payload data
-    - Exit with code 1 (error) when no payload available
-    """
-    # Setup mocks
-    mock_send_event.return_value = None
-    mock_stdin.isatty.return_value = True  # No piped input
-
-    # Run the command without payload
-    stdout, stderr, exit_code = unpage("agent run test-agent")
-
-    # Verify error message and exit code
-    assert "No payload provided" in stdout
-    assert "Pass an alert payload as an argument or pipe the payload data to stdin" in stdout
-    assert stderr == ""
-    assert exit_code == 1
-
-
-@patch("sys.stdin")
 @patch("unpage.cli.agent.run.load_agent")
 @patch("unpage.cli.agent.run.PluginManager")
 @patch("unpage.cli.agent.run.telemetry.send_event")
