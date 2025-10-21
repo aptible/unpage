@@ -1,0 +1,53 @@
+# Edit the list of criteria in this description.
+description: >
+  Use this agent to run a periodic task, like cost optimization, on a schedule
+
+# Optional configuration for periodically running the agent on a schedule. Uses standard cron syntax.
+# The agent will receive no input. Make sure to specify in your prompt how the agent should
+# get any inputs it will need (e.g., via tool calls).
+schedule:
+  cron: "0 10 2 * *"  # On the 2nd of every month at 10am
+
+# Instructions for the agent for investigating the alert.
+prompt: >
+  This agent runs a periodic task on a schedule. It does not receive any input.
+
+  You should use available tools to perform the task, and you should log your
+  actions and results.
+
+  You should NEVER make up information. If any of the information required for
+  your task is unclear, you should state that it is unclear and that you
+  will defer to a human to make a final determination.
+
+# The tools the agent has access to. Accepts wildcards (e.g. "graph_*"). You can
+# also use regex patterns by surrounding the pattern in slashes (e.g. "/^graph_.*/").
+#
+# Use this to list all tools:
+#
+#    unpage mcp tools list
+#
+tools:
+  # - "aws_get_realtime_instance_status"
+  # - "aws_get_realtime_instance_status_by_node"
+  - "core_calculate"
+  - "core_convert_to_timezone"
+  - "core_current_datetime"
+  # - "datadog_search_logs"
+  - "graph_get_neighboring_resources"
+  - "graph_get_resource_details"
+  - "graph_get_resource_map"
+  - "graph_get_resource_topology"
+  - "graph_search_resources"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "metrics_list_node_types_that_support_metrics"
+  - "networking_dig"
+  - "networking_ping"
+  - "networking_request_url"
+  - "networking_traceroute"
+  - "pagerduty_get_alert_details_for_incident"
+  - "pagerduty_get_incident_details"
+  - "pagerduty_post_status_update"
+  # - "pagerduty_resolve_incident"
+  # - "papertrail_search_logs"
+  # - "solarwinds_search_logs"

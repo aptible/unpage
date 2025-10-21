@@ -26,6 +26,17 @@ class AgentTestPayload(BaseModel):
     payload: str = Field(description="The test payload to use")
 
 
+class AgentSchedule(BaseModel):
+    cron: str = Field(
+        description=(
+            "Cron expression for scheduling the agent. Supports:\n"
+            "- Standard 5-field: minute hour day month day_of_week (e.g., '0 10 2 * *')\n"
+            "- Extended 6-field: second minute hour day month day_of_week (e.g., '*/2 * * * * *' for every 2 seconds)\n"
+            "- Aliases: @hourly, @daily, @weekly, @monthly, @yearly, @annually"
+        )
+    )
+
+
 class Agent(BaseModel):
     name: str = Field(description="The name of the agent", default="")
     description: str = Field(description="A description of the agent and when it should be used")
@@ -37,6 +48,10 @@ class Agent(BaseModel):
     )
     test_payloads: dict[str, AgentTestPayload] | None = Field(
         description="Test payloads for testing the agent",
+        default=None,
+    )
+    schedule: AgentSchedule | None = Field(
+        description="Optional schedule configuration for periodic agent runs",
         default=None,
     )
 
@@ -83,8 +98,8 @@ class SelectAgent(dspy.Signature):
 
 
 class Analyze(dspy.Signature):
-    payload: str = dspy.InputField(description="The alert payload to triage")
-    analysis: str = dspy.OutputField(description="The triage analysis of the alert payload")
+    payload: str = dspy.InputField(description="The task input, if provided")
+    analysis: str = dspy.OutputField(description="The task output")
 
 
 class AnalysisAgent(dspy.Module):
