@@ -8,11 +8,7 @@ This example shows how to create an Unpage agent that automatically enriches ale
 
 ## Use Case
 
-Your team receives alerts from Datadog, Grafana, or other monitoring tools. You want to:
-- Automatically post alerts to a Slack channel
-- Enrich alerts with additional context from your infrastructure
-- Include relevant metrics, logs, or remediation steps
-- Reduce time spent manually investigating and communicating about incidents
+Post messages to a Slack channel as part of your Unpage agents!
 
 ## Prerequisites
 
@@ -66,7 +62,7 @@ tools:
 
 ## Configure the Slack Plugin
 
-Make sure your Slack plugin is configured with the webhook URL. Run:
+Make sure your Slack plugin is configured with the webhook URL ([slack webhook documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)). Run:
 
 ```bash
 $ unpage configure
