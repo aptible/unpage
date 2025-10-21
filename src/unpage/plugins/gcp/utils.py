@@ -178,17 +178,15 @@ def get_available_auth_methods() -> list[str]:
     """Detect which authentication methods are available."""
     available = []
 
-    # Check for Application Default Credentials
+    # Check for Application Default Credentials (ADC)
+    # This includes credentials from: gcloud auth application-default login,
+    # environment variables, or service accounts on GCP compute resources
     try:
         credentials, _ = default()
         if credentials:
             available.append("adc")
     except exceptions.DefaultCredentialsError:
         pass
-
-    # Check for gcloud CLI
-    if get_gcloud_default_project():
-        available.append("gcloud")
 
     # Service account is always an option if user provides a key file
     available.append("service_account")

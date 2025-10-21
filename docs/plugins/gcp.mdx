@@ -52,8 +52,7 @@ resources from GCP:
 
 You should have GCP credentials configured through one of the following methods:
 
-- **gcloud CLI**: Use `gcloud auth login` to authenticate with the [gcloud CLI](https://cloud.google.com/sdk/gcloud) (recommended for local development)
-- **Application Default Credentials (ADC)**: Recommended for cloud environments, set up using `gcloud auth application-default login`
+- **Application Default Credentials (ADC)**: Set up using `gcloud auth application-default login` (recommended for local development and cloud environments). Requires the [gcloud CLI](https://cloud.google.com/sdk/gcloud) to be installed.
 - **Service Account Key File**: Create and download a service account key file from the GCP Console
 
 The plugin follows the [standard GCP credential provider chain](https://cloud.google.com/docs/authentication/application-default-credentials).
@@ -180,7 +179,7 @@ plugins:
         my-project:
           name: "My GCP Project"
           project_id: "my-project-id"
-          auth_method: "gcloud"  # Options: "gcloud", "adc", "service_account"
+          auth_method: "adc"  # Options: "adc", "service_account"
           # Optional: path to service account key file (required if auth_method is "service_account")
           # service_account_key_path: "/path/to/service-account-key.json"
           # Optional: restrict to specific regions (defaults to all regions)
@@ -193,8 +192,7 @@ If no project is specified, the plugin will use the default project from your gc
 
 ### Authentication Methods
 
-- **`gcloud`**: Uses credentials from the gcloud CLI (recommended for local development)
-- **`adc`**: Uses Application Default Credentials (recommended for cloud environments)
+- **`adc`**: Uses Application Default Credentials (set up via `gcloud auth application-default login`)
 - **`service_account`**: Uses a service account key file (requires `service_account_key_path`)
 
 ## Tools

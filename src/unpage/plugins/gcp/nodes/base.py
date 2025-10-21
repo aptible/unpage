@@ -24,7 +24,7 @@ class GcpProject(BaseModel):
 
     name: str = Field(default=DEFAULT_GCP_PROJECT_NAME)
     project_id: str | None = Field(default=None)
-    auth_method: str = Field(default="adc")  # adc, service_account, gcloud
+    auth_method: str = Field(default="adc")  # adc, service_account
     service_account_key_path: str | None = Field(default=None)
     regions: list[str] | None = Field(default=None)  # None means all regions
 
@@ -37,16 +37,10 @@ class GcpProject(BaseModel):
                 )
             credentials, _ = load_credentials_from_file(self.service_account_key_path)
             return credentials
-        elif self.auth_method == "gcloud":
-            # Try to use gcloud credentials
-            try:
-                # This will use credentials from gcloud auth application-default login
-                credentials, _ = default()
-                return cast("Credentials", credentials)
-            except Exception as e:
-                raise ValueError(f"Failed to load gcloud credentials: {e}") from e
         else:
-            # Default to Application Default Credentials
+            # Default to Application Default Credentials (ADC)
+            # This will use credentials from: gcloud auth application-default login,
+            # environment variables, or service accounts on GCP compute resources
             credentials, _ = default()
             return cast("Credentials", credentials)
 

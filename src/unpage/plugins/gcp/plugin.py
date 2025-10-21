@@ -129,13 +129,9 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         if "adc" in available_auth_methods:
             auth_choices.append(
                 Choice(
-                    "Application Default Credentials (recommended for cloud environments)",
+                    "Application Default Credentials (recommended - uses gcloud auth application-default login)",
                     value="adc",
                 )
-            )
-        if "gcloud" in available_auth_methods:
-            auth_choices.append(
-                Choice("gcloud CLI credentials (recommended for local development)", value="gcloud")
             )
         auth_choices.append(Choice("Service account key file", value="service_account"))
 
@@ -180,10 +176,8 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
             rich.print(f"[red]Failed to list GCP projects: {e}[/red]")
             available_projects = []
 
-        # Get default project for gcloud
-        default_project_id = None
-        if selected_auth_method == "gcloud":
-            default_project_id = get_gcloud_default_project()
+        # Try to get default project from gcloud config if available
+        default_project_id = get_gcloud_default_project()
 
         # Select project (single project only)
         selected_projects = []
@@ -253,7 +247,7 @@ class GcpPlugin(Plugin, KnowledgeGraphMixin, McpServerMixin):
         if not projects_config:
             # Try to get the default project ID
             fallback_project_id = default_project_id
-            if not fallback_project_id and selected_auth_method == "adc":
+            if not fallback_project_id and selected_auth_method != "service_account":
                 # For ADC, try to get quota_project_id from credentials
                 try:
                     if hasattr(credentials, "quota_project_id") and credentials.quota_project_id:
