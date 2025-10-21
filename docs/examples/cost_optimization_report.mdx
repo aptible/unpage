@@ -1,0 +1,396 @@
+---
+title: Scheduled Cost Optimization Reports
+---
+
+Infrastructure costs can spiral out of control without regular oversight. Idle resources,
+oversized instances, forgotten test environments, and unattached volumes quietly drain
+budgets month after month. Most engineering teams know they should review costs regularly,
+but manual audits are time-consuming and often get deprioritized during busy sprints.
+
+What makes cost optimization particularly challenging is the need for consistent, periodic
+review. One-time audits catch current waste but don't prevent future problems. You need
+ongoing monitoring, but dedicating team time to monthly cost reviews is difficult to
+maintain. The investigation follows predictable patterns: identify underutilized resources,
+check for orphaned volumes, review instance sizing, and flag opportunities for savings.
+
+In this example, we'll show how to create a scheduled SRE agent using Unpage that
+automatically generates monthly cost optimization reports, identifying savings opportunities
+in your AWS infrastructure without requiring manual effort.
+
+## Why Schedule This Agent?
+
+Unlike incident response agents that react to alerts, cost optimization benefits from
+proactive, scheduled analysis:
+
+- **Consistent monitoring**: Runs automatically on the same schedule every month
+- **No input needed**: Gathers data directly from your infrastructure using tools
+- **Actionable reports**: Identifies specific resources and potential savings
+- **No alert fatigue**: Generates insights on your schedule, not random alert timing
+
+Scheduled agents are perfect for "background chores" like cost analysis, security audits,
+and compliance checks that should happen regularly but don't require immediate response.
+
+## Creating A Scheduled Cost Optimization Agent
+
+Let's create an agent that runs on the 1st of every month, analyzes your AWS
+infrastructure, and generates a report of cost optimization opportunities.
+
+After [installing Unpage](/), create the agent by running:
+
+```bash
+unpage agent create cost_optimization_monthly
+```
+
+A YAML file will open in your `$EDITOR`. Paste the following agent definition:
+
+```yaml
+description: Generate monthly cost optimization reports for AWS infrastructure
+
+schedule:
+  cron: "0 9 1 * *"  # 9:00 AM on the 1st of every month
+
+prompt: >
+  You are a cost optimization specialist analyzing AWS infrastructure for potential savings.
+
+  Generate a comprehensive monthly cost optimization report by:
+
+  1. Using graph tools to discover all AWS EC2 instances and EBS volumes in the infrastructure
+  2. For each EC2 instance:
+     - Check current instance type and size
+     - Analyze CPU and memory utilization metrics from the past 30 days
+     - Identify instances with consistently low utilization (< 20% average)
+     - Flag instances that appear oversized for their workload
+  3. For EBS volumes:
+     - Identify unattached volumes that are incurring costs
+     - Check for volumes attached to stopped instances
+     - Note volumes larger than 1TB that may warrant review
+  4. Check for:
+     - EC2 instances running in non-production environments
+     - Old snapshots that could be deleted
+     - Resources tagged as 'temporary' or 'test'
+
+  Format your findings as a structured report with:
+  - Executive summary with total estimated monthly savings
+  - Detailed findings organized by opportunity type
+  - Specific resource IDs, current costs, and recommended actions
+  - Priority levels (high, medium, low) for each recommendation
+
+  Be specific with numbers and resource identifiers. Only recommend changes you have
+  data to support. If you cannot access certain data, note that in your report.
+
+  At the end, use the pagerduty_create_incident tool to create a low-priority incident
+  with your report, so the team can review and act on the recommendations.
+
+tools:
+  - "core_current_datetime"
+  - "core_calculate"
+  - "graph_search_resources"
+  - "graph_get_resource_details"
+  - "graph_get_resource_map"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "aws_*"
+  - "pagerduty_create_incident"
+```
+
+Let's break down each section:
+
+### Description: What the agent does
+
+The `description` explains the agent's purpose. For scheduled agents, this helps you
+remember what each agent does when reviewing your list of agents.
+
+### Schedule: When the agent runs
+
+The `schedule` section defines when the agent runs automatically. Unpage supports multiple cron formats:
+
+**Standard 5-field format** (minute precision):
+```yaml
+schedule:
+  cron: "0 9 1 * *"  # 9:00 AM on the 1st of every month
+```
+
+**Extended 6-field format** (second precision):
+```yaml
+schedule:
+  cron: "*/30 * * * * *"  # Every 30 seconds
+```
+
+**Convenient aliases**:
+```yaml
+schedule:
+  cron: "@monthly"  # Same as "0 0 1 * *"
+  cron: "@weekly"   # Same as "0 0 * * 0"
+  cron: "@daily"    # Same as "0 0 * * *"
+  cron: "@hourly"   # Same as "0 * * * *"
+```
+
+Common patterns:
+- `"0 9 1 * *"` - Monthly on the 1st at 9 AM
+- `"0 9 * * 1"` - Weekly on Mondays at 9 AM
+- `"0 0 * * *"` - Daily at midnight
+- `"0 */6 * * *"` - Every 6 hours
+- `"*/2 * * * * *"` - Every 2 seconds (6-field format)
+
+All schedules use UTC timezone. See the [schedule command documentation](/commands/agent#subcommand-schedule) for more details.
+
+### Prompt: What the agent should do
+
+The `prompt` contains detailed instructions for the agent. Since scheduled agents receive
+no input payload, the prompt must specify:
+
+- **How to get data**: Use graph and metrics tools to discover resources
+- **What to analyze**: Clear criteria for identifying cost optimization opportunities
+- **Output format**: Structure for the report
+- **What action to take**: Create a PagerDuty incident with findings
+
+### Tools: What the agent can access
+
+The `tools` section grants permissions to specific infrastructure tools:
+
+- **Graph tools**: Discover and query infrastructure resources
+- **Metrics tools**: Analyze resource utilization over time
+- **AWS tools**: Get detailed information about EC2 instances and volumes
+- **PagerDuty tools**: Create incidents to deliver the report
+
+Use wildcards (`aws_*`) to grant access to all tools from a plugin.
+
+To see all available tools:
+
+```bash
+unpage mcp tools list
+```
+
+## Setting Up Your Infrastructure Graph
+
+For the agent to discover AWS resources, you need to build your infrastructure
+knowledge graph:
+
+```bash
+# Configure AWS plugin
+unpage configure
+
+# Build the graph (discovers all resources)
+unpage graph build
+```
+
+The graph should be rebuilt periodically to stay up-to-date. You can run
+`unpage graph build --interval 3600` to rebuild every hour.
+
+See the [knowledge graph documentation](/concepts/knowledge-graph) for details.
+
+## Running The Scheduler
+
+To start the scheduler and have your agent run automatically on its schedule:
+
+```bash
+unpage agent schedule
+```
+
+This starts a daemon that:
+1. Loads all agents with schedule configurations
+2. Sets up cron jobs for each scheduled agent
+3. Runs agents automatically according to their schedules
+4. Logs output of each agent run
+
+The scheduler runs in the foreground. Press Ctrl+C to stop it.
+
+### Testing Before Scheduling
+
+Before relying on the schedule, test your agent manually:
+
+```bash
+# Run the agent immediately to test it
+unpage agent run cost_optimization_monthly
+```
+
+This runs the agent with no payload (same as the scheduled run) and shows you
+the output. Use this to verify your agent works before putting it on a schedule.
+
+## Example Output
+
+When your scheduled agent runs, it will analyze your infrastructure and create a
+PagerDuty incident with findings like:
+
+```
+Cost Optimization Report - March 2025
+
+EXECUTIVE SUMMARY
+Estimated monthly savings: $2,847
+High priority recommendations: 3
+Medium priority recommendations: 7
+Low priority recommendations: 4
+
+HIGH PRIORITY OPPORTUNITIES
+
+1. Oversized EC2 instances (Est. savings: $1,200/month)
+   - i-0abc123def (t3.2xlarge → t3.large)
+     Current: $0.1664/hr | Recommended: $0.0832/hr
+     CPU utilization: 12% avg over 30 days
+     Memory: 18% avg over 30 days
+
+   - i-0def456ghi (m5.4xlarge → m5.xlarge)
+     Current: $0.768/hr | Recommended: $0.192/hr
+     CPU utilization: 8% avg over 30 days
+     Memory: 15% avg over 30 days
+
+2. Unattached EBS volumes (Est. savings: $847/month)
+   - vol-0abc123 (500 GB gp3) - $40/month
+     Last attached: 45 days ago
+   - vol-0def456 (1 TB gp3) - $80/month
+     Last attached: 87 days ago
+   [... 8 more volumes]
+
+3. Test environment running 24/7 (Est. savings: $800/month)
+   - 4 instances tagged 'environment:test' running continuously
+   - Recommendation: Schedule shutdown during non-business hours
+
+MEDIUM PRIORITY OPPORTUNITIES
+[...]
+```
+
+The incident is created with low priority, so it doesn't wake anyone up but ensures
+the team reviews the recommendations.
+
+## Production Deployment
+
+For production use, run the scheduler as a persistent service:
+
+### Using systemd (Linux)
+
+Create `/etc/systemd/system/unpage-scheduler.service`:
+
+```ini
+[Unit]
+Description=Unpage Agent Scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=unpage
+WorkingDirectory=/home/unpage
+ExecStart=/usr/local/bin/unpage agent schedule
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl enable unpage-scheduler
+sudo systemctl start unpage-scheduler
+sudo systemctl status unpage-scheduler
+```
+
+### Using Docker
+
+```dockerfile
+FROM python:3.12-slim
+
+RUN pip install unpage
+
+COPY config.yaml /root/.unpage/profiles/default/config.yaml
+COPY agents/ /root/.unpage/profiles/default/agents/
+
+CMD ["unpage", "agent", "schedule"]
+```
+
+See the [deployment guide](/howto/deployment-guide) for comprehensive production setup
+instructions.
+
+## More Scheduled Agent Ideas
+
+Once you have the scheduler running, consider adding more scheduled agents:
+
+### Security Audits
+```yaml
+schedule:
+  cron: "0 10 * * 1"  # Weekly on Mondays
+prompt: >
+  Review security groups for overly permissive rules, check for exposed databases,
+  verify encryption settings, and identify resources without proper tags.
+```
+
+### Unused Resource Cleanup
+```yaml
+schedule:
+  cron: "0 2 * * *"  # Daily at 2 AM
+prompt: >
+  Identify resources tagged 'temporary' that are older than 7 days and create
+  recommendations for cleanup.
+```
+
+### Performance Trend Analysis
+```yaml
+schedule:
+  cron: "0 8 * * 5"  # Weekly on Fridays
+prompt: >
+  Analyze performance metrics trends over the past week, identify degrading services,
+  and generate a weekly health report.
+```
+
+### Compliance Checks
+```yaml
+schedule:
+  cron: "0 6 1 * *"  # Monthly on the 1st
+prompt: >
+  Review resources for compliance with tagging policies, check for unencrypted volumes,
+  verify backup policies are applied, and generate compliance report.
+```
+
+## Best Practices
+
+When creating scheduled agents:
+
+1. **Test thoroughly**: Run manually several times before relying on the schedule
+2. **Start conservative**: Begin with weekly or monthly schedules, not daily
+3. **Set clear outputs**: Have agents create incidents or send notifications with findings
+4. **Monitor execution**: Check logs regularly to ensure agents are working as expected
+5. **Include timestamps**: Have agents log when they started and what period they analyzed
+6. **Handle failures gracefully**: Design prompts to continue even if some data is unavailable
+7. **Document expectations**: Note in prompts what data sources are required
+
+## Troubleshooting
+
+### Agent not running on schedule
+
+Check the scheduler logs:
+```bash
+unpage agent schedule
+```
+
+You should see messages like:
+```
+Loaded scheduled agent: cost_optimization_monthly
+  - Schedule: 0 9 1 * *
+  - Description: Generate monthly cost optimization reports
+```
+
+### Agent failing during execution
+
+Run manually to see errors:
+```bash
+unpage agent run cost_optimization_monthly
+```
+
+Enable debug mode for more details:
+```bash
+unpage agent run cost_optimization_monthly --debug
+```
+
+### Schedule not triggering
+
+Verify cron expression at [crontab.guru](https://crontab.guru). Remember schedules
+use UTC timezone.
+
+## Conclusion
+
+Scheduled agents enable proactive infrastructure management without manual overhead.
+By running cost optimization, security audits, and compliance checks automatically,
+you can maintain infrastructure health while freeing up team time for higher-value work.
+
+The cost optimization example shows how scheduled agents gather data, analyze patterns,
+and deliver actionable insights—all on autopilot. Apply this pattern to any repetitive
+operational task that benefits from consistent execution.

@@ -86,6 +86,35 @@ tools:
   - "/^(?!.*_modify_|.*_delete_|.*_create_).*$/"
 ```
 
+### 4. Schedule (Optional)
+
+The optional schedule section enables agents to run periodically on a cron schedule. This is useful for "background chores" like cost optimization reports, security audits, and routine maintenance tasks.
+
+Unpage supports multiple cron formats:
+
+```yaml
+# Standard 5-field cron (minute precision)
+schedule:
+  cron: "0 10 2 * *"  # Run at 10:00 AM on the 2nd day of every month
+
+# Extended 6-field cron (second precision)
+schedule:
+  cron: "*/30 * * * * *"  # Run every 30 seconds
+
+# Convenient aliases
+schedule:
+  cron: "@hourly"  # Run every hour
+  # cron: "@daily"   # Run daily at midnight
+  # cron: "@weekly"  # Run weekly on Sunday at midnight
+  # cron: "@monthly" # Run monthly on the 1st at midnight
+```
+
+<Note>
+Scheduled agents run with no input payload. Make sure your agent prompt specifies how to get any required inputs (e.g., via tool calls).
+</Note>
+
+See the [schedule command documentation](/commands/agent#subcommand-schedule) for more details on cron formats and running scheduled agents.
+
 ## Agent File Location
 
 Agent configuration files are stored in your Unpage profile directory:
@@ -182,6 +211,13 @@ unpage agent run cpu-alert-agent @path/to/alert.json
 unpage agent run cpu-alert-agent '{"alert": "CPU usage exceeds 90%"}'
 ```
 
+### Starting the Scheduler for Periodic Agents
+
+```bash
+# Start the scheduler to run all agents with schedules
+unpage agent schedule
+```
+
 ## Common Agent Use Cases
 
 Agents can be configured for various infrastructure tasks:
@@ -212,6 +248,16 @@ Handle routine operational tasks:
 - Gather context for human responders
 - Document incident timelines
 - Check system health after changes
+
+### Scheduled Maintenance
+
+Run periodic "background chores" on a schedule:
+
+- Generate cost optimization reports
+- Run security audits and compliance checks
+- Monitor for unused resources
+- Analyze performance trends
+- Generate weekly/monthly summaries
 
 ## Best Practices for Agent Design
 
