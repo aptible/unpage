@@ -37,6 +37,11 @@ def test_list_templates_success(unpage):
         f"{template_file.relative_to(template_dir).with_suffix('')}"
         for template_file in template_dir.glob("**/*.yaml")
     ]
+    for t in template_lines:
+        if t.endswith("…"):
+            expected_templates = [
+                et[: len(t) - 1] + "…" if et.startswith(t[:-1]) else et for et in expected_templates
+            ]
     assert sorted(template_lines) == sorted(expected_templates)
 
 
