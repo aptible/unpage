@@ -5,10 +5,29 @@ from .base import KubernetesBaseNode
 
 class KubernetesService(KubernetesBaseNode):
     async def get_identifiers(self) -> list[str | None]:
-        return [
+        identifiers = [
             *await super().get_identifiers(),
             *self.raw_data.get("spec", {}).get("clusterIPs", []),
         ]
+
+        # Add namespace/name identifier for matching with GCP load balancers
+        # GCP target pools reference services as "namespace/service-name"
+        metadata = self.raw_data.get("metadata", {})
+        namespace = metadata.get("namespace")
+        name = metadata.get("name")
+        if namespace and name:
+            identifiers.append(f"{namespace}/{name}")
+
+        # Add LoadBalancer ingress IPs as identifiers for matching
+        identifiers.extend(
+            ingress["ip"]
+            for ingress in self.raw_data.get("status", {})
+            .get("loadBalancer", {})
+            .get("ingress", [])
+            if "ip" in ingress
+        )
+
+        return identifiers
 
     async def get_reference_identifiers(self) -> list[str | None | tuple[str | None, str]]:
         return [

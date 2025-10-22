@@ -1,0 +1,70 @@
+description: >
+  Use this agent to investigate errors with GCP Compute Engine instances and diagnose common issues
+
+prompt: >
+  - Extract the GCP instance name, zone, and error details from the incoming alert
+  - Use the graph tools to find the Compute Engine instance in the knowledge graph
+  - Use the GCP MCP tools to fetch real-time status information about the instance
+  - Check recent metrics (CPU, memory, disk, network) to identify resource exhaustion or performance issues
+  - Review recent logs from Cloud Logging to identify error patterns or warnings
+  - Check for related resources:
+    - Persistent disks attached to the instance
+    - Network interfaces and connectivity
+    - Load balancers or backend services that may be affected
+  - Determine if a human SRE should investigate further
+  - Post a status update to the PagerDuty incident with:
+    - 1-2 sentences summarizing what happened and the suggested action
+    - Key metrics and log findings that led to your conclusion
+    - Whether the issue appears to be resolving on its own or requires intervention
+    - Don't assume or make things up; say you don't know if you don't
+
+tools:
+  - "gcp_*"
+  - "core_current_datetime"
+  - "core_calculate"
+  - "graph_get_resource_details"
+  - "graph_get_resource_map"
+  - "graph_search_resources"
+  - "graph_get_neighboring_resources"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "pagerduty_get_incident_details"
+  # - "pagerduty_post_status_update"
+
+test_payloads:
+  compute_instance_error:
+    payload: >
+      {
+        "incident": {
+          "title": "GCP Compute Instance High CPU - instance-1 in us-central1-a",
+          "description": "Compute Engine instance 'instance-1' in zone 'us-central1-a' is experiencing high CPU utilization (95% average over 10 minutes). This may impact application performance.",
+          "created_at": "2024-01-15T10:30:00Z",
+          "status": "triggered",
+          "service": {
+            "id": "PGCPMON",
+            "type": "service_reference",
+            "summary": "GCP Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PGCPMON",
+            "html_url": "https://example.pagerduty.com/service-directory/PGCPMON"
+          }
+        }
+      }
+
+  compute_instance_unreachable:
+    payload: >
+      {
+        "incident": {
+          "title": "GCP Compute Instance Unreachable - web-server-prod in us-east1-b",
+          "description": "Compute Engine instance 'web-server-prod' in zone 'us-east1-b' is not responding to health checks. Instance may be stopped or experiencing network issues.",
+          "created_at": "2024-01-15T11:45:00Z",
+          "status": "triggered",
+          "urgency": "high",
+          "service": {
+            "id": "PGCPMON",
+            "type": "service_reference",
+            "summary": "GCP Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PGCPMON",
+            "html_url": "https://example.pagerduty.com/service-directory/PGCPMON"
+          }
+        }
+      }
