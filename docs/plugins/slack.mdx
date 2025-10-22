@@ -1,0 +1,98 @@
+---
+title: Slack
+---
+
+The Slack plugin allows [Agents](/concepts/agents) to post messages to Slack channels using incoming webhooks. This enables agents to send notifications, alerts, and incident updates directly to your team's Slack workspace.
+
+<AccordionGroup>
+  <Accordion title="MCP Tools" icon="wrench">
+    - **slack_post_to_[channel_name]**: Post messages to configured Slack channels (one tool per configured channel)
+  </Accordion>
+</AccordionGroup>
+
+## Prerequisites
+
+To configure the Slack integration, you'll need to create an incoming webhook for each Slack channel you want to post to.
+
+<Steps>
+  <Step title="Open your Slack workspace settings">
+    Navigate to your Slack workspace and click on your workspace name in the top-left corner, then select "Settings & administration" > "Manage apps".
+  </Step>
+  <Step title="Add Incoming Webhooks">
+    Search for "Incoming Webhooks" in the app directory and click "Add to Slack" (or "Add" if already installed).
+  </Step>
+  <Step title="Configure the webhook">
+    Select the channel where you want to receive notifications and click "Add Incoming Webhooks integration".
+
+    Copy the webhook URL - it should look like:
+    ```
+    https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX
+    ```
+  </Step>
+  <Step title="Customize (optional)">
+    You can customize the webhook name and icon in the Slack settings, but Unpage can also set these when posting messages.
+  </Step>
+</Steps>
+
+## Configuration
+
+Configure the Slack plugin by running `uv run unpage configure` or by editing the `~/.unpage/profiles/<profile_name>/config.yaml` file:
+
+```yaml
+plugins:
+  # ...
+  slack:
+    enabled: true
+    settings:
+      channels:
+        - name: incidents
+          description: Post incident updates and alerts
+          webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+        - name: alerts
+          description: Post monitoring alerts
+          webhook_url: https://hooks.slack.com/services/YOUR/OTHER/WEBHOOK/URL
+```
+
+Each channel creates a corresponding MCP tool that agents can use. For example, the `incidents` channel above creates a tool called `slack_post_to_incidents`.
+
+## Developing Agents
+
+Your agents can post messages to Slack channels as part of their incident response workflows. Messages can include enriched context from your [Knowledge Graph](/concepts/knowledge-graph), results from [Metrics](/plugins/metrics) queries, or output from [Shell Commands](/plugins/shell).
+
+Learn more about [Creating Agents](/concepts/agents).
+
+### Configuration During Setup
+
+When you run `uv run unpage configure`, you'll be prompted to set up one Slack webhook interactively. For additional channels, edit the `config.yaml` file directly and add more entries to the `channels` list.
+
+### Testing Locally
+
+You can test your agents locally to verify they can post to Slack:
+
+```bash
+uv run unpage agent run <agent_name>
+```
+
+The agent will post test messages to your configured Slack channels according to its defined behavior.
+
+## Tools
+
+The Slack plugin dynamically creates tools based on your configured channels. Each channel gets its own tool:
+
+<Card title="slack_post_to_[channel_name]">
+  Post a message to the configured Slack channel.
+
+  **Arguments**
+  <ParamField path="message" type="string" required>
+    The message to post to the Slack channel. Supports plain text and basic formatting.
+  </ParamField>
+  <ParamField path="username" type="string">
+    Username to display for the message. Defaults to "Unpage".
+  </ParamField>
+
+  **Returns** `string`: Success or error message.
+</Card>
+
+## Example
+
+See our complete [Slack notification example](/examples/slack_notifications) for a full walkthrough of setting up an agent that posts enriched incident alerts to Slack.

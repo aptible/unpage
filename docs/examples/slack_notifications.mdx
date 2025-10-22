@@ -1,0 +1,202 @@
+---
+title: Slack Notifications
+---
+
+Sending timely, context-rich notifications to your team is essential for effective incident response. When alerts fire, your team needs immediate visibility with enough context to understand the situation without diving into multiple monitoring tools.
+
+This example shows how to create an Unpage agent that automatically enriches alerts from your monitoring system and posts detailed notifications to Slack. The agent will analyze incoming alerts, gather additional context, and format clear, actionable messages for your team.
+
+## Use Case
+
+Post messages to a Slack channel as part of your Unpage agents!
+
+## Prerequisites
+
+Before creating this agent, you'll need:
+1. [Unpage installed](/) on your system
+2. A [Slack webhook URL](/plugins/slack#prerequisites) for your target channel
+3. Optionally: Other plugins configured ([Datadog](/plugins/datadog), [AWS](/plugins/aws), etc.) for enrichment
+
+## Creating a Slack Notification Agent
+
+After installing Unpage, create a new agent:
+
+```bash
+$ unpage agent create slack_alert_notifier
+```
+
+A YAML file will open in your `$EDITOR`. Here's an example agent configuration:
+
+```yaml
+description: Enrich monitoring alerts and post to Slack
+
+prompt: >
+  You are responding to a monitoring alert. Your job is to:
+
+  1. Parse the alert payload to extract:
+     - Alert severity/priority
+     - Affected service or resource
+     - Alert description and any error messages
+     - Timestamp
+
+  2. Gather additional context:
+     - If the alert mentions specific infrastructure (EC2 instances, databases, etc.),
+       use the knowledge graph to find related resources
+     - Check recent metrics if available
+     - Look for similar recent incidents
+
+  3. Format a clear Slack message that includes:
+     - Alert title and severity (use emojis: 🔴 critical, 🟡 warning, 🟢 info)
+     - Affected service/resource with links when available
+     - Summary of the issue
+     - Key metrics or context you gathered
+     - Suggested next steps or runbook links if applicable
+
+  4. Post the formatted message to the #incidents Slack channel using slack_post_to_incidents
+
+tools:
+  - "slack_post_to_incidents"
+  - "graph_*"  # Allow graph queries for enrichment
+  - "datadog_*"  # If you have Datadog configured
+```
+
+## Configure the Slack Plugin
+
+Make sure your Slack plugin is configured with the webhook URL ([slack webhook documentation](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/)). Run:
+
+```bash
+$ unpage configure
+```
+
+Select the Slack plugin and enter your webhook URL when prompted. Or edit `~/.unpage/profiles/default/config.yaml`:
+
+```yaml
+plugins:
+  slack:
+    enabled: true
+    settings:
+      channels:
+        - name: incidents
+          description: Post incident updates and alerts
+          webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+
+## Testing Your Agent
+
+### Test with a Sample Alert
+
+Create a test alert payload in JSON format:
+
+```json
+{
+  "alert_name": "High CPU Usage",
+  "severity": "critical",
+  "service": "web-api",
+  "description": "CPU usage exceeded 90% for 5 minutes",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "instance_id": "i-1234567890abcdef0"
+}
+```
+
+Save it to a file (e.g., `test_alert.json`) and run:
+
+```bash
+$ unpage agent run slack_alert_notifier test_alert.json
+```
+
+The agent will process the alert and post a message to your Slack channel.
+
+### Test with Live Alerts
+
+For testing with actual monitoring alerts, you can:
+
+1. **Use an existing PagerDuty incident:**
+   ```bash
+   $ unpage agent run slack_alert_notifier https://yourcompany.pagerduty.com/incidents/ABC123
+   ```
+
+2. **Set up a webhook endpoint:**
+   ```bash
+   # Start the webhook server
+   $ unpage agent serve
+
+   # Or with ngrok for external access
+   $ unpage agent serve --tunnel
+   ```
+
+   Then configure your monitoring tool to send webhooks to the provided URL.
+
+## Example Output
+
+When an alert comes in, your agent will post a message to Slack like:
+
+```
+🔴 CRITICAL: High CPU Usage on web-api
+
+Service: web-api (EC2 instance i-1234567890abcdef0)
+Region: us-east-1
+
+Issue: CPU usage exceeded 90% for 5 minutes
+Current CPU: 94.2%
+
+Related Resources:
+• Load Balancer: web-api-lb (healthy)
+• Database: web-api-db-primary (normal load)
+
+Suggested Actions:
+1. Check application logs for errors or unusual activity
+2. Review recent deployments (last deploy: 2 hours ago)
+3. Consider scaling horizontally if sustained high load
+
+Runbook: https://docs.yourcompany.com/runbooks/high-cpu
+```
+
+## Advanced: Multiple Channels
+
+You can configure multiple Slack channels for different alert types:
+
+```yaml
+plugins:
+  slack:
+    enabled: true
+    settings:
+      channels:
+        - name: incidents
+          description: Critical incidents requiring immediate attention
+          webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL1
+        - name: alerts
+          description: Warning-level alerts for monitoring
+          webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL2
+        - name: deployments
+          description: Deployment notifications
+          webhook_url: https://hooks.slack.com/services/YOUR/WEBHOOK/URL3
+```
+
+Then create different agents or use conditional logic in your agent prompts to route to different channels based on severity:
+
+```yaml
+prompt: >
+  - Parse the alert to determine severity
+  - If critical or high: use slack_post_to_incidents
+  - If warning or info: use slack_post_to_alerts
+  - Format the message appropriately for the severity level
+```
+
+## Integrating with Other Monitoring Tools
+
+This pattern works with any monitoring tool that can send webhooks or has a plugin:
+
+- **Datadog**: Configure Datadog plugin and webhook
+- **Grafana**: Send Grafana webhook to Unpage
+- **CloudWatch**: Use AWS plugin + CloudWatch alarms
+- **Custom scripts**: Any JSON payload sent to the webhook endpoint
+
+See our [Custom Alerts plugin](/plugins/customalerts) documentation for more details on accepting webhooks from any source.
+
+## Production Deployment
+
+For production use, deploy Unpage as a service that continuously listens for webhooks. See our [Deployment Guide](/howto/deployment-guide) for details on:
+- Running Unpage in Docker
+- Setting up with Kubernetes
+- Configuring CI/CD with GitHub Actions
+- Monitoring and logging best practices
