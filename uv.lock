@@ -292,17 +292,16 @@ wheels = [
 
 [[package]]
 name = "azure-mgmt-containerservice"
-version = "39.1.0"
+version = "40.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "azure-common" },
     { name = "azure-mgmt-core" },
-    { name = "isodate" },
+    { name = "msrest" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/eb/db/0b0263f3fe50d8c5f1adb1b8e1575fc9010dc36a08e5527ffe43a8b6a1d0/azure_mgmt_containerservice-39.1.0.tar.gz", hash = "sha256:6f0c3fe44e937e8efd0b6037be1023923599a52ce57b811e3056d80b7f9738d0", size = 188641, upload-time = "2025-08-21T04:09:18.75Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/d8/57a59d50f2287809af2f5a3dd4092ab58a6dfd98b992c3a137911a3c50d2/azure_mgmt_containerservice-40.0.0.tar.gz", hash = "sha256:6c52a0cd5d55520ef028ea90b72bd8d1328f80d0ce697434ef61c5068626af6f", size = 188968, upload-time = "2025-10-10T08:42:18.865Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8b/d5/a8076a4e665687f040fe2eb4547a74314a6bd0634ecdaa38bfd1fcb773ae/azure_mgmt_containerservice-39.1.0-py3-none-any.whl", hash = "sha256:b46d0eac51a4cfb80533e41b266246ccbe7607d21c4ae6bfbb1f9fb90c6e1244", size = 207739, upload-time = "2025-08-21T04:09:20.621Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/ee/0a88a2105e01862dfa185b951daafbcf6c142725e5ad85f9bc4b16d6e42b/azure_mgmt_containerservice-40.0.0-py3-none-any.whl", hash = "sha256:08278030ac5c8cc840dd121a36a0d1b1dd7d930a9427b4c1df103d6758377ca4", size = 209345, upload-time = "2025-10-10T08:42:20.242Z" },
 ]
 
 [[package]]
