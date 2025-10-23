@@ -2,6 +2,18 @@
 
 <!-- version list -->
 
+## v0.1.0-alpha.45 (2025-10-22)
+
+### Features
+
+- Gcp plugin [SC-34604] ([#208](https://github.com/aptible/unpage/pull/208),
+  [`cc1693e`](https://github.com/aptible/unpage/commit/cc1693e2a8aba75da23cb03a0c5ea7e3b5236cfc))
+
+- Interactive config and docs for slack plugin [SC-34358]
+  ([#228](https://github.com/aptible/unpage/pull/228),
+  [`073616f`](https://github.com/aptible/unpage/commit/073616fc105c3a828ac895dd9e9cd8d56476bc06))
+
+
 ## v0.1.0-alpha.44 (2025-10-20)
 
 ### Features

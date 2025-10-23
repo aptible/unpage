@@ -115,13 +115,14 @@ class KubernetesPlugin(Plugin, KnowledgeGraphMixin):
         rich.print(f"Found {len(available_contexts)} Kubernetes context(s)")
 
         # Ask if user wants all contexts or specific ones
+        choices = [
+            Choice("Select specific contexts", value=False),
+            Choice("Include all available contexts", value=True),
+        ]
         include_all_choice = await select(
             "How would you like to configure Kubernetes contexts?",
-            choices=[
-                Choice("Select specific contexts", value=False),
-                Choice("Include all available contexts", value=True),
-            ],
-            default=Choice("Select specific contexts", value=False),
+            choices=choices,
+            default=choices[0],
         )
 
         # Extract the value from the Choice object

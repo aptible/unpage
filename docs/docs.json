@@ -50,6 +50,7 @@
         "group": "Example Agents",
         "pages": [
           "examples/ssl_connection_failure",
+          "examples/slack_notifications",
           "examples/disk_space_alerts",
           "examples/db_connection_pool",
           "examples/k8s_crash_loop_backoff",
@@ -64,6 +65,7 @@
           "plugins/aptible",
           "plugins/aws",
           "plugins/azure",
+          "plugins/gcp",
           "plugins/core",
           "plugins/datadog",
           "plugins/github",
@@ -75,6 +77,7 @@
           "plugins/pagerduty",
           "plugins/papertrail",
           "plugins/sentry",
+          "plugins/slack",
           "plugins/solarwinds",
           "plugins/shell",
           "plugins/customalerts",

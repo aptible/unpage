@@ -1,0 +1,98 @@
+description: >
+  Use this agent to investigate errors with GCP Cloud SQL database instances and diagnose connection or performance issues
+
+prompt: >
+  - Extract the Cloud SQL instance name and error details from the incoming alert
+  - Use the graph tools to find the Cloud SQL instance in the knowledge graph
+  - Use the GCP MCP tools to fetch real-time status information about the database instance
+  - Check recent metrics to identify issues:
+    - CPU utilization (high CPU may indicate inefficient queries)
+    - Memory usage (high memory may indicate connection pool exhaustion)
+    - Disk usage (running out of disk space)
+    - Network connections (too many or too few active connections)
+    - Replication lag (if this is a replica instance)
+  - Review recent logs from Cloud Logging to identify:
+    - Connection failures or authentication errors
+    - Slow query warnings
+    - Database errors or crashes
+    - Configuration changes
+  - Check for related resources:
+    - Check if this is a replica and whether the master instance is healthy
+    - Identify any replicas if this is a master instance
+    - Check backup configuration and recent backup status
+  - Determine if a human SRE should investigate further
+  - Post a status update to the PagerDuty incident with:
+    - 1-2 sentences summarizing what happened and the suggested action
+    - Key metrics and log findings that led to your conclusion
+    - Whether this is a capacity issue, configuration problem, or application issue
+    - Don't assume or make things up; say you don't know if you don't
+
+tools:
+  - "gcp_*"
+  - "core_current_datetime"
+  - "core_calculate"
+  - "graph_get_resource_details"
+  - "graph_get_resource_map"
+  - "graph_search_resources"
+  - "graph_get_neighboring_resources"
+  - "metrics_get_metrics_for_node"
+  - "metrics_list_available_metrics_for_node"
+  - "pagerduty_get_incident_details"
+  # - "pagerduty_post_status_update"
+
+test_payloads:
+  cloud_sql_high_cpu:
+    payload: >
+      {
+        "incident": {
+          "title": "GCP Cloud SQL High CPU - production-db in us-central1",
+          "description": "Cloud SQL instance 'production-db' is experiencing high CPU utilization (92% average over 15 minutes). This may be caused by inefficient queries or increased load.",
+          "created_at": "2024-01-15T14:20:00Z",
+          "status": "triggered",
+          "urgency": "high",
+          "service": {
+            "id": "PGCPMON",
+            "type": "service_reference",
+            "summary": "GCP Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PGCPMON",
+            "html_url": "https://example.pagerduty.com/service-directory/PGCPMON"
+          }
+        }
+      }
+
+  cloud_sql_connection_failure:
+    payload: >
+      {
+        "incident": {
+          "title": "GCP Cloud SQL Connection Failures - staging-postgres",
+          "description": "Cloud SQL instance 'staging-postgres' is experiencing connection failures. Multiple applications are reporting 'could not connect to server' errors.",
+          "created_at": "2024-01-15T09:15:00Z",
+          "status": "triggered",
+          "urgency": "high",
+          "service": {
+            "id": "PGCPMON",
+            "type": "service_reference",
+            "summary": "GCP Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PGCPMON",
+            "html_url": "https://example.pagerduty.com/service-directory/PGCPMON"
+          }
+        }
+      }
+
+  cloud_sql_replication_lag:
+    payload: >
+      {
+        "incident": {
+          "title": "GCP Cloud SQL High Replication Lag - read-replica-1",
+          "description": "Cloud SQL read replica 'read-replica-1' has high replication lag (45 seconds behind master). This may cause stale reads for applications using this replica.",
+          "created_at": "2024-01-15T16:30:00Z",
+          "status": "triggered",
+          "service": {
+            "id": "PGCPMON",
+            "type": "service_reference",
+            "summary": "GCP Monitoring Service",
+            "self": "https://api.pagerduty.com/services/PGCPMON",
+            "html_url": "https://example.pagerduty.com/service-directory/PGCPMON"
+          }
+        }
+      }
