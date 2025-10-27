@@ -2604,16 +2604,14 @@ wheels = [
 
 [[package]]
 name = "pagerduty"
-version = "5.1.0"
+version = "6.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "certifi" },
-    { name = "requests" },
-    { name = "urllib3" },
+    { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/8a/fc8897653aef6452ff6fcee65308fa1092f09e651f65e562f8875b1ed8b7/pagerduty-5.1.0.tar.gz", hash = "sha256:05e02aa59adde6dbecaa59cf0b87c5219fbe73b34f7694b0087292b29b38640b", size = 44974, upload-time = "2025-10-01T15:20:12.137Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/fe/2bdad5e6d444e4ca9457a06f6b277215321fbd08303b30e1723906499b6a/pagerduty-6.0.0.tar.gz", hash = "sha256:2fc467d6f4ff531207c57b30f28ef0c55b67d6e0f5d98c8d8b933703f665ba57", size = 46559, upload-time = "2025-10-24T18:01:57.42Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5b/6b/59862542a73a416fd6bed3eee2df333376c2ca2358ea527100dda89b1e6b/pagerduty-5.1.0-py3-none-any.whl", hash = "sha256:134726358040ea55fde806d540ea3a4d25b5a51e792e430fbb0411b7dfee6b4f", size = 51760, upload-time = "2025-10-01T15:20:10.597Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/8e/48769fceac5b950a902767f4004f29c21708725dd79c18b3a5187be46937/pagerduty-6.0.0-py3-none-any.whl", hash = "sha256:32b2e9de4887b5c0e1c8851957a1c1a721892da4ebd25bce089e05ed80d0a775", size = 54553, upload-time = "2025-10-24T18:01:56.172Z" },
 ]
 
 [[package]]
