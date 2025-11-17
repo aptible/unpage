@@ -74,7 +74,7 @@ If you need help, you can find us in the [Unpage Slack community](https://join.s
 On macOS:
 
 ```shell
-curl -fsSL https://unpage.ai/install.sh | bash
+curl -fsSL https://install.unpage.ai | bash
 ```
 
 For other platforms, first install `uv` using the [official uv installation guide](https://github.com/astral-sh/uv), then run the command above.
